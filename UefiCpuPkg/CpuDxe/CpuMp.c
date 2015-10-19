@@ -313,6 +313,47 @@ CheckAndUpdateAllAPsToIdleState (
 }
 
 /**
+  Check if all APs are in state CpuStateSleeping.
+
+  Return TRUE if all APs are in the CpuStateSleeping state.  Do not
+  check the state of the BSP or any disabled APs.
+
+  @retval TRUE   All APs are in CpuStateSleeping state.
+  @retval FALSE  One or more APs are not in CpuStateSleeping state.
+
+**/
+BOOLEAN
+CheckAllAPsSleeping (
+  VOID
+  )
+{
+  UINTN           ProcessorNumber;
+  CPU_DATA_BLOCK  *CpuData;
+
+  for (ProcessorNumber = 0; ProcessorNumber < mMpSystemData.NumberOfProcessors; ProcessorNumber++) {
+    CpuData = &mMpSystemData.CpuDatas[ProcessorNumber];
+    if (TestCpuStatusFlag (CpuData, PROCESSOR_AS_BSP_BIT)) {
+      //
+      // Skip BSP
+      //
+      continue;
+    }
+
+    if (!TestCpuStatusFlag (CpuData, PROCESSOR_ENABLED_BIT)) {
+      //
+      // Skip Disabled processors
+      //
+      continue;
+    }
+
+    if (GetApState (CpuData) != CpuStateSleeping) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
   If the timeout expires before all APs returns from Procedure,
   we should forcibly terminate the executing AP and fill FailedList back
   by StartupAllAPs().
@@ -1650,8 +1691,9 @@ InitializeMpSupport (
   VOID
   )
 {
-  EFI_STATUS    Status;
-  MTRR_SETTINGS MtrrSettings;
+  EFI_STATUS     Status;
+  MTRR_SETTINGS  MtrrSettings;
+  UINTN          Timeout;
 
   gMaxLogicalProcessorNumber = (UINTN) PcdGet32 (PcdCpuMaxLogicalProcessorNumber);
   if (gMaxLogicalProcessorNumber < 1) {
@@ -1700,7 +1742,23 @@ InitializeMpSupport (
                              sizeof (CPU_DATA_BLOCK) * mMpSystemData.NumberOfProcessors,
                              mMpSystemData.CpuDatas);
 
+  //
+  // Release all APs to complete initialization and enter idle loop
+  //
   mAPsAlreadyInitFinished = TRUE;
+
+  //
+  // Wait for all APs to enter idle loop.
+  //
+  Timeout = 0;
+  do {
+    if (CheckAllAPsSleeping ()) {
+      break;
+    }
+    MicroSecondDelay (gPollInterval);
+    Timeout += gPollInterval;
+  } while (Timeout <= PcdGet32 (PcdCpuApInitTimeOutInMicroSeconds));
+  ASSERT (Timeout <= PcdGet32 (PcdCpuApInitTimeOutInMicroSeconds));
 
   //
   // Update CPU healthy information from Guided HOB
