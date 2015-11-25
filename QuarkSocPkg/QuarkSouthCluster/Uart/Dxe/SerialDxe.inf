@@ -1,0 +1,76 @@
+## @file
+# Quark(TM) Soc X1000 processor UART Support
+#
+# Provides support for the UART controllers found in the Quark(TM) Soc X1000 processor.
+#
+# Copyright (c) 2007 - 2013, Intel Corporation. All rights reserved.<BR>
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SerialDxe
+  FILE_GUID                      = bf40c9d7-c415-41c2-9ec9-da6e07878520
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InitializeIohSerial
+  MODULE_UNI_FILE                = SerialDxeModStrs.uni
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  Serial.h
+  Serial.c
+  ComponentName.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+  QuarkSocPkg/QuarkSocPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  DebugLib
+  UefiLib
+  DevicePathLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  ReportStatusCodeLib
+  PcdLib
+
+[Guids]
+  gEfiUartDevicePathGuid                        ## SOMETIMES_CONSUMES   ## GUID
+
+[Protocols]
+  ## TO_START
+  ## BY_START
+  gEfiDevicePathProtocolGuid
+  gEfiSerialIoProtocolGuid                      ## BY_START
+  gEfiPciIoProtocolGuid                         ## TO_START
+
+[FeaturePcd]
+  gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdIsaBusSerialUseHalfHandshake|FALSE   ## CONSUMES
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate             ## CONSUMES
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultDataBits             ## CONSUMES
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity               ## CONSUMES
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits             ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate           ## CONSUMES
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  SerialDxeExtra.uni
