@@ -863,7 +863,7 @@ stack_double(OnigStackType** arg_stk_base, OnigStackType** arg_stk_end,
               if (BIT_STATUS_AT(reg->bt_mem_end, k->u.mem.num))\
                 endp = STACK_AT(k->u.mem.end)->u.mem.pstr;\
               else\
-                endp = (UChar* )k->u.mem.end;\
+                endp = (UChar* )(UINTN)k->u.mem.end;\
               if (STACK_AT(k->u.mem.start)->u.mem.pstr != endp) {\
                 (isnull) = 0; break;\
               }\
@@ -904,7 +904,7 @@ stack_double(OnigStackType** arg_stk_base, OnigStackType** arg_stk_end,
                 if (BIT_STATUS_AT(reg->bt_mem_end, k->u.mem.num))\
                   endp = STACK_AT(k->u.mem.end)->u.mem.pstr;\
                 else\
-                  endp = (UChar* )k->u.mem.end;\
+                  endp = (UChar* )(UINTN)k->u.mem.end;\
                 if (STACK_AT(k->u.mem.start)->u.mem.pstr != endp) {\
                   (isnull) = 0; break;\
                 }\
@@ -1344,11 +1344,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 		if (BIT_STATUS_AT(reg->bt_mem_start, i))
 		  rmt[i].rm_so = (regoff_t)(STACK_AT(mem_start_stk[i])->u.mem.pstr - str);
 		else
-		  rmt[i].rm_so = (regoff_t)((UChar* )((void* )(mem_start_stk[i])) - str);
+		  rmt[i].rm_so = (regoff_t)((UChar* )((void* )(UINTN)(mem_start_stk[i])) - str);
 
 		rmt[i].rm_eo = (regoff_t)((BIT_STATUS_AT(reg->bt_mem_end, i)
 				? STACK_AT(mem_end_stk[i])->u.mem.pstr
-				: (UChar* )((void* )mem_end_stk[i])) - str);
+				: (UChar* )((void* )(UINTN)mem_end_stk[i])) - str);
 	      }
 	      else {
 		rmt[i].rm_so = rmt[i].rm_eo = ONIG_REGION_NOTPOS;
@@ -1364,11 +1364,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 		if (BIT_STATUS_AT(reg->bt_mem_start, i))
 		  region->beg[i] = (int)(STACK_AT(mem_start_stk[i])->u.mem.pstr - str);
 		else
-		  region->beg[i] = (int)((UChar* )((void* )mem_start_stk[i]) - str);
+		  region->beg[i] = (int)((UChar* )((void* )(UINTN)mem_start_stk[i]) - str);
 
 		region->end[i] = (int)((BIT_STATUS_AT(reg->bt_mem_end, i)
 				  ? STACK_AT(mem_end_stk[i])->u.mem.pstr
-				  : (UChar* )((void* )mem_end_stk[i])) - str);
+				  : (UChar* )((void* )(UINTN)mem_end_stk[i])) - str);
 	      }
 	      else {
 		region->beg[i] = region->end[i] = ONIG_REGION_NOTPOS;
@@ -1442,7 +1442,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
     case OP_EXACT1_IC:  MOP_IN(OP_EXACT1_IC);
       {
 	int len;
-	UChar *q, lowbuf[ONIGENC_MBC_CASE_FOLD_MAXLEN];
+	UChar *q1, lowbuf[ONIGENC_MBC_CASE_FOLD_MAXLEN];
 
 	DATA_ENSURE(1);
 	len = ONIGENC_MBC_CASE_FOLD(encode,
@@ -1450,12 +1450,12 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 		    case_fold_flag,
 		    &s, end, lowbuf);
 	DATA_ENSURE(0);
-	q = lowbuf;
+	q1 = lowbuf;
 	while (len-- > 0) {
-	  if (*p != *q) {
+	  if (*p != *q1) {
             goto fail;
           }
-	  p++; q++;
+	  p++; q1++;
 	}
       }
       MOP_OUT;
@@ -1531,7 +1531,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
     case OP_EXACTN_IC:  MOP_IN(OP_EXACTN_IC);
       {
 	int len;
-	UChar *q, *endp, lowbuf[ONIGENC_MBC_CASE_FOLD_MAXLEN];
+	UChar *qn, *endp, lowbuf[ONIGENC_MBC_CASE_FOLD_MAXLEN];
 
 	GET_LENGTH_INC(tlen, p);
 	endp = p + tlen;
@@ -1544,10 +1544,10 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 		      case_fold_flag,
 		      &s, end, lowbuf);
 	  DATA_ENSURE(0);
-	  q = lowbuf;
+	  qn = lowbuf;
 	  while (len-- > 0) {
-	    if (*p != *q) goto fail;
-	    p++; q++;
+	    if (*p != *qn) goto fail;
+	    p++; qn++;
 	  }
 	}
       }
@@ -2082,7 +2082,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
     case OP_MEMORY_START:  MOP_IN(OP_MEMORY_START);
       GET_MEMNUM_INC(mem, p);
-      mem_start_stk[mem] = (OnigStackIndex )((void* )s);
+      mem_start_stk[mem] = (OnigStackIndex )(UINTN)((void* )s);
       MOP_OUT;
       continue;
       break;
@@ -2096,7 +2096,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
     case OP_MEMORY_END:  MOP_IN(OP_MEMORY_END);
       GET_MEMNUM_INC(mem, p);
-      mem_end_stk[mem] = (OnigStackIndex )((void* )s);
+      mem_end_stk[mem] = (OnigStackIndex )(UINTN)((void* )s);
       MOP_OUT;
       continue;
       break;
@@ -2113,13 +2113,13 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
     case OP_MEMORY_END_REC:  MOP_IN(OP_MEMORY_END_REC);
       GET_MEMNUM_INC(mem, p);
-      mem_end_stk[mem] = (OnigStackIndex )((void* )s);
+      mem_end_stk[mem] = (OnigStackIndex )(UINTN)((void* )s);
       STACK_GET_MEM_START(mem, stkp);
 
       if (BIT_STATUS_AT(reg->bt_mem_start, mem))
 	mem_start_stk[mem] = GET_STACK_INDEX(stkp);
       else
-	mem_start_stk[mem] = (OnigStackIndex )((void* )stkp->u.mem.pstr);
+	mem_start_stk[mem] = (OnigStackIndex )(UINTN)((void* )stkp->u.mem.pstr);
 
       STACK_PUSH_MEM_END_MARK(mem);
       MOP_OUT;
@@ -2153,11 +2153,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	if (BIT_STATUS_AT(reg->bt_mem_start, mem))
 	  pstart = STACK_AT(mem_start_stk[mem])->u.mem.pstr;
 	else
-	  pstart = (UChar* )((void* )mem_start_stk[mem]);
+	  pstart = (UChar* )((void* )(UINTN)mem_start_stk[mem]);
 
 	pend = (BIT_STATUS_AT(reg->bt_mem_end, mem)
 		? STACK_AT(mem_end_stk[mem])->u.mem.pstr
-		: (UChar* )((void* )mem_end_stk[mem]));
+		: (UChar* )((void* )(UINTN)mem_end_stk[mem]));
 	n = (int)(pend - pstart);
 	DATA_ENSURE(n);
 	sprev = s;
@@ -2185,11 +2185,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	if (BIT_STATUS_AT(reg->bt_mem_start, mem))
 	  pstart = STACK_AT(mem_start_stk[mem])->u.mem.pstr;
 	else
-	  pstart = (UChar* )((void* )mem_start_stk[mem]);
+	  pstart = (UChar* )((void* )(UINTN)mem_start_stk[mem]);
 
 	pend = (BIT_STATUS_AT(reg->bt_mem_end, mem)
 		? STACK_AT(mem_end_stk[mem])->u.mem.pstr
-		: (UChar* )((void* )mem_end_stk[mem]));
+		: (UChar* )((void* )(UINTN)mem_end_stk[mem]));
 	n = (int)(pend - pstart);
 	DATA_ENSURE(n);
 	sprev = s;
@@ -2217,11 +2217,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	  if (BIT_STATUS_AT(reg->bt_mem_start, mem))
 	    pstart = STACK_AT(mem_start_stk[mem])->u.mem.pstr;
 	  else
-	    pstart = (UChar* )((void* )mem_start_stk[mem]);
+	    pstart = (UChar* )((void* )(UINTN)mem_start_stk[mem]);
 
 	  pend = (BIT_STATUS_AT(reg->bt_mem_end, mem)
 		  ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
-		  : (UChar* )((void* )mem_end_stk[mem]));
+		  : (UChar* )((void* )(UINTN)mem_end_stk[mem]));
 	  n = (int)(pend - pstart);
 	  DATA_ENSURE(n);
 	  sprev = s;
@@ -2256,11 +2256,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	  if (BIT_STATUS_AT(reg->bt_mem_start, mem))
 	    pstart = STACK_AT(mem_start_stk[mem])->u.mem.pstr;
 	  else
-	    pstart = (UChar* )((void* )mem_start_stk[mem]);
+	    pstart = (UChar* )((void* )(UINTN)mem_start_stk[mem]);
 
 	  pend = (BIT_STATUS_AT(reg->bt_mem_end, mem)
 		  ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
-		  : (UChar* )((void* )mem_end_stk[mem]));
+		  : (UChar* )((void* )(UINTN)mem_end_stk[mem]));
 	  n = (int)(pend - pstart);
 	  DATA_ENSURE(n);
 	  sprev = s;

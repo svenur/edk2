@@ -45,7 +45,7 @@ InvalidateInstructionCache (
   VOID
   )
 {
-  ArmInvalidateInstructionCache();
+  ASSERT (FALSE);
 }
 
 VOID
@@ -64,7 +64,7 @@ InvalidateInstructionCacheRange (
   IN      UINTN                     Length
   )
 {
-  CacheRangeOperation (Address, Length, ArmCleanDataCacheEntryByMVA);
+  CacheRangeOperation (Address, Length, ArmCleanDataCacheEntryToPoUByMVA);
   ArmInvalidateInstructionCache ();
   return Address;
 }

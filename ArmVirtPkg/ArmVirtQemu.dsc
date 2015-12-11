@@ -233,10 +233,7 @@
   #
   # PEI Phase modules
   #
-  ArmPlatformPkg/PrePeiCore/PrePeiCoreUniCore.inf {
-    <LibraryClasses>
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/Pei/PeiArmPlatformGlobalVariableLib.inf
-  }
+  ArmPlatformPkg/PrePeiCore/PrePeiCoreUniCore.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   MdeModulePkg/Universal/PCD/Pei/Pcd.inf
   ArmPlatformPkg/PlatformPei/PlatformPeim.inf
@@ -288,7 +285,7 @@
   MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
-  EmbeddedPkg/SerialDxe/SerialDxe.inf
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
 
@@ -305,6 +302,7 @@
   # Platform Driver
   #
   ArmVirtPkg/VirtFdtDxe/VirtFdtDxe.inf
+  ArmVirtPkg/HighMemDxe/HighMemDxe.inf
   OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
   OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
   OvmfPkg/VirtioNetDxe/VirtioNet.inf

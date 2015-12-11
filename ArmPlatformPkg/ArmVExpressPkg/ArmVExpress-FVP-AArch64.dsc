@@ -1,5 +1,6 @@
 #
 #  Copyright (c) 2011-2015, ARM Limited. All rights reserved.
+#  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -212,14 +213,10 @@
     <LibraryClasses>
       ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
       ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibRTSM/ArmVExpressLib.inf
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/PrePi/PrePiArmPlatformGlobalVariableLib.inf
   }
 !else
   # UEFI lives in FLASH and copies itself to RAM
-  ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf {
-    <LibraryClasses>
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/Pei/PeiArmPlatformGlobalVariableLib.inf
-  }
+  ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   MdeModulePkg/Universal/PCD/Pei/Pcd.inf  {
     <LibraryClasses>
@@ -275,7 +272,7 @@
   MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
-  EmbeddedPkg/SerialDxe/SerialDxe.inf
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
 

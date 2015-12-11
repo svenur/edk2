@@ -36,6 +36,7 @@
   DEFINE SECURE_BOOT_ENABLE      = FALSE
   DEFINE NETWORK_IP6_ENABLE      = FALSE
   DEFINE HTTP_BOOT_ENABLE        = FALSE
+  DEFINE SMM_REQUIRE             = FALSE
 
 [BuildOptions]
   GCC:*_UNIXGCC_*_CC_FLAGS             = -DMDEPKG_NDEBUG
@@ -104,7 +105,9 @@
   QemuFwCfgLib|OvmfPkg/Library/QemuFwCfgLib/QemuFwCfgLib.inf
   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
   LoadLinuxLib|OvmfPkg/Library/LoadLinuxLib/LoadLinuxLib.inf
+!if $(SMM_REQUIRE) == FALSE
   LockBoxLib|OvmfPkg/Library/LockBoxLib/LockBoxBaseLib.inf
+!endif
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
 
 !ifdef $(SOURCE_DEBUG_ENABLE)
@@ -116,7 +119,7 @@
 !endif
 
   ResetSystemLib|OvmfPkg/Library/ResetSystemLib/ResetSystemLib.inf
-  LocalApicLib|UefiCpuPkg/Library/BaseXApicLib/BaseXApicLib.inf
+  LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -270,7 +273,11 @@
   DpcLib|MdeModulePkg/Library/DxeDpcLib/DxeDpcLib.inf
   PlatformBdsLib|OvmfPkg/Library/PlatformBdsLib/PlatformBdsLib.inf
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/DxeCpuExceptionHandlerLib.inf
+!if $(SMM_REQUIRE) == TRUE
+  LockBoxLib|MdeModulePkg/Library/SmmLockBoxLib/SmmLockBoxDxeLib.inf
+!else
   LockBoxLib|OvmfPkg/Library/LockBoxLib/LockBoxDxeLib.inf
+!endif
 !ifdef $(SOURCE_DEBUG_ENABLE)
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
 !endif
@@ -290,10 +297,36 @@
 [LibraryClasses.common.DXE_SMM_DRIVER]
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   TimerLib|OvmfPkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
+  MemoryAllocationLib|MdePkg/Library/SmmMemoryAllocationLib/SmmMemoryAllocationLib.inf
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
+  SmmServicesTableLib|MdePkg/Library/SmmServicesTableLib/SmmServicesTableLib.inf
+!ifdef $(DEBUG_ON_SERIAL_PORT)
+  DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
+!else
+  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformDebugLibIoPort.inf
+!endif
+  CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
+!ifdef $(SOURCE_DEBUG_ENABLE)
+  DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/SmmDebugAgentLib.inf
+!endif
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/SmmCryptLib.inf
 
 [LibraryClasses.common.SMM_CORE]
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   TimerLib|OvmfPkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
+  SmmCorePlatformHookLib|MdeModulePkg/Library/SmmCorePlatformHookLibNull/SmmCorePlatformHookLibNull.inf
+  MemoryAllocationLib|MdeModulePkg/Library/PiSmmCoreMemoryAllocationLib/PiSmmCoreMemoryAllocationLib.inf
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
+  SmmServicesTableLib|MdeModulePkg/Library/PiSmmCoreSmmServicesTableLib/PiSmmCoreSmmServicesTableLib.inf
+!ifdef $(DEBUG_ON_SERIAL_PORT)
+  DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
+!else
+  DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformDebugLibIoPort.inf
+!endif
 
 ################################################################################
 #
@@ -309,6 +342,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutUgaSupport|FALSE
 !if $(SECURE_BOOT_ENABLE) == TRUE
   gUefiOvmfPkgTokenSpaceGuid.PcdSecureBootEnable|TRUE
+!endif
+!if $(SMM_REQUIRE) == TRUE
+  gUefiOvmfPkgTokenSpaceGuid.PcdSmmSmramRequire|TRUE
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmEnableBspElection|FALSE
 !endif
 
 [PcdsFixedAtBuild]
@@ -337,6 +374,11 @@
 
 !ifndef $(USE_OLD_SHELL)
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
+!endif
+
+!if $(SMM_REQUIRE) == TRUE
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmSyncMode|0x01
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmApSyncTimeout|100000
 !endif
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -416,7 +458,16 @@
   UefiCpuPkg/Universal/Acpi/S3Resume2Pei/S3Resume2Pei.inf {
     <LibraryClasses>
       PcdLib|MdePkg/Library/PeiPcdLib/PeiPcdLib.inf
+!if $(SMM_REQUIRE) == TRUE
+      LockBoxLib|MdeModulePkg/Library/SmmLockBoxLib/SmmLockBoxPeiLib.inf
+!endif
   }
+!if $(SMM_REQUIRE) == TRUE
+  OvmfPkg/SmmAccess/SmmAccessPei.inf {
+    <LibraryClasses>
+      PcdLib|MdePkg/Library/PeiPcdLib/PeiPcdLib.inf
+  }
+!endif
 
   #
   # DXE Phase modules
@@ -468,19 +519,9 @@
   OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
   OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
   OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
-  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
   OvmfPkg/XenIoPciDxe/XenIoPciDxe.inf
   OvmfPkg/XenBusDxe/XenBusDxe.inf
   OvmfPkg/XenPvBlkDxe/XenPvBlkDxe.inf
-  OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf {
-    <LibraryClasses>
-      PlatformFvbLib|OvmfPkg/Library/EmuVariableFvbLib/EmuVariableFvbLib.inf
-  }
-  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
-  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
-    <LibraryClasses>
-      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
-  }
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
@@ -632,3 +673,60 @@
 !endif
 
   OvmfPkg/PlatformDxe/Platform.inf
+
+!if $(SMM_REQUIRE) == TRUE
+  OvmfPkg/SmmAccess/SmmAccess2Dxe.inf
+  OvmfPkg/SmmControl2Dxe/SmmControl2Dxe.inf
+  UefiCpuPkg/CpuS3DataDxe/CpuS3DataDxe.inf
+
+  #
+  # SMM Initial Program Load (a DXE_RUNTIME_DRIVER)
+  #
+  MdeModulePkg/Core/PiSmmCore/PiSmmIpl.inf
+
+  #
+  # SMM_CORE
+  #
+  MdeModulePkg/Core/PiSmmCore/PiSmmCore.inf
+
+  #
+  # Privileged drivers (DXE_SMM_DRIVER modules)
+  #
+  UefiCpuPkg/CpuIo2Smm/CpuIo2Smm.inf
+  MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf {
+    <LibraryClasses>
+      LockBoxLib|MdeModulePkg/Library/SmmLockBoxLib/SmmLockBoxSmmLib.inf
+  }
+  UefiCpuPkg/PiSmmCpuDxeSmm/PiSmmCpuDxeSmm.inf {
+    <LibraryClasses>
+      SmmCpuPlatformHookLib|UefiCpuPkg/Library/SmmCpuPlatformHookLibNull/SmmCpuPlatformHookLibNull.inf
+      SmmCpuFeaturesLib|OvmfPkg/Library/SmmCpuFeaturesLib/SmmCpuFeaturesLib.inf
+  }
+
+  #
+  # Variable driver stack (SMM)
+  #
+  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesSmm.inf
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteSmm.inf
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmm.inf {
+    <LibraryClasses>
+      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
+  }
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmmRuntimeDxe.inf
+
+!else
+
+  #
+  # Variable driver stack (non-SMM)
+  #
+  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
+  OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf {
+    <LibraryClasses>
+      PlatformFvbLib|OvmfPkg/Library/EmuVariableFvbLib/EmuVariableFvbLib.inf
+  }
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
+    <LibraryClasses>
+      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
+  }
+!endif

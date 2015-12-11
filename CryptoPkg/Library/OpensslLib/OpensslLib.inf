@@ -813,22 +813,22 @@
   #
   # PQUEUE
   #
-  $(OPENSSL_PATH)/crypto/pqueue/pqueue.c
+  #$(OPENSSL_PATH)/crypto/pqueue/pqueue.c
 
   #
   # TS
   #
-  $(OPENSSL_PATH)/crypto/ts/ts_err.c
-  $(OPENSSL_PATH)/crypto/ts/ts_req_utils.c
-  $(OPENSSL_PATH)/crypto/ts/ts_req_print.c
-  $(OPENSSL_PATH)/crypto/ts/ts_rsp_utils.c
-  $(OPENSSL_PATH)/crypto/ts/ts_rsp_print.c
-  $(OPENSSL_PATH)/crypto/ts/ts_rsp_sign.c
-  $(OPENSSL_PATH)/crypto/ts/ts_rsp_verify.c
-  $(OPENSSL_PATH)/crypto/ts/ts_verify_ctx.c
-  $(OPENSSL_PATH)/crypto/ts/ts_lib.c
-  $(OPENSSL_PATH)/crypto/ts/ts_conf.c
-  $(OPENSSL_PATH)/crypto/ts/ts_asn1.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_err.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_req_utils.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_req_print.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_rsp_utils.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_rsp_print.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_rsp_sign.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_rsp_verify.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_verify_ctx.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_lib.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_conf.c
+  #$(OPENSSL_PATH)/crypto/ts/ts_asn1.c
 
   #
   # SRP - Disabled by OPENSSL_NO_SRP
@@ -850,6 +850,9 @@
 [LibraryClasses]
   DebugLib
 
+[LibraryClasses.ARM]
+  ArmSoftFloatLib
+
 [BuildOptions]
   #
   # Disables the following Visual Studio compiler warnings brought by openssl source, so we do not break the build with /WX option:
@@ -862,9 +865,10 @@
   # C4305: truncation from type1 to type2 of smaller size
   # C4306: conversion from type1 to type2 of greater size
   # C4702: Potentially uninitialized local variable name used
+  # C4311: pointer truncation from 'type' to 'type'
   #
   MSFT:*_*_IA32_CC_FLAGS    = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4244 /wd4701 /wd4702 /wd4706
-  MSFT:*_*_X64_CC_FLAGS     = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4133 /wd4244 /wd4245 /wd4267 /wd4701 /wd4305 /wd4306 /wd4702 /wd4706
+  MSFT:*_*_X64_CC_FLAGS     = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4133 /wd4244 /wd4245 /wd4267 /wd4701 /wd4305 /wd4306 /wd4702 /wd4706 /wd4311
   MSFT:*_*_IPF_CC_FLAGS     = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4133 /wd4244 /wd4245 /wd4267 /wd4701 /wd4305 /wd4306 /wd4702 /wd4706
 
   INTEL:*_*_IA32_CC_FLAGS   = -U_WIN32 -U_WIN64 -U_MSC_VER -U__ICC $(OPENSSL_FLAGS) /w
@@ -889,6 +893,6 @@
   #  513: a value of type <type> cannot be assigned to an entity of type <type>
   #  188: enumerated type mixed with another type (i.e. passing an integer as an enum without a cast)
   # 1296: Extended constant initialiser used
-  RVCT:*_*_ARM_CC_FLAGS     = $(OPENSSL_FLAGS) --library_interface=aeabi_clib99 --fpu=vfpv3 --diag_suppress=1296,1295,550,1293,111,68,177,223,144,513,188
+  RVCT:*_*_ARM_CC_FLAGS     = $(OPENSSL_FLAGS) --library_interface=aeabi_clib99 --diag_suppress=1296,1295,550,1293,111,68,177,223,144,513,188
   XCODE:*_*_IA32_CC_FLAGS   = -mmmx -msse -U_WIN32 -U_WIN64 $(OPENSSL_FLAGS) -w
   XCODE:*_*_X64_CC_FLAGS    = -mmmx -msse -U_WIN32 -U_WIN64 $(OPENSSL_FLAGS) -w

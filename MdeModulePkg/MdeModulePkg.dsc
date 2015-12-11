@@ -208,6 +208,7 @@
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   MdeModulePkg/Application/MemoryProfileInfo/MemoryProfileInfo.inf
 
+  MdeModulePkg/Bus/Pci/PciSioSerialDxe/PciSioSerialDxe.inf
   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   MdeModulePkg/Bus/Pci/IncompatiblePciDeviceSupportDxe/IncompatiblePciDeviceSupportDxe.inf
   MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
@@ -385,6 +386,8 @@
     <LibraryClasses>
       FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
   }
+
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
 [Components.IA32, Components.X64, Components.IPF]  
   MdeModulePkg/Universal/Network/UefiPxeBcDxe/UefiPxeBcDxe.inf

@@ -760,6 +760,9 @@ PiCpuSmmEntry (
   UINTN                      NumberOfEnabledProcessors;
   UINTN                      Index;
   VOID                       *Buffer;
+  UINTN                      BufferPages;
+  UINTN                      TileCodeSize;
+  UINTN                      TileDataSize;
   UINTN                      TileSize;
   VOID                       *GuidHob;
   EFI_SMRAM_DESCRIPTOR       *SmramDescriptor;
@@ -937,9 +940,13 @@ PiCpuSmmEntry (
   // specific context in a PROCESSOR_SMM_DESCRIPTOR, and the SMI entry point.  This size
   // is rounded up to nearest power of 2.
   //
-  TileSize = sizeof (SMRAM_SAVE_STATE_MAP) + sizeof (PROCESSOR_SMM_DESCRIPTOR) + GetSmiHandlerSize () - 1;
+  TileCodeSize = GetSmiHandlerSize ();
+  TileCodeSize = ALIGN_VALUE(TileCodeSize, SIZE_4KB);
+  TileDataSize = sizeof (SMRAM_SAVE_STATE_MAP) + sizeof (PROCESSOR_SMM_DESCRIPTOR);
+  TileDataSize = ALIGN_VALUE(TileDataSize, SIZE_4KB);
+  TileSize = TileDataSize + TileCodeSize - 1;
   TileSize = 2 * GetPowerOfTwo32 ((UINT32)TileSize);
-  DEBUG ((EFI_D_INFO, "SMRAM TileSize = %08x\n", TileSize));
+  DEBUG ((EFI_D_INFO, "SMRAM TileSize = 0x%08x (0x%08x, 0x%08x)\n", TileSize, TileCodeSize, TileDataSize));
 
   //
   // If the TileSize is larger than space available for the SMI Handler of CPU[i],
@@ -961,12 +968,14 @@ PiCpuSmmEntry (
   // Intel486 processors: FamilyId is 4
   // Pentium processors : FamilyId is 5
   //
+  BufferPages = EFI_SIZE_TO_PAGES (SIZE_32KB + TileSize * (mMaxNumberOfCpus - 1));
   if ((FamilyId == 4) || (FamilyId == 5)) {
-    Buffer = AllocateAlignedPages (EFI_SIZE_TO_PAGES (SIZE_32KB + TileSize * (mMaxNumberOfCpus - 1)), SIZE_32KB);
+    Buffer = AllocateAlignedPages (BufferPages, SIZE_32KB);
   } else {
-    Buffer = AllocatePages (EFI_SIZE_TO_PAGES (SIZE_32KB + TileSize * (mMaxNumberOfCpus - 1)));
+    Buffer = AllocateAlignedPages (BufferPages, SIZE_4KB);
   }
   ASSERT (Buffer != NULL);
+  DEBUG ((EFI_D_INFO, "SMRAM SaveState Buffer (0x%08x, 0x%08x)\n", Buffer, EFI_PAGES_TO_SIZE(BufferPages)));
 
   //
   // Allocate buffer for pointers to array in  SMM_CPU_PRIVATE_DATA.
@@ -1407,6 +1416,35 @@ ConfigSmmCodeAccessCheck (
 }
 
 /**
+  This API provides a way to allocate memory for page table.
+
+  This API can be called more once to allocate memory for page tables.
+
+  Allocates the number of 4KB pages of type EfiRuntimeServicesData and returns a pointer to the
+  allocated buffer.  The buffer returned is aligned on a 4KB boundary.  If Pages is 0, then NULL
+  is returned.  If there is not enough memory remaining to satisfy the request, then NULL is
+  returned.
+
+  @param  Pages                 The number of 4 KB pages to allocate.
+
+  @return A pointer to the allocated buffer or NULL if allocation fails.
+
+**/
+VOID *
+AllocatePageTableMemory (
+  IN UINTN           Pages
+  )
+{
+  VOID  *Buffer;
+
+  Buffer = SmmCpuFeaturesAllocatePageTableMemory (Pages);
+  if (Buffer != NULL) {
+    return Buffer;
+  }
+  return AllocatePages (Pages);
+}
+
+/**
   Perform the remaining tasks.
 
 **/
@@ -1430,6 +1468,8 @@ PerformRemainingTasks (
     // Configure SMM Code Access Check feature if available.
     //
     ConfigSmmCodeAccessCheck ();
+
+    SmmCpuFeaturesCompleteSmmReadyToLock ();
 
     //
     // Clean SMM ready to lock flag
@@ -1455,6 +1495,8 @@ PerformPreTasks (
     // Configure SMM Code Access Check feature if available.
     //
     ConfigSmmCodeAccessCheck ();
+
+    SmmCpuFeaturesCompleteSmmReadyToLock ();
 
     mRestoreSmmConfigurationInS3 = FALSE;
   }

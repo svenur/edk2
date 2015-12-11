@@ -78,7 +78,7 @@ FV = SECFV
 ################################################################################
 
 [FD.MEMFD]
-BaseAddress   = 0x800000
+BaseAddress   = $(MEMFD_BASE_ADDRESS)
 Size          = 0xA00000
 ErasePolarity = 1
 BlockSize     = 0x10000
@@ -171,6 +171,9 @@ INF  IntelFrameworkModulePkg/Universal/StatusCode/Pei/StatusCodePei.inf
 INF  OvmfPkg/PlatformPei/PlatformPei.inf
 INF  MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf
 INF  UefiCpuPkg/Universal/Acpi/S3Resume2Pei/S3Resume2Pei.inf
+!if $(SMM_REQUIRE) == TRUE
+INF  OvmfPkg/SmmAccess/SmmAccessPei.inf
+!endif
 
 ################################################################################
 
@@ -196,7 +199,9 @@ READ_LOCK_STATUS   = TRUE
 APRIORI DXE {
   INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+!if $(SMM_REQUIRE) == FALSE
   INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
+!endif
 }
 
 #
@@ -224,14 +229,10 @@ INF  OvmfPkg/BlockMmioToBlockIoDxe/BlockIo.inf
 INF  OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
 INF  OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
 INF  OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
-INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
-INF  OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf
-INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
 INF  OvmfPkg/XenIoPciDxe/XenIoPciDxe.inf
 INF  OvmfPkg/XenBusDxe/XenBusDxe.inf
 INF  OvmfPkg/XenPvBlkDxe/XenPvBlkDxe.inf
 
-INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
   INF  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
@@ -352,6 +353,35 @@ INF  RuleOverride=CSM OvmfPkg/Csm/Csm16/Csm16.inf
 INF  OvmfPkg/QemuVideoDxe/QemuVideoDxe.inf
 INF  OvmfPkg/PlatformDxe/Platform.inf
 
+!if $(SMM_REQUIRE) == TRUE
+INF  OvmfPkg/SmmAccess/SmmAccess2Dxe.inf
+INF  OvmfPkg/SmmControl2Dxe/SmmControl2Dxe.inf
+INF  UefiCpuPkg/CpuS3DataDxe/CpuS3DataDxe.inf
+INF  MdeModulePkg/Core/PiSmmCore/PiSmmIpl.inf
+INF  MdeModulePkg/Core/PiSmmCore/PiSmmCore.inf
+INF  UefiCpuPkg/CpuIo2Smm/CpuIo2Smm.inf
+INF  MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf
+INF  UefiCpuPkg/PiSmmCpuDxeSmm/PiSmmCpuDxeSmm.inf
+
+#
+# Variable driver stack (SMM)
+#
+INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesSmm.inf
+INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteSmm.inf
+INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmm.inf
+INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmmRuntimeDxe.inf
+
+!else
+
+#
+# Variable driver stack (non-SMM)
+#
+INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
+INF  OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf
+INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+!endif
+
 ################################################################################
 
 [FV.FVMAIN_COMPACT]
@@ -383,6 +413,8 @@ FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
      SECTION FV_IMAGE = DXEFV
    }
  }
+
+!include DecomprScratchEnd.fdf.inc
 
 ################################################################################
 
@@ -475,4 +507,19 @@ FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
 [Rule.Common.SEC.RESET_VECTOR]
   FILE RAW = $(NAMED_GUID) {
     RAW BIN   Align = 16   |.bin
+  }
+
+[Rule.Common.SMM_CORE]
+  FILE SMM_CORE = $(NAMED_GUID) {
+    PE32     PE32           $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI       STRING="$(MODULE_NAME)" Optional
+    VERSION  STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+  }
+
+[Rule.Common.DXE_SMM_DRIVER]
+  FILE SMM = $(NAMED_GUID) {
+    SMM_DEPEX    SMM_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
+    PE32     PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI       STRING="$(MODULE_NAME)" Optional
+    VERSION  STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
   }

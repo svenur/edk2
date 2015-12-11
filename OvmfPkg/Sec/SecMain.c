@@ -362,6 +362,14 @@ DecompressMemFvs (
 
   OutputBuffer = (VOID*) ((UINT8*)(UINTN) PcdGet32 (PcdOvmfDxeMemFvBase) + SIZE_1MB);
   ScratchBuffer = ALIGN_POINTER ((UINT8*) OutputBuffer + OutputBufferSize, SIZE_1MB);
+
+  DEBUG ((EFI_D_VERBOSE, "%a: OutputBuffer@%p+0x%x ScratchBuffer@%p+0x%x "
+    "PcdOvmfDecompressionScratchEnd=0x%x\n", __FUNCTION__, OutputBuffer,
+    OutputBufferSize, ScratchBuffer, ScratchBufferSize,
+    PcdGet32 (PcdOvmfDecompressionScratchEnd)));
+  ASSERT ((UINTN)ScratchBuffer + ScratchBufferSize ==
+    PcdGet32 (PcdOvmfDecompressionScratchEnd));
+
   Status = ExtractGuidedSectionDecode (
              Section,
              &OutputBuffer,
@@ -531,13 +539,25 @@ FindPeiCoreImageBase (
      OUT  EFI_PHYSICAL_ADDRESS             *PeiCoreImageBase
   )
 {
+  BOOLEAN S3Resume;
+
   *PeiCoreImageBase = 0;
 
-  if (IsS3Resume ()) {
+  S3Resume = IsS3Resume ();
+  if (S3Resume && !FeaturePcdGet (PcdSmmSmramRequire)) {
+    //
+    // A malicious runtime OS may have injected something into our previously
+    // decoded PEI FV, but we don't care about that unless SMM/SMRAM is required.
+    //
     DEBUG ((EFI_D_VERBOSE, "SEC: S3 resume\n"));
     GetS3ResumePeiFv (BootFv);
   } else {
-    DEBUG ((EFI_D_VERBOSE, "SEC: Normal boot\n"));
+    //
+    // We're either not resuming, or resuming "securely" -- we'll decompress
+    // both PEI FV and DXE FV from pristine flash.
+    //
+    DEBUG ((EFI_D_VERBOSE, "SEC: %a\n",
+      S3Resume ? "S3 resume (with PEI decompression)" : "Normal boot"));
     FindMainFv (BootFv);
 
     DecompressMemFvs (BootFv);
@@ -698,6 +718,19 @@ SecCoreStartupWithStack (
   SEC_IDT_TABLE               IdtTableInStack;
   IA32_DESCRIPTOR             IdtDescriptor;
   UINT32                      Index;
+  volatile UINT8              *Table;
+
+  //
+  // To ensure SMM can't be compromised on S3 resume, we must force re-init of
+  // the BaseExtractGuidedSectionLib. Since this is before library contructors
+  // are called, we must use a loop rather than SetMem.
+  //
+  Table = (UINT8*)(UINTN)FixedPcdGet64 (PcdGuidedExtractHandlerTableAddress);
+  for (Index = 0;
+       Index < FixedPcdGet32 (PcdGuidedExtractHandlerTableSize);
+       ++Index) {
+    Table[Index] = 0;
+  }
 
   ProcessLibraryConstructorList (NULL, NULL);
 

@@ -233,13 +233,13 @@
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
   (pad_size) = WORD_ALIGNMENT_SIZE \
-               - ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
+               - ((unsigned int )(UINTN)(addr) % WORD_ALIGNMENT_SIZE);\
   if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
 } while (0)
 
 #define ALIGNMENT_RIGHT(addr) do {\
   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
-  (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
+  (addr) -= ((unsigned int )(UINTN)(addr) % WORD_ALIGNMENT_SIZE);\
 } while (0)
 
 #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
@@ -329,8 +329,8 @@ typedef Bits*          BitSetRef;
 #define SIZE_BITSET        sizeof(BitSet)
 
 #define BITSET_CLEAR(bs) do {\
-  int i;\
-  for (i = 0; i < (int )BITSET_SIZE; i++) { (bs)[i] = 0; }	\
+  int id;\
+  for (id = 0; id < (int )BITSET_SIZE; id++) { (bs)[id] = 0; }	\
 } while (0)
 
 #define BS_ROOM(bs,pos)            (bs)[pos / BITS_IN_ROOM]
