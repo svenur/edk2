@@ -103,7 +103,7 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 # 
 
-**Build Options**
+**Build Features**
 
 # 
 
@@ -111,27 +111,27 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 # 
 
-Setting up a Serial Console and Booting to UEFI Shell
+**Setting up a Serial Console and Booting to UEFI Shell**
 
 # 
 
-Install, Configure, and Boot Yocto Linux
+**Install, Configure, and Boot Yocto Linux**
 
 # 
 
-Source Debug Using Intel(R) UDK Debugger Tool
+**Source Debug Using Intel(R) UDK Debugger Tool**
 
 # 
 
-JTAG Debug using Intel(r) System Studio Debugger
+**JTAG Debug using Intel(r) System Studio Debugger**
 
 # 
 
-UEFI Secure Boot Feature and Physical Presence
+**UEFI Secure Boot Feature and Physical Presence**
 
 # 
 
-Testing Measured Boot Feature using Atmel I2C TPM on Sparkfun CryptoShield
+**Testing Measured Boot Feature using Atmel I2C TPM on CryptoShield**
 
 
 
