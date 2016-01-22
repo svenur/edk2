@@ -2,7 +2,7 @@
 
 # 
 
-Features
+**Features**
 * Minimal Firmware image for initial power-on and debug
 * UEFI Firmware image with ability to enable/disable major features such as
     - Logging
@@ -28,7 +28,7 @@ Features
 
 # 
 
-Windows Build Instructions
+**Windows Build Instructions**
 
 ## 
 
@@ -64,7 +64,7 @@ build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/QuarkMin.dsc
 ``````
 # 
 
-Linux Build Instructions
+**Linux Build Instructions**
 
 Pre-requisites:
 * GIT client
@@ -101,15 +101,13 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/Quark.dsc
 build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 ``````
 
+# 
 
+**Build Options**
 
 # 
 
-Build Options
-
-# 
-
-FLASH Update using DediProg SF100
+**FLASH Update using DediProg SF100**
 
 # 
 
