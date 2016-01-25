@@ -3,13 +3,13 @@
 # 
 
 **Features**
-* Minimal Firmware image for initial power-on and debug
-* UEFI Firmware image with ability to enable/disable major features such as
+* UEFI firmware image with ability to enable/disable major features such as
     - Logging
     - Source level debug using Intel(R) UDK Debugger Tool
     - Boot Performance Measurements
     - UEFI Secure Boot with Physical Presence
     - TCG Measured Boot using TPM 1.2 hardware devices on I2C bus
+* Minimal firmware image for initial power-on and debug
 * UEFI Shell built into FLASH image
 * UEFI Yocto Linux operating system boot support from Micro SD FLASH
 * Hardware Support
@@ -123,7 +123,7 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 # 
 
-**JTAG Debug using Intel(r) System Studio Debugger**
+**JTAG Debug Using Intel(r) System Studio Debugger**
 
 # 
 
