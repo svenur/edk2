@@ -105,6 +105,8 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 **Build Features**
 
+The table below contains a summary of the build flags to enable or disable features on the build command line using the ```-D``` flag.
+
 | **Define Name**          | **Default Value**   | **Supported Values** |
 | ------------------------ | ------------------- | -------------------- |
 | ```GALILEO```              |                GEN2 | GEN1, GEN2           |
@@ -121,7 +123,7 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 * ```SOURCE_DEBUG_ENABLE``` - Used to enable/disable source level debug using the [Intel(R) UDK Debugger Tool](https://firmware.intel.com/develop/intel-uefi-tools-and-utilities/intel-uefi-development-kit-debugger-tool).  The default is FALSE for disabled.  Add ```-D SOURCE_DEBUG_ENABLE``` to the build command line to enable source level debug.
 
-* ```PERFORMANCE_ENABLE``` - Used to enable/disable boot performance measurement.  The default is FALSE for disabled.  Add ```-D PERFORMANCE_ENABLE``` to the build command line to enable boot performance measurement.
+* ```PERFORMANCE_ENABLE``` - Used to enable/disable boot performance measurement.  The default is FALSE for disabled.  Add ```-D PERFORMANCE_ENABLE``` to the build command line to enable boot performance measurement.  When this feature is enabled, both ```LOGGING``` and ```SOURCE_DEBUG_ENABLE``` are automatically disabled so there is not boot time overhead from the serial UART for logging messages or the debug agent.
 
 * ```SECURE_BOOT_ENABLE``` - Used to enable/disable UEFI Secure Boot features.  The default is FALSE for disabled.  Add ```-D SECURE_BOOT_ENABLE``` to the build command line to enable UEFI Secure Boot features.
 
@@ -130,9 +132,40 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 * ```TPM_12_HARDWARE``` - Used to specify the type of TPM 1.2 hardware device that is connected to the Galileo board.  This define is valid if the measure boot feature is enabled using ```-D MEASURED_BOOT_ENABLE```.  The default is NONE for no TPM 1.2 hardware device connected.  Add ```-D TPM_12_HARDWARE=LPC``` for a TPM hardware device attached to an LPC bus (not supported on on Intel(R) Quark SoC X1000).  Add ```-D TPM_12_HARDWARE=ATMEL_I2C``` for an [Atmel AT97SC3204T](http://www.atmel.com/devices/AT97SC3204T.aspx) or  [Atmel AT97SC3205T](http://www.atmel.com/images/atmel-8883s-tpm-at97sc3205t-datasheet-summary.pdf) attached to the I2C bus of the Galileo Arduino header.  Add ```-D TPM_12_HARDWARE=INFINION_I2C``` for an [Infineon SLB9645](http://www.infineon.com/dgdl/Infineon-TPM+SLB+9645-DS-v01_00-EN.pdf?fileId=5546d4625185e0e201518b83d0c63d7c) attached to the I2C bus of the Galileo Arduino header.  The ATMEL_I2C setting has been tested with the [CryptoShield](https://www.sparkfun.com/products/13183) available from [SparkFun](https://www.sparkfun.com/).
   
 
+## 
+
+**Example Build Commands**
+
+Default build with logging enabled:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc```
+
+Release build with logging disabled:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc -b RELEASE```
+
+Enable source level debugging:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc -D SOURCE_DEBUG_ENABLE```
+
+Enable boot performance metrics:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc -D PERFORMANCE_ENABLE```
+
+Enable UEFI Secure Boot features:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc -D UEFI_SECURE_BOOT```
+
+Enable both UEFI Secure Boot features and measure boot using Atmel I2C TPM hardware device:
+
+```build -a IA32 -t VS2015x86 -p QuarkPlatformPkg/Quark.dsc -D UEFI_SECURE_BOOT -D MEASURED_BOOT_ENABLE -D TPM_12_HARDWARE=ATMEL_I2C```
+
+
 # 
 
 **FLASH Update using DediProg SF100**
+
+
 
 # 
 
