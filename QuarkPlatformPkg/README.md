@@ -126,7 +126,9 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 * ```SECURE_BOOT_ENABLE``` - Used to enable/disable UEFI Secure Boot features.  The default is FALSE for disabled.  Add ```-D SECURE_BOOT_ENABLE``` to the build command line to enable UEFI Secure Boot features.
 
 * ```MEASURED_BOOT_ENABLE``` - Used to enable/disable measurement of firmware code and data into a TPM 1.2 hardware device.  The default is FALSE for disabled.  Add ```-D MEASURED_BOOT_ENABLE``` to the build command line to enable UEFI Secure Boot features.
-* ```TPM_12_HARDWARE``` - Used to specify the type of TPM 1.2 hardware device that is connected to the Galileo board.  This define is ignored if MEASURED_BOOT_ENABLE is disabled.
+
+* ```TPM_12_HARDWARE``` - Used to specify the type of TPM 1.2 hardware device that is connected to the Galileo board.  This define is valid if the measure boot feature is enabled using ```-D MEASURED_BOOT_ENABLE```.  The default is NONE for no TPM 1.2 hardware device connected.  Add ```-D TPM_12_HARDWARE=LPC``` for a TPM hardware device attached to an LPC bus (not supported on on Intel(R) Quark SoC X1000).  Add ```-D TPM_12_HARDWARE=ATMEL_I2C``` for an [Atmel AT97SC3204T](http://www.atmel.com/devices/AT97SC3204T.aspx) or  [Atmel AT97SC3205T](http://www.atmel.com/images/atmel-8883s-tpm-at97sc3205t-datasheet-summary.pdf) attached to the I2C bus of the Galileo Arduino header.  Add ```-D TPM_12_HARDWARE=INFINION_I2C``` for an [Infineon SLB 9645](http://www.infineon.com/dgdl/Infineon-TPM+SLB+9645-DS-v01_00-EN.pdf?fileId=5546d4625185e0e201518b83d0c63d7c) attached to the I2C bus of the Galileo Arduino header. 
+
 # 
 
 **FLASH Update using DediProg SF100**
