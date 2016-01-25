@@ -165,9 +165,13 @@ Enable both UEFI Secure Boot features and measure boot using Atmel I2C TPM hardw
 
 **FLASH Update using DediProg SF100**
 
-Once the sources have been downloaded, a build environment established, and a firmware image has been built, the firmware image needs to installed into the FLASH device on the target Galileo development board.  One way to do this is with the [Dediprog SF100 IC Programmer](http://www.dediprog.com/pd/spi-flash-solution/SF100).
+Once the sources have been downloaded, a build environment established, and a firmware image has been built, the firmware image needs to installed into the FLASH device on the target Galileo development board.  One way to do this is with the [Dediprog SF100 IC Programmer](http://www.dediprog.com/pd/spi-flash-solution/SF100).  
 
-* **NOTE**: You may want to read and save the current FLASH image that was shipped with the Galileo development board before updating FLASH image.
+* Install the DediProg SF100 software.
+
+* Connect the DediProg SF100 to the Galileo development board.
+
+* **NOTE**: It is recommended that the FLASH image that was shipped with the Galileo development board be read and saved before updating FLASH image(e.g. ```dpcmd.exe -r GalileoOriginalFirmware.bin```).
 
 
 
