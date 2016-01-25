@@ -105,6 +105,24 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 **Build Features**
 
+| **Define Name**          | **Default Value**   | **Supported Values** |
+| ------------------------ | ------------------- | -------------------- |
+| **GALILEO**              |                GEN2 | GEN1, GEN2           |
+| **LOGGING**              |                TRUE | TRUE, FALSE          |
+| **SOURCE_DEBUG_ENABLE**  |               FALSE | TRUE, FALSE          |
+| **PERFORMANCE_ENABLE**   |               FALSE | TRUE, FALSE          |
+| **SECURE_BOOT_ENABLE**   |               FALSE | TRUE, FALSE          |
+| **MEASURED_BOOT_ENABLE** |               FALSE | TRUE, FALSE          |
+| **TPM_12_HARDWARE**      |                NONE | NONE, LPC, ATMEL_I2C, INFINEON_I2C |
+
+* **GALILEO** - 
+* **LOGGING** - 
+* **SOURCE_DEBUG_ENABLE** - 
+* **PERFORMANCE_ENABLE** - 
+* **SECURE_BOOT_ENABLE** - 
+* **MEASURED_BOOT_ENABLE** - 
+* **TPM_12_HARDWARE** - 
+
 # 
 
 **FLASH Update using DediProg SF100**
@@ -133,6 +151,6 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 **Testing Measured Boot Feature using Atmel I2C TPM on CryptoShield**
 
+# 
 
-
-
+**Measuring Boot Performance**
