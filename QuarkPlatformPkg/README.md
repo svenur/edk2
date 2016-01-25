@@ -13,9 +13,9 @@
 * UEFI Shell built into FLASH image
 * UEFI Yocto Linux operating system boot support from Micro SD FLASH
 * Hardware Support
-    -  Intel(R) Quark SoC X1000 CPU
-    -  Intel(R) Galileo Development Board
-    -  Intel(R) Galileo Gen 2 Development Board
+    -  [Intel(R) Quark SoC X1000 CPU](http://www.intel.com/content/www/us/en/embedded/products/quark/quark-x1000-datasheet.html)
+    -  [Intel(R) Gaileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html)
+    -  [Intel(R) Galileo Gen 2 Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-overview.html)
     -  HPET Timer
     -  Real Time Clock
 * Major I/O Subsystems
@@ -115,9 +115,14 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 | **MEASURED_BOOT_ENABLE** |               FALSE | TRUE, FALSE          |
 | **TPM_12_HARDWARE**      |                NONE | NONE, LPC, ATMEL_I2C, INFINEON_I2C |
 
-* **GALILEO** - 
-* **LOGGING** - 
-* **SOURCE_DEBUG_ENABLE** - 
+* **GALILEO** - Used to determine the type of Intel(R) Gaileo board type.  The default is GEN2 for the Intel(R) Galileo Gen 2 Development Board.  The other supported value is GEN1 for the Intel(R) Galileo Development Board.
+
+| **-D GALILEO=GEN1** | [Intel(R) Gaileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html) |
+| -- | -- |
+| **-D GALILEO=GEN2** | [Intel(R) Galileo Gen 2 Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-overview.html) |
+
+* **LOGGING** - Used to enable/disable logging messages from DEBUG() macros to a serial UART.  The default is TRUE for enabled when the BUILDTARGET is DEBUG (-b DEBUG).  The default is FALSE for disabled when the BUILDTARGET is not DEBUG (e.g. -b RELEASE).
+* **SOURCE_DEBUG_ENABLE** - Used to enable/disable source level debug  
 * **PERFORMANCE_ENABLE** - 
 * **SECURE_BOOT_ENABLE** - 
 * **MEASURED_BOOT_ENABLE** - 
