@@ -122,7 +122,17 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 | **-D GALILEO=GEN2** | [Intel(R) Galileo Gen 2 Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-overview.html) |
 
 * **LOGGING** - Used to enable/disable logging messages from DEBUG() macros to a serial UART.  The default is TRUE for enabled when the BUILDTARGET is DEBUG (-b DEBUG).  The default is FALSE for disabled when the BUILDTARGET is not DEBUG (e.g. -b RELEASE).
-* **SOURCE_DEBUG_ENABLE** - Used to enable/disable source level debug  
+
+| **-D LOGGING** | Force logging enabled|
+| -- | -- |
+| **-D LOGGING=FALSE** | Force logging disabled|
+
+* **SOURCE_DEBUG_ENABLE** - Used to enable/disable source level debug using the [Intel(R) UDK Debugger Tool](https://firmware.intel.com/develop/intel-uefi-tools-and-utilities/intel-uefi-development-kit-debugger-tool).  The default is FALSE for disabled.
+
+| **-D SOURCE_DEBUG_ENABLE** | Enable source level debug|
+| -- | -- |
+| **-D SOURCE_DEBUG_ENABLE=FALSE** | Disable source level debug|
+
 * **PERFORMANCE_ENABLE** - 
 * **SECURE_BOOT_ENABLE** - 
 * **MEASURED_BOOT_ENABLE** - 
