@@ -107,28 +107,26 @@ build –a IA32 –t GCC49 –p QuarkPlatformPkg/QuarkMin.dsc
 
 | **Define Name**          | **Default Value**   | **Supported Values** |
 | ------------------------ | ------------------- | -------------------- |
-| **GALILEO**              |                GEN2 | GEN1, GEN2           |
-| **LOGGING**              |                TRUE | TRUE, FALSE          |
-| **SOURCE_DEBUG_ENABLE**  |               FALSE | TRUE, FALSE          |
-| **PERFORMANCE_ENABLE**   |               FALSE | TRUE, FALSE          |
-| **SECURE_BOOT_ENABLE**   |               FALSE | TRUE, FALSE          |
-| **MEASURED_BOOT_ENABLE** |               FALSE | TRUE, FALSE          |
-| **TPM_12_HARDWARE**      |                NONE | NONE, LPC, ATMEL_I2C, INFINEON_I2C |
+| ```GALILEO```              |                GEN2 | GEN1, GEN2           |
+| ```LOGGING```              |                TRUE | TRUE, FALSE          |
+| ```SOURCE_DEBUG_ENABLE```  |               FALSE | TRUE, FALSE          |
+| ```PERFORMANCE_ENABLE```   |               FALSE | TRUE, FALSE          |
+| ```SECURE_BOOT_ENABLE```   |               FALSE | TRUE, FALSE          |
+| ```MEASURED_BOOT_ENABLE``` |               FALSE | TRUE, FALSE          |
+| ```TPM_12_HARDWARE```      |                NONE | NONE, LPC, ATMEL_I2C, INFINEON_I2C |
 
-* **GALILEO** - Used to determine the type of Intel(R) Gaileo board type.  The default is **GEN2** for the [Intel(R) Galileo Gen 2 Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-overview.html).  The other supported value is **GEN1** for the [Intel(R) Galileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html).  Add **-D GALILEO=GEN1** to the build command for [Intel(R) Gaileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html).
+* ```GALILEO``` - Used to specify the type of Intel(R) Gaileo board type.  The default is ```GEN2``` for the [Intel(R) Galileo Gen 2 Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-overview.html).  The other supported value is ```GEN1``` for the [Intel(R) Galileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html).  Add ```-D GALILEO=GEN1``` to the build command for [Intel(R) Gaileo Development Board](http://www.intel.com/content/www/us/en/embedded/products/galileo/galileo-g1-datasheet.html).
 
-* **LOGGING** - Used to enable/disable logging messages from DEBUG() macros to a serial UART.  The default is TRUE for enabled when the BUILDTARGET is DEBUG (-b DEBUG).  The default is FALSE for disabled when the BUILDTARGET is not DEBUG (e.g. -b RELEASE).  Add **-D LOGGING** to the build command to force logging enabled.  Add **-D LOGGING=FALSE** to force logging disabled.
+* ```LOGGING``` - Used to enable/disable logging messages from DEBUG() macros to a serial UART.  The default is TRUE for enabled when the BUILDTARGET is DEBUG (```-b DEBUG```).  The default is FALSE for disabled when the BUILDTARGET is not DEBUG (e.g. ```-b RELEASE```).  Add ```-D LOGGING``` to the build command to force logging enabled.  Add ```-D LOGGING=FALSE``` to force logging disabled.
 
-* **SOURCE_DEBUG_ENABLE** - Used to enable/disable source level debug using the [Intel(R) UDK Debugger Tool](https://firmware.intel.com/develop/intel-uefi-tools-and-utilities/intel-uefi-development-kit-debugger-tool).  The default is FALSE for disabled.  Add **-D SOURCE_DEBUG_ENABLE** to the build command line to enable source level debug.
+* ```SOURCE_DEBUG_ENABLE``` - Used to enable/disable source level debug using the [Intel(R) UDK Debugger Tool](https://firmware.intel.com/develop/intel-uefi-tools-and-utilities/intel-uefi-development-kit-debugger-tool).  The default is FALSE for disabled.  Add ```-D SOURCE_DEBUG_ENABLE``` to the build command line to enable source level debug.
 
-* **PERFORMANCE_ENABLE** - Used to enable/disable boot performance measurement.  The default is FALSE for disabled.  Add **-D PERFORMANCE_ENABLE** to the build command line to enable boot performance measurement.
+* ```PERFORMANCE_ENABLE``` - Used to enable/disable boot performance measurement.  The default is FALSE for disabled.  Add ```-D PERFORMANCE_ENABLE``` to the build command line to enable boot performance measurement.
 
-* **SECURE_BOOT_ENABLE** - Used to enable/disable UEFI Secure Boot features.  The default is FALSE for disabled.  Add **-D SECURE_BOOT_ENABLE** to the build command line to enable UEFI Secure Boot features.
+* ```SECURE_BOOT_ENABLE``` - Used to enable/disable UEFI Secure Boot features.  The default is FALSE for disabled.  Add ```-D SECURE_BOOT_ENABLE``` to the build command line to enable UEFI Secure Boot features.
 
-* **MEASURED_BOOT_ENABLE** - Used to enable/disable measurement of firmware code and data into a TPM 1.2 hardware device.
-* measured boot using a TPM 1.2 hardwarte UEFI Secure Boot features.  The default is FALSE for disabled.  Add **-D SECURE_BOOT_ENABLE** to the build command line to enable UEFI Secure Boot features.
-* **TPM_12_HARDWARE** - 
-
+* ```MEASURED_BOOT_ENABLE``` - Used to enable/disable measurement of firmware code and data into a TPM 1.2 hardware device.  The default is FALSE for disabled.  Add ```-D MEASURED_BOOT_ENABLE``` to the build command line to enable UEFI Secure Boot features.
+* ```TPM_12_HARDWARE``` - Used to specify the type of TPM 1.2 hardware device that is connected to the Galileo board.  This define is ignored if MEASURED_BOOT_ENABLE is disabled.
 # 
 
 **FLASH Update using DediProg SF100**
