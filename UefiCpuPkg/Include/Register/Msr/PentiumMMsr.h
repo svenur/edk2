@@ -404,7 +404,7 @@ typedef union {
     UINT32  FERR:1;
     ///
     /// [Bit 11] Branch Trace Storage Unavailable (RO)
-    /// 1 = Processor doesn’t support branch trace storage (BTS)
+    /// 1 = Processor doesn't support branch trace storage (BTS)
     /// 0 = BTS is supported
     ///
     UINT32  BTS:1;
