@@ -1,4 +1,4 @@
-#EDK II
+#EDK II - Proposal to organize packages into directories 
 
 There have been some discussions about organizing packages into directories.
 Below is a proposal for a top level directory structure and a first pass 
@@ -15,8 +15,8 @@ https://github.com/tianocore/tianocore.github.io/wiki/Multiple_Workspace
 Please provide feedback on the proposal (for, against, alternate proposal), 
 the number/type of top level directories, and the top level directory names.
 
-Top Level Directory Structure (Listed Alphabetically)
-=====================================================
+# Top Level Directory Structure (Listed Alphabetically)
+```
 edk2
   Application       Applications and application support libraries
   BaseTools         EDK II build tools/scripts
@@ -43,9 +43,9 @@ edk2
     Intel           Intel specific CPU/Chipset/SoC drivers 
     <VendorX>       <VendorX> specific CPU/Chipset/SoC drivers
     <VendorY>       <VendorY> specific CPU/Chipset/SoC drivers
-
-Mapping packages from edk2/master into proposed directory structure
-===================================================================
+```
+# Mapping packages from edk2/master into proposed directory structure
+```
 edk2
   Application
     AppPkg
@@ -106,11 +106,10 @@ edk2
     Intel
       QuarkSocPkg
       Vlv2DeviceRefCodePkg
+```
 
-</proposal>
-
-Setting PACKAGES_PATH to support builds using proposed directory structure
-===========================================================================
+# Setting PACKAGES_PATH to support builds using proposed directory structure
+```
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Core
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Driver
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Silicon\Arm
@@ -123,3 +122,4 @@ set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Platform\Intel
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Application
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2\Deprecated
 set PACKAGES_PATH=%PACKAGES_PATH%;%WORKSPACE%\edk2
+```
