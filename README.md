@@ -12,9 +12,6 @@ I have verified that platforms can be built using this proposal.
 
 https://github.com/tianocore/tianocore.github.io/wiki/Multiple_Workspace
 
-Please provide feedback on the proposal (for, against, alternate proposal), 
-the number/type of top level directories, and the top level directory names.
-
 # Top Level Directory Structure (Listed Alphabetically)
 ```
 edk2
@@ -56,8 +53,6 @@ edk2
     StdLibPrivateInternalFiles    
   Core
     CryptoPkg
-    IntelFsp2Pkg
-    IntelFsp2WrapperPkg
     MdeModulePkg
     MdePkg
     SecurityPkg
@@ -69,8 +64,6 @@ edk2
     FatBinPkg
     IntelFrameworkModulePkg
     IntelFrameworkPkg
-    IntelFspPkg
-    IntelFspWrapperPkg
     PerformancePkg
     ShellBinPkg
     UnixPkg
@@ -88,11 +81,11 @@ edk2
     BeagleBoard
       BeagleBoardPkg
     Common    
-      DuetPkg
-      OvmfPkg
       CorebootPayloadPkg
+      DuetPkg
       EmulatorPkg
       Nt32Pkg
+      OvmfPkg
     Intel
       QuarkPlatformPkg
       Vlv2TbltDevicePkg
@@ -105,7 +98,12 @@ edk2
       PcAtChipsetPkg
       UefiCpuPkg
     Intel
-      QuarkSocPkg
+      IntelFsp2Pkg
+      IntelFsp2WrapperPkg
+      IntelFspPkg
+      IntelFspWrapperPkg
+      IntelSiliconPkg
+     QuarkSocPkg
       Vlv2DeviceRefCodePkg
     TexasInstruments
       Omap35xxPkg
