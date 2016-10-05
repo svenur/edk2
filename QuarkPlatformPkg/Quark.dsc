@@ -281,6 +281,8 @@
   PerformanceLib|MdeModulePkg/Library/SmmPerformanceLib/SmmPerformanceLib.inf
 !endif
 
+  SmmPeriodicSmiLib|MdePkg/Library/SmmPeriodicSmiLib/SmmPeriodicSmiLib.inf
+  
 [LibraryClasses.IA32.SMM_CORE]
   SmmServicesTableLib|MdeModulePkg/Library/PiSmmCoreSmmServicesTableLib/PiSmmCoreSmmServicesTableLib.inf
   ReportStatusCodeLib|MdeModulePkg/Library/SmmReportStatusCodeLib/SmmReportStatusCodeLib.inf
@@ -774,6 +776,8 @@
   MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf
   UefiCpuPkg/PiSmmCommunication/PiSmmCommunicationSmm.inf
 
+  UnitTestPkg/ReproduceBug51/ReproduceBug51.inf
+  
   #
   # SMBIOS
   #
@@ -884,6 +888,6 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
-
+  
 [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
   MSFT:*_*_*_DLINK_FLAGS = /ALIGN:4096

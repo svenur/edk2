@@ -507,6 +507,8 @@ INF  QuarkPlatformPkg/Acpi/DxeSmm/SmmPowerManagement/SmmPowerManagement.inf
 INF  MdeModulePkg/Universal/LockBox/SmmLockBox/SmmLockBox.inf
 INF  UefiCpuPkg/PiSmmCommunication/PiSmmCommunicationSmm.inf
 
+INF  UnitTestPkg/ReproduceBug51/ReproduceBug51.inf
+
 #
 # SMBIOS
 #
