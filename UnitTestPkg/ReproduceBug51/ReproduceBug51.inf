@@ -1,0 +1,38 @@
+## @file
+#  DXE SMM Driver to reproduce Bulzilla issue #51
+#
+#  https://bugzilla.tianocore.org/show_bug.cgi?id=51
+# 
+#  Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION               = 0x00010005
+  BASE_NAME                 = ReproduceBug51
+  FILE_GUID                 = 508bfbd1-8a8a-11e6-9a9b-402cf4d70a24
+  MODULE_TYPE               = DXE_SMM_DRIVER
+  VERSION_STRING            = 0.1
+  PI_SPECIFICATION_VERSION  = 0x0001000A
+  ENTRY_POINT               = ReproduceBug51DriverEntryPoint
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[Sources]
+  ReproduceBug51.c
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  DebugLib
+  SmmPeriodicSmiLib
+
+[Depex]
+  TRUE  
