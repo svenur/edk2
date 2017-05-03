@@ -288,7 +288,7 @@ INF  ShellPkg/Application/Shell/Shell.inf
 INF  RuleOverride = BINARY USE = X64 EdkShellBinPkg/FullShell/FullShell.inf
 !endif
 
-INF MdeModulePkg/Logo/LogoDxe.inf
+#INF MdeModulePkg/Logo/LogoDxe.inf
 
 #
 # Network modules
