@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2015 - 2017, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -201,11 +201,6 @@ CProcedureInvoke:
     push       rbp
     mov        rbp, rsp
 
-    mov        rax, ASM_PFX(InitializeFloatingPointUnits)
-    sub        rsp, 20h
-    call       rax               ; Call assembly function to initialize FPU per UEFI spec
-    add        rsp, 20h
-
     mov        edx, ebx          ; edx is NumApsExecuting
     mov        ecx, esi
     add        ecx, LockLocation ; rcx is address of exchange info data buffer
@@ -282,11 +277,11 @@ AsmRelocateApLoopEnd:
 ;-------------------------------------------------------------------------------------
 global ASM_PFX(AsmGetAddressMap)
 ASM_PFX(AsmGetAddressMap):
-    mov        rax, ASM_PFX(RendezvousFunnelProc)
+    lea        rax, [ASM_PFX(RendezvousFunnelProc)]
     mov        qword [rcx], rax
     mov        qword [rcx +  8h], LongModeStart - RendezvousFunnelProcStart
     mov        qword [rcx + 10h], RendezvousFunnelProcEnd - RendezvousFunnelProcStart
-    mov        rax, ASM_PFX(AsmRelocateApLoop)
+    lea        rax, [ASM_PFX(AsmRelocateApLoop)]
     mov        qword [rcx + 18h], rax
     mov        qword [rcx + 20h], AsmRelocateApLoopEnd - AsmRelocateApLoopStart
     ret

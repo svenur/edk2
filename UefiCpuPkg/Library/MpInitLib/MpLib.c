@@ -549,6 +549,12 @@ ApWakeupFunction (
   UINT64                     ApTopOfStack;
 
   //
+  // Initialize floating point operating environment
+  // to be compliant with UEFI spec.
+  //
+  InitializeFloatingPointUnits();
+
+  //
   // AP finished assembly code and begin to execute C code
   //
   CpuMpData = ExchangeInfo->CpuMpData;
