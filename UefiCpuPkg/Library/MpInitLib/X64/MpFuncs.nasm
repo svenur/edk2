@@ -201,7 +201,7 @@ CProcedureInvoke:
     push       rbp
     mov        rbp, rsp
 
-    mov        rax, ASM_PFX(InitializeFloatingPointUnits)
+    lea        rax, [ASM_PFX(InitializeFloatingPointUnits)]
     sub        rsp, 20h
     call       rax               ; Call assembly function to initialize FPU per UEFI spec
     add        rsp, 20h
@@ -282,11 +282,11 @@ AsmRelocateApLoopEnd:
 ;-------------------------------------------------------------------------------------
 global ASM_PFX(AsmGetAddressMap)
 ASM_PFX(AsmGetAddressMap):
-    mov        rax, ASM_PFX(RendezvousFunnelProc)
+    lea        rax, [ASM_PFX(RendezvousFunnelProc)]
     mov        qword [rcx], rax
     mov        qword [rcx +  8h], LongModeStart - RendezvousFunnelProcStart
     mov        qword [rcx + 10h], RendezvousFunnelProcEnd - RendezvousFunnelProcStart
-    mov        rax, ASM_PFX(AsmRelocateApLoop)
+    lea        rax, [ASM_PFX(AsmRelocateApLoop)]
     mov        qword [rcx + 18h], rax
     mov        qword [rcx + 20h], AsmRelocateApLoopEnd - AsmRelocateApLoopStart
     ret
