@@ -3,6 +3,7 @@
   to show progress bar and LOGO.
 
 Copyright (c) 2011 - 2016, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2016, Microsoft Corporation<BR>
 This program and the accompanying materials are licensed and made available under
 the terms and conditions of the BSD License that accompanies this distribution.
 The full text of the license may be found at
@@ -26,6 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/PcdLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
+#include <Protocol/BootLogo2.h>
 
 /**
   Show LOGO returned from Edkii Platform Logo protocol on all consoles.
@@ -56,6 +58,7 @@ BootLogoEnableLogo (
   UINT32                                RefreshRate;
   EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
   EFI_BOOT_LOGO_PROTOCOL                *BootLogo;
+  EDKII_BOOT_LOGO2_PROTOCOL             *BootLogo2;
   UINTN                                 NumberOfLogos;
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *LogoBlt;
   UINTN                                 LogoDestX;
@@ -96,6 +99,14 @@ BootLogoEnableLogo (
   Status = gBS->LocateProtocol (&gEfiBootLogoProtocolGuid, NULL, (VOID **) &BootLogo);
   if (EFI_ERROR (Status)) {
     BootLogo = NULL;
+  }
+
+  //
+  // Try to open Boot Logo 2 Protocol.
+  //
+  Status = gBS->LocateProtocol (&gEdkiiBootLogo2ProtocolGuid, NULL, (VOID **) &BootLogo2);
+  if (EFI_ERROR (Status)) {
+    BootLogo2 = NULL;
   }
 
   //
@@ -330,7 +341,12 @@ BootLogoEnableLogo (
   }
 
   if (!EFI_ERROR (Status)) {
-    BootLogo->SetBootLogo (BootLogo, LogoBlt, LogoDestX, LogoDestY, LogoWidth, LogoHeight);
+    if (BootLogo != NULL) {
+      BootLogo->SetBootLogo (BootLogo, LogoBlt, LogoDestX, LogoDestY, LogoWidth, LogoHeight);
+    }
+    if (BootLogo2 != NULL) {
+      BootLogo2->SetBootLogo (BootLogo2, LogoBlt, LogoDestX, LogoDestY, LogoWidth, LogoHeight);
+    }
   }
   FreePool (LogoBlt);
 
