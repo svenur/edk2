@@ -1,7 +1,7 @@
 #/** @file
 # Platform description.
 #
-# Copyright (c) 2012  - 2017, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2012  - 2018, Intel Corporation. All rights reserved.<BR>
 #
 # This program and the accompanying materials are licensed and made available under
 # the terms and conditions of the BSD License that accompanies this distribution.
@@ -146,6 +146,8 @@
   UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   GenericBdsLib|$(PLATFORM_PACKAGE)/Override/IntelFrameworkModulePkg/Library/GenericBdsLib/GenericBdsLib.inf
+  BmpSupportLib|MdeModulePkg/Library/BaseBmpSupportLib/BaseBmpSupportLib.inf
+  SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
   PlatformBdsLib|$(PLATFORM_PACKAGE)/Library/PlatformBdsLib/PlatformBdsLib.inf
   NetLib|MdeModulePkg/Library/DxeNetLib/DxeNetLib.inf
   DpcLib|MdeModulePkg/Library/DxeDpcLib/DxeDpcLib.inf
