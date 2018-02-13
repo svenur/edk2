@@ -12,6 +12,8 @@
 ;
 ;**/
 
+%pragma macho subsections_via_symbols
+
 %define EXCPT64_DIVIDE_ERROR 0
 %define EXCPT64_DEBUG 1
 %define EXCPT64_NMI 2
