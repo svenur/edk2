@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 extern  ASM_PFX(SmiPFHandler)
 
 global  ASM_PFX(gcSmiIdtr)

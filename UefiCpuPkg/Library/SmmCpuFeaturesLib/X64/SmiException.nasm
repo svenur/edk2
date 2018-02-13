@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 global  ASM_PFX(gcStmPsd)
 
 extern  ASM_PFX(SmmStmExceptionHandler)

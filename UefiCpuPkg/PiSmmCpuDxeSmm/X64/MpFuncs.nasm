@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 %define VacantFlag 0x0
 %define NotVacantFlag 0xff
 

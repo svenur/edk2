@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 ;
 ; CommonExceptionHandler()
 ;
