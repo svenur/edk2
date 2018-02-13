@@ -1,3 +1,5 @@
+
+%pragma macho subsections_via_symbols
 SECTION .text
 
 ; INTN
