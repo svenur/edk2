@@ -6,7 +6,7 @@
   CapsuleAuthenticateSystemFirmware(), ExtractAuthenticatedImage() will receive
   untrusted input and do basic validation.
 
-  Copyright (c) 2016 - 2017, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -370,6 +370,8 @@ ExtractAuthenticatedImage (
   GUID                                      *CertType;
   VOID                                      *PublicKeyData;
   UINTN                                     PublicKeyDataLength;
+  UINT8                                     *PublicKeyDataXdr;
+  UINT8                                     *PublicKeyDataXdrEnd;
 
   DEBUG((DEBUG_INFO, "ExtractAuthenticatedImage - Image: 0x%08x - 0x%08x\n", (UINTN)Image, (UINTN)ImageSize));
 
@@ -410,21 +412,78 @@ ExtractAuthenticatedImage (
   if (CompareGuid(&gEfiCertPkcs7Guid, CertType)) {
     PublicKeyData   = PcdGetPtr(PcdPkcs7CertBuffer);
     PublicKeyDataLength = PcdGetSize(PcdPkcs7CertBuffer);
+
+    ASSERT (PublicKeyData != NULL);
+    ASSERT (PublicKeyDataLength != 0);
+
+    Status = AuthenticateFmpImage(
+               ImageAuth,
+               ImageSize,
+               PublicKeyData,
+               PublicKeyDataLength
+               );
+    if (EFI_ERROR (Status)) {
+      PublicKeyDataXdr    = PcdGetPtr (PcdPkcs7CertBufferXdr);
+      PublicKeyDataXdrEnd = PublicKeyDataXdr + PcdGetSize (PcdPkcs7CertBufferXdr);
+
+      ASSERT (PublicKeyDataXdr != NULL);
+      ASSERT (PublicKeyDataXdr != PublicKeyDataXdrEnd);
+
+      //
+      // Try each key from PcdPkcs7CertBufferXdr
+      //
+      while (PublicKeyDataXdr < PublicKeyDataXdrEnd) {
+        if (PublicKeyDataXdr + sizeof (UINT32) > PublicKeyDataXdrEnd) {
+          //
+          // Key data extends beyond end of PCD
+          //
+          break;
+        }
+        //
+        // Read key length stored in big endian format
+        //
+        PublicKeyDataLength = SwapBytes32 (*(UINT32 *)(PublicKeyDataXdr));
+        //
+        // Point to the start of the key data
+        //
+        PublicKeyDataXdr += sizeof (UINT32);
+        if (PublicKeyDataXdr + PublicKeyDataLength > PublicKeyDataXdrEnd) {
+          //
+          // Key data extends beyond end of PCD
+          //
+          break;
+        }
+        PublicKeyData = PublicKeyDataXdr;
+        Status = AuthenticateFmpImage (
+                   ImageAuth,
+                   ImageSize,
+                   PublicKeyData,
+                   PublicKeyDataLength
+                   );
+        if (!EFI_ERROR (Status)) {
+          break;
+        }
+        PublicKeyDataXdr += PublicKeyDataLength;
+        PublicKeyDataXdr = (UINT8 *)ALIGN_POINTER (PublicKeyDataXdr, sizeof(UINT32));
+      }
+    }
   } else if (CompareGuid(&gEfiCertTypeRsa2048Sha256Guid, CertType)) {
     PublicKeyData = PcdGetPtr(PcdRsa2048Sha256PublicKeyBuffer);
     PublicKeyDataLength = PcdGetSize(PcdRsa2048Sha256PublicKeyBuffer);
+
+    ASSERT (PublicKeyData != NULL);
+    ASSERT (PublicKeyDataLength != 0);
+
+    Status = AuthenticateFmpImage(
+               ImageAuth,
+               ImageSize,
+               PublicKeyData,
+               PublicKeyDataLength
+               );
   } else {
     return FALSE;
   }
-  ASSERT (PublicKeyData != NULL);
-  ASSERT (PublicKeyDataLength != 0);
 
-  Status = AuthenticateFmpImage(
-             ImageAuth,
-             ImageSize,
-             PublicKeyData,
-             PublicKeyDataLength
-             );
   switch (Status) {
   case RETURN_SUCCESS:
     *LastAttemptStatus = LAST_ATTEMPT_STATUS_SUCCESS;
