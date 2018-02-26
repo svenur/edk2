@@ -236,10 +236,10 @@ _StmSmiHandler:
     rdmsr
     mov     r8, rdx                    ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .0
+    jz      .2
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.0:
+.2:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD            ; enable NXE

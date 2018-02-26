@@ -222,10 +222,10 @@ _StmSmiHandler:
     rdmsr
     mov     esi, edx                   ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .5
+    jz      .8
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.5:
+.8:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
@@ -248,25 +248,25 @@ _StmSmiHandler:
     cpuid                               ; use CPUID to determine if specific CR4 bits are supported
     mov     eax, cr4                    ; init EAX
     test    edx, BIT2                   ; Check for DE capabilities
-    jz      .0
+    jz      .10
     or      eax, BIT3
-.0:
+.10:
     test    edx, BIT6                   ; Check for PAE capabilities
-    jz      .1
+    jz      .11
     or      eax, BIT5
-.1:
+.11:
     test    edx, BIT7                   ; Check for MCE capabilities
-    jz      .2
+    jz      .12
     or      eax, BIT6
-.2:
+.12:
     test    edx, BIT24                  ; Check for FXSR capabilities
-    jz      .3
+    jz      .13
     or      eax, BIT9
-.3:
+.13:
     test    edx, BIT25                  ; Check for SSE capabilities
-    jz      .4
+    jz      .14
     or      eax, BIT10
-.4:                                     ; as cr4.PGE is not set here, refresh cr3
+.14:                                    ; as cr4.PGE is not set here, refresh cr3
     mov     cr4, eax                    ; in PreModifyMtrrs() to flush TLB.
     ; STM init finish
     jmp     CommonHandler
