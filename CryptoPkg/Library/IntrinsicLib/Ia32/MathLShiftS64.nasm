@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 global ASM_PFX(__ashldi3)
@@ -30,19 +32,19 @@ global ASM_PFX(__ashldi3)
 ;------------------------------------------------------------------------------
 ASM_PFX(__ashldi3):
     cmp cl,0x40
-    jnc ReturnZero
+    jnc L_ReturnZero
     cmp cl,0x20
-    jnc More32
+    jnc L_More32
     shld edx,eax,cl
     shl eax,cl
     ret
-More32:
+L_More32:
     mov edx,eax
     xor eax,eax
     and cl,0x1f
     shl edx,cl
     ret
-ReturnZero:
+L_ReturnZero:
     xor eax,eax
     xor edx,edx
     ret

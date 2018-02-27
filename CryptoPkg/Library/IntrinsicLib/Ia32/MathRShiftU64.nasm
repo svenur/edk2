@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -30,19 +32,19 @@
 global ASM_PFX(__ashrdi3)
 ASM_PFX(__ashrdi3):
     cmp cl,0x40
-    jnc _Exit
+    jnc L_Exit
     cmp cl,0x20
-    jnc More32
+    jnc L_More32
     shrd eax,edx,cl
     shr edx,cl
     ret
-More32:
+L_More32:
     mov eax,edx
     xor edx,edx
     and cl,0x1f
     shr eax,cl
     ret
-_Exit:
+L_Exit:
     xor eax,eax
     xor edx,edx
     ret
