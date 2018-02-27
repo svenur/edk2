@@ -1,7 +1,7 @@
 ;; @file
 ;  Provide FSP API entry points.
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -10,6 +10,8 @@
 ; THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;;
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -28,7 +30,7 @@ extern   ASM_PFX(PcdGet32 (PcdFspReservedBufferSize))
 ;
 extern ASM_PFX(AsmGetFspBaseAddress)
 extern ASM_PFX(AsmGetFspInfoHeader)
-;extern ASM_PFX(LoadMicrocode)    ; @todo: needs a weak implementation
+;extern ASM_PFX(L_LoadMicrocode)    ; @todo: needs a weak implementation
 extern ASM_PFX(SecPlatformInit)   ; @todo: needs a weak implementation
 extern ASM_PFX(SecCarInit)
 
@@ -167,29 +169,29 @@ ASM_PFX(LoadMicrocodeDefault):
    movd   ebp, mm7
 
    cmp    esp, 0
-   jz     ParamError
+   jz     L_ParamError
    mov    eax, dword [esp + 4]    ; Parameter pointer
    cmp    eax, 0
-   jz     ParamError
+   jz     L_ParamError
    mov    esp, eax
 
    ; skip loading Microcode if the MicrocodeCodeSize is zero
    ; and report error if size is less than 2k
    mov    eax, dword [esp + LoadMicrocodeParams.MicrocodeCodeSize]
    cmp    eax, 0
-   jz     Exit2
+   jz     L_Exit2
    cmp    eax, 0800h
-   jl     ParamError
+   jl     L_ParamError
 
    mov    esi, dword [esp + LoadMicrocodeParams.MicrocodeCodeAddr]
    cmp    esi, 0
-   jnz    CheckMainHeader
+   jnz    L_CheckMainHeader
 
-ParamError:
+L_ParamError:
    mov    eax, 080000002h
-   jmp    Exit2
+   jmp    L_Exit2
 
-CheckMainHeader:
+L_CheckMainHeader:
    ; Get processor signature and platform ID from the installed processor
    ; and save into registers for later use
    ; ebx = processor signature
@@ -215,30 +217,30 @@ CheckMainHeader:
    ; Minimal test checking for header version and loader version as 1
    mov   eax, dword 1
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrVersion], eax
-   jne   AdvanceFixedSize
+   jne   L_AdvanceFixedSize
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrLoader], eax
-   jne   AdvanceFixedSize
+   jne   L_AdvanceFixedSize
 
    ; Check if signature and plaform ID match
    cmp   ebx, dword [esi + MicrocodeHdr.MicrocodeHdrProcessor]
-   jne   LoadMicrocodeDefault1
+   jne   L_LoadMicrocodeDefault1
    test  edx, dword [esi + MicrocodeHdr.MicrocodeHdrFlags ]
-   jnz   LoadCheck  ; Jif signature and platform ID match
+   jnz   L_LoadCheck  ; Jif signature and platform ID match
 
-LoadMicrocodeDefault1:
+L_LoadMicrocodeDefault1:
    ; Check if extended header exists
    ; First check if MicrocodeHdrTotalSize and MicrocodeHdrDataSize are valid
    xor   eax, eax
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrTotalSize], eax
-   je    NextMicrocode
+   je    L_NextMicrocode
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrDataSize], eax
-   je    NextMicrocode
+   je    L_NextMicrocode
 
    ; Then verify total size - sizeof header > data size
    mov   ecx, dword [esi + MicrocodeHdr.MicrocodeHdrTotalSize]
    sub   ecx, MicrocodeHdr.size
    cmp   ecx, dword [esi + MicrocodeHdr.MicrocodeHdrDataSize]
-   jng   NextMicrocode    ; Jif extended header does not exist
+   jng   L_NextMicrocode    ; Jif extended header does not exist
 
    ; Set edi -> extended header
    mov   edi, esi
@@ -251,50 +253,50 @@ LoadMicrocodeDefault1:
    ; Move pointer to first signature structure
    add   edi, ExtSigHdr.size
 
-CheckExtSig:
+L_CheckExtSig:
    ; Check if extended signature and platform ID match
    cmp   dword [edi + ExtSig.ExtSigProcessor], ebx
-   jne   LoadMicrocodeDefault2
+   jne   L_LoadMicrocodeDefault2
    test  dword [edi + ExtSig.ExtSigFlags], edx
-   jnz   LoadCheck      ; Jif signature and platform ID match
-LoadMicrocodeDefault2:
+   jnz   L_LoadCheck      ; Jif signature and platform ID match
+L_LoadMicrocodeDefault2:
    ; Check if any more extended signatures exist
    add   edi, ExtSig.size
-   loop  CheckExtSig
+   loop  L_CheckExtSig
 
-NextMicrocode:
+L_NextMicrocode:
    ; Advance just after end of this microcode
    xor   eax, eax
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrTotalSize], eax
-   je    LoadMicrocodeDefault3
+   je    L_LoadMicrocodeDefault3
    add   esi, dword [esi + MicrocodeHdr.MicrocodeHdrTotalSize]
-   jmp   CheckAddress
-LoadMicrocodeDefault3:
+   jmp   L_CheckAddress
+L_LoadMicrocodeDefault3:
    add   esi, dword  2048
-   jmp   CheckAddress
+   jmp   L_CheckAddress
 
-AdvanceFixedSize:
+L_AdvanceFixedSize:
    ; Advance by 4X dwords
    add   esi, dword  1024
 
-CheckAddress:
+L_CheckAddress:
    ; Is valid Microcode start point ?
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrVersion], 0ffffffffh
-   jz    Done
+   jz    L_Done
 
    ; Is automatic size detection ?
    mov   eax, dword [esp + LoadMicrocodeParams.MicrocodeCodeSize]
    cmp   eax, 0ffffffffh
-   jz    LoadMicrocodeDefault4
+   jz    L_LoadMicrocodeDefault4
 
    ; Address >= microcode region address + microcode region size?
    add   eax, dword [esp + LoadMicrocodeParams.MicrocodeCodeAddr]
    cmp   esi, eax
-   jae   Done        ;Jif address is outside of microcode region
-   jmp   CheckMainHeader
+   jae   L_Done        ;Jif address is outside of microcode region
+   jmp   L_CheckMainHeader
 
-LoadMicrocodeDefault4:
-LoadCheck:
+L_LoadMicrocodeDefault4:
+L_LoadCheck:
    ; Get the revision of the current microcode update loaded
    mov   ecx, MSR_IA32_BIOS_SIGN_ID
    xor   eax, eax               ; Clear EAX
@@ -308,9 +310,9 @@ LoadCheck:
 
    ; Verify this microcode update is not already loaded
    cmp   dword [esi + MicrocodeHdr.MicrocodeHdrRevision], edx
-   je    Continue
+   je    L_Continue
 
-LoadMicrocode:
+L_LoadMicrocode:
    ; EAX contains the linear address of the start of the Update Data
    ; EDX contains zero
    ; ECX contains 79h (IA32_BIOS_UPDT_TRIG)
@@ -323,20 +325,20 @@ LoadMicrocode:
    mov   eax, 1
    cpuid
 
-Continue:
-   jmp   NextMicrocode
+L_Continue:
+   jmp   L_NextMicrocode
 
-Done:
+L_Done:
    mov   eax, 1
    cpuid
    mov   ecx, MSR_IA32_BIOS_SIGN_ID
    rdmsr                         ; Get current microcode signature
    xor   eax, eax
    cmp   edx, 0
-   jnz   Exit2
+   jnz   L_Exit2
    mov   eax, 08000000Eh
 
-Exit2:
+L_Exit2:
    jmp   ebp
 
 
@@ -387,13 +389,13 @@ ASM_PFX(EstablishStackFsp):
   sub       edx,  [ASM_PFX(PcdGet32 (PcdFspReservedBufferSize))]
 
   cmp       ecx, edx        ;If PcdFspReservedBufferSize >= PcdTemporaryRamSize, then error.
-  jb        EstablishStackFspSuccess
+  jb        L_EstablishStackFspSuccess
   mov       eax, 80000003h  ;EFI_UNSUPPORTED
-  jmp       EstablishStackFspExit
-EstablishStackFspSuccess:
+  jmp       L_EstablishStackFspExit
+L_EstablishStackFspSuccess:
   xor       eax, eax
 
-EstablishStackFspExit:
+L_EstablishStackFspExit:
   RET_ESI
 
 ;----------------------------------------------------------------------------
@@ -429,14 +431,14 @@ ASM_PFX(TempRamInitApi):
   mov       eax, dword [esp + 4]
   cmp       eax, 0
   mov       eax, 80000002h
-  jz        TempRamInitExit
+  jz        L_TempRamInitExit
 
   ;
   ; Sec Platform Init
   ;
   CALL_MMX  ASM_PFX(SecPlatformInit)
   cmp       eax, 0
-  jnz       TempRamInitExit
+  jnz       L_TempRamInitExit
 
   ; Load microcode
   LOAD_ESP
@@ -448,16 +450,16 @@ ASM_PFX(TempRamInitApi):
   LOAD_ESP
   CALL_MMX  ASM_PFX(SecCarInit)
   cmp       eax, 0
-  jnz       TempRamInitExit
+  jnz       L_TempRamInitExit
 
   LOAD_ESP
   CALL_MMX  ASM_PFX(EstablishStackFsp)
   cmp       eax, 0
-  jnz       TempRamInitExit
+  jnz       L_TempRamInitExit
 
   LXMMN      xmm6, eax, 3  ;Restore microcode status if no CAR init error from ECX-SLOT 3 in xmm6.
 
-TempRamInitExit:
+L_TempRamInitExit:
    mov      bl, al                  ; save al data in bl
    mov      al, 07Fh                ; API exit postcode 7f
    out      080h, al

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -12,6 +12,8 @@
 ; Abstract:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
 
 SECTION .data
@@ -58,7 +60,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     mov     eax, 1
     cpuid
     bt      edx, 25
-    jnc     Done
+    jnc     L_Done
 
     ;
     ; Set OSFXSR bit 9 in CR4
@@ -72,7 +74,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     ; ldmxcsr instruction
     ;
     ldmxcsr [ASM_PFX(mMmxControlWord)]
-Done:
+L_Done:
     pop     ebx
 
     ret

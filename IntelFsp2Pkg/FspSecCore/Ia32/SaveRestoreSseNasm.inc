@@ -134,7 +134,7 @@
             ;
             ; Initialize floating point units
             ;
-            jmp     NextAddress
+            jmp     L_NextAddress
 align 4
             ;
             ; Float control word initial value:
@@ -146,12 +146,12 @@ FpuControlWord       DW      027Fh
             ; all exceptions masked, round-to-nearest, flush to zero for masked underflow
             ;
 MmxControlWord       DD      01F80h
-SseError:
+L_SseError:
             ;
             ; Processor has to support SSE
             ;
-            jmp     SseError
-NextAddress:
+            jmp     L_SseError
+L_NextAddress:
             finit
             fldcw   [FpuControlWord]
 
@@ -162,14 +162,14 @@ NextAddress:
             mov     eax, 1
             cpuid
             bt      edx, 25
-            jnc     SseError
+            jnc     L_SseError
 
 %ifdef USE_SSE41_FLAG
             ;
             ; SSE 4.1 support
             ;
             bt      ecx, 19
-            jnc     SseError
+            jnc     L_SseError
 %endif
 
             ;

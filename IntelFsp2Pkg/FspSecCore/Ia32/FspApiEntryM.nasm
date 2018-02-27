@@ -1,7 +1,7 @@
 ;; @file
 ;  Provide FSP API entry points.
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -10,6 +10,8 @@
 ; THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;;
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -119,7 +121,7 @@ ASM_PFX(FspApiCommonContinue):
   ;  Get Stackbase and StackSize from FSPM_UPD Param 
   mov    edx, [esp + API_PARAM1_OFFSET] 
   cmp    edx, 0
-  jnz    FspStackSetup  
+  jnz    L_FspStackSetup
 
   ; Get UPD default values if FspmUpdDataPtr (ApiParam1) is null
   push   eax
@@ -128,7 +130,7 @@ ASM_PFX(FspApiCommonContinue):
   add    edx, [eax + FSP_HEADER_CFGREG_OFFSET]
   pop    eax
   
-  FspStackSetup:
+  L_FspStackSetup:
   mov    edi, [edx + FSPM_UPD_COMMON.StackBase]
   mov    ecx, [edx + FSPM_UPD_COMMON.StackSize]
   add    edi, ecx
@@ -179,7 +181,7 @@ ASM_PFX(FspApiCommonContinue):
   ;
   call    ASM_PFX(SecStartup)
   add     esp, 4
-exit:
+L_exit:
   ret
 
 global ASM_PFX(FspPeiCoreEntryOff)

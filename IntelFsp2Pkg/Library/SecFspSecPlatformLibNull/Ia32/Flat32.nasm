@@ -2,7 +2,7 @@
 ;  This is the code that goes from real-mode to protected mode.
 ;  It consumes the reset vector, configures the stack.
 ;
-; Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -11,6 +11,8 @@
 ; THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;;
+
+%pragma macho subsections_via_symbols
 
 ;
 ; Define assembler characteristics
@@ -83,14 +85,14 @@ global  ASM_PFX(BootGdtTable)
 ;
 ; GDT[0]: 0x00: Null entry, never used.
 ;
-NULL_SEL        equ     $ - GDT_BASE        ; Selector [0]
-GDT_BASE:
+NULL_SEL        equ     $ - L_GDT_BASE        ; Selector [0]
+L_GDT_BASE:
 ASM_PFX(BootGdtTable):    DD      0
                           DD      0
 ;
 ; Linear code segment descriptor
 ;
-LINEAR_CODE_SEL equ     $ - GDT_BASE        ; Selector [0x8]
+LINEAR_CODE_SEL equ     $ - L_GDT_BASE        ; Selector [0x8]
         DW      0FFFFh                      ; limit 0xFFFF
         DW      0                           ; base 0
         DB      0
@@ -100,7 +102,7 @@ LINEAR_CODE_SEL equ     $ - GDT_BASE        ; Selector [0x8]
 ;
 ; System data segment descriptor
 ;
-SYS_DATA_SEL    equ     $ - GDT_BASE        ; Selector [0x10]
+SYS_DATA_SEL    equ     $ - L_GDT_BASE        ; Selector [0x10]
         DW      0FFFFh                      ; limit 0xFFFF
         DW      0                           ; base 0
         DB      0
@@ -108,14 +110,14 @@ SYS_DATA_SEL    equ     $ - GDT_BASE        ; Selector [0x10]
         DB      0CFh                        ; page-granular, 32-bit
         DB      0
 
-GDT_SIZE        EQU     $ - GDT_BASE        ; Size, in bytes
+GDT_SIZE        EQU     $ - L_GDT_BASE        ; Size, in bytes
 
 ;
 ; GDT Descriptor
 ;
-GdtDesc:                                    ; GDT descriptor
+L_GdtDesc:                                    ; GDT descriptor
         DW      GDT_SIZE - 1                ; GDT limit
-        DD      GDT_BASE                    ; GDT base address
+        DD      L_GDT_BASE                    ; GDT base address
 
 global ASM_PFX(ProtectedModeEntryLinearAddress)
 global ASM_PFX(ProtectedModeEntryLinearOffset)
