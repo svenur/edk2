@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2013, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -45,21 +47,21 @@ ASM_PFX(AsmCpuidEx):
     cpuid
     push    ecx
     mov     ecx, [ebp + 20]
-    jecxz   .0
+    jecxz   L_0
     mov     [ecx], eax
-.0:
+L_0:
     mov     ecx, [ebp + 24]
-    jecxz   .1
+    jecxz   L_1
     mov     [ecx], ebx
-.1:
+L_1:
     mov     ecx, [ebp + 32]
-    jecxz   .2
+    jecxz   L_2
     mov     [ecx], edx
-.2:
+L_2:
     mov     ecx, [ebp + 28]
-    jecxz   .3
+    jecxz   L_3
     pop     DWORD [ecx]
-.3:
+L_3:
     mov     eax, [ebp + 12]
     leave
     pop     ebx

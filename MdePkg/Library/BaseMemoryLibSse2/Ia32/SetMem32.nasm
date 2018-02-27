@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -41,25 +43,25 @@ ASM_PFX(InternalMemSetMem32):
     sub     ecx, edi
     and     ecx, 15                     ; ecx + edi aligns on 16-byte boundary
     mov     eax, [esp + 16]
-    jz      .0
+    jz      L_0
     shr     ecx, 2
     cmp     ecx, edx
     cmova   ecx, edx
     sub     edx, ecx
     rep     stosd
-.0:
+L_0:
     mov     ecx, edx
     and     edx, 3
     shr     ecx, 2
-    jz      @SetDwords
+    jz      L_SetDwords
     movd    xmm0, eax
     pshufd  xmm0, xmm0, 0
-.1:
+L_1:
     movntdq [edi], xmm0
     add     edi, 16
-    loop    .1
+    loop    L_1
     mfence
-@SetDwords:
+L_SetDwords:
     mov     ecx, edx
     rep     stosd
     mov     eax, [esp + 8]

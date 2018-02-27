@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;   Set error flag for all division functions
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -40,9 +42,9 @@ ASM_PFX(InternalMathDivRemU64x32):
     mov     eax, [esp + 8]          ; eax <- dividend[0..31]
     div     ecx                     ; eax <- quotient[0..31]
     mov     ecx, [esp + 20]         ; ecx <- Remainder
-    jecxz   .0                      ; abandon remainder if Remainder == NULL
+    jecxz   L_0                      ; abandon remainder if Remainder == NULL
     mov     [ecx], edx
-.0:
+L_0:
     pop     edx                     ; edx <- quotient[32..63]
     ret
 

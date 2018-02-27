@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     DEFAULT REL
     SECTION .text
@@ -42,38 +44,38 @@ ASM_PFX(InternalMemCopyMem):
     lea     r9, [rsi + r8 - 1]          ; r9 <- Last byte of Source
     cmp     rsi, rdi
     mov     rax, rdi                    ; rax <- Destination as return value
-    jae     .0                          ; Copy forward if Source > Destination
+    jae     L_0                          ; Copy forward if Source > Destination
     cmp     r9, rdi                     ; Overlapped?
-    jae     @CopyBackward               ; Copy backward if overlapped
-.0:
+    jae     L_CopyBackward               ; Copy backward if overlapped
+L_0:
     xor     rcx, rcx
     sub     rcx, rdi                    ; rcx <- -rdi
     and     rcx, 15                     ; rcx + rsi should be 16 bytes aligned
-    jz      .1                          ; skip if rcx == 0
+    jz      L_1                          ; skip if rcx == 0
     cmp     rcx, r8
     cmova   rcx, r8
     sub     r8, rcx
     rep     movsb
-.1:
+L_1:
     mov     rcx, r8
     and     r8, 15
     shr     rcx, 4                      ; rcx <- # of DQwords to copy
-    jz      @CopyBytes
+    jz      L_CopyBytes
     movdqa  [rsp + 0x18], xmm0           ; save xmm0 on stack
-.2:
+L_2:
     movdqu  xmm0, [rsi]                 ; rsi may not be 16-byte aligned
     movntdq [rdi], xmm0                 ; rdi should be 16-byte aligned
     add     rsi, 16
     add     rdi, 16
-    loop    .2
+    loop    L_2
     mfence
     movdqa  xmm0, [rsp + 0x18]           ; restore xmm0
-    jmp     @CopyBytes                  ; copy remaining bytes
-@CopyBackward:
+    jmp     L_CopyBytes                  ; copy remaining bytes
+L_CopyBackward:
     mov     rsi, r9                     ; rsi <- Last byte of Source
     lea     rdi, [rdi + r8 - 1]         ; rdi <- Last byte of Destination
     std
-@CopyBytes:
+L_CopyBytes:
     mov     rcx, r8
     rep     movsb
     cld

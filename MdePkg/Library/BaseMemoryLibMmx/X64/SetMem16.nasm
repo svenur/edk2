@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     DEFAULT REL
     SECTION .text
@@ -43,14 +45,14 @@ ASM_PFX(InternalMemSetMem16):
     mov     rcx, rdx
     and     edx, 3
     shr     rcx, 2
-    jz      @SetWords
+    jz      L_SetWords
     DB      0xf, 0x70, 0xC0, 0x0         ; pshufw mm0, mm0, 0h
-.0:
+L_0:
     DB      0xf, 0xe7, 0x7              ; movntq [rdi], mm0
     add     rdi, 8
-    loop    .0
+    loop    L_0
     mfence
-@SetWords:
+L_SetWords:
     mov     ecx, edx
     rep     stosw
     mov     rax, r8

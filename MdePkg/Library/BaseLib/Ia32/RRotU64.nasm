@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2015, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;   64-bit right rotation for Ia32
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -40,11 +42,11 @@ ASM_PFX(InternalMathRRotU64):
     rol     ebx, cl
     shrd    edx, ebx, cl
     test    cl, 32                      ; Count >= 32?
-    jz      .0
+    jz      L_0
     mov     ecx, eax                    ; switch eax & edx if Count >= 32
     mov     eax, edx
     mov     edx, ecx
-.0:
+L_0:
     pop     ebx
     ret
 

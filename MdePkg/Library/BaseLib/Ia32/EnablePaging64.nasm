@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -37,7 +39,7 @@
 global ASM_PFX(InternalX86EnablePaging64)
 ASM_PFX(InternalX86EnablePaging64):
     cli
-    mov     DWORD [esp], .0         ; offset for far retf, seg is the 1st arg
+    mov     DWORD [esp], L_0         ; offset for far retf, seg is the 1st arg
     mov     eax, cr4
     or      al, (1 << 5)
     mov     cr4, eax                    ; enable PAE
@@ -49,7 +51,7 @@ ASM_PFX(InternalX86EnablePaging64):
     bts     eax, 31                     ; set PG
     mov     cr0, eax                    ; enable paging
     retf                                ; topmost 2 dwords hold the address
-.0:
+L_0:
     DB      0x67, 0x48                    ; 32-bit address size, 64-bit operand size
     mov     ebx, [esp]                  ; mov rbx, [esp]
     DB      0x67, 0x48

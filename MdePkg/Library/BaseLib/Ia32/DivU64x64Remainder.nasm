@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 extern ASM_PFX(InternalMathDivRemU64x32)
@@ -37,15 +39,15 @@ global ASM_PFX(InternalMathDivRemU64x64)
 ASM_PFX(InternalMathDivRemU64x64):
     mov     ecx, [esp + 16]             ; ecx <- divisor[32..63]
     test    ecx, ecx
-    jnz     _@DivRemU64x64              ; call _@DivRemU64x64 if Divisor > 2^32
+    jnz     L_DivRemU64x64              ; call L_DivRemU64x64 if Divisor > 2^32
     mov     ecx, [esp + 20]
-    jecxz   .0
+    jecxz   L_0
     and     dword [ecx + 4], 0      ; zero high dword of remainder
     mov     [esp + 16], ecx             ; set up stack frame to match DivRemU64x32
-.0:
+L_0:
     jmp     ASM_PFX(InternalMathDivRemU64x32)
 
-_@DivRemU64x64:
+L_DivRemU64x64:
     push    ebx
     push    esi
     push    edi
@@ -54,12 +56,12 @@ _@DivRemU64x64:
     mov     edi, edx
     mov     esi, eax                    ; edi:esi <- dividend
     mov     ebx, dword [esp + 24]   ; ecx:ebx <- divisor
-.1:
+L_1:
     shr     edx, 1
     rcr     eax, 1
     shrd    ebx, ecx, 1
     shr     ecx, 1
-    jnz     .1
+    jnz     L_1
     div     ebx
     mov     ebx, eax                    ; ebx <- quotient
     mov     ecx, [esp + 28]             ; ecx <- high dword of divisor
@@ -67,24 +69,24 @@ _@DivRemU64x64:
     imul    ecx, ebx                    ; ecx <- quotient * divisor[32..63]
     add     edx, ecx                    ; edx <- (quotient * divisor)[32..63]
     mov     ecx, dword [esp + 32]   ; ecx <- addr for Remainder
-    jc      @TooLarge                   ; product > 2^64
+    jc      L_TooLarge                   ; product > 2^64
     cmp     edi, edx                    ; compare high 32 bits
-    ja      @Correct
-    jb      @TooLarge                   ; product > dividend
+    ja      L_Correct
+    jb      L_TooLarge                   ; product > dividend
     cmp     esi, eax
-    jae     @Correct                    ; product <= dividend
-@TooLarge:
+    jae     L_Correct                    ; product <= dividend
+L_TooLarge:
     dec     ebx                         ; adjust quotient by -1
-    jecxz   @Return                     ; return if Remainder == NULL
+    jecxz   L_Return                     ; return if Remainder == NULL
     sub     eax, dword [esp + 24]
     sbb     edx, dword [esp + 28]   ; edx:eax <- (quotient - 1) * divisor
-@Correct:
-    jecxz   @Return
+L_Correct:
+    jecxz   L_Return
     sub     esi, eax
     sbb     edi, edx                    ; edi:esi <- remainder
     mov     [ecx], esi
     mov     [ecx + 4], edi
-@Return:
+L_Return:
     mov     eax, ebx                    ; eax <- quotient
     xor     edx, edx                    ; quotient is 32 bits long
     pop     edi

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; Portions copyright (c) 2011, Apple Inc. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
@@ -19,6 +19,8 @@
 ;   Implementation of a stack switch on IA-32.
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 

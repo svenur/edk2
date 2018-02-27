@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2008, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     DEFAULT REL
     SECTION .text
 
@@ -38,9 +40,9 @@
 global ASM_PFX(InternalX86DisablePaging64)
 ASM_PFX(InternalX86DisablePaging64):
     cli
-    lea     rsi, [.0]                     ; rsi <- The start address of transition code
+    lea     rsi, [L_0]                     ; rsi <- The start address of transition code
     mov     edi, [rsp + 0x28]            ; rdi <- New stack
-    lea     rax, [mTransitionEnd]         ; rax <- end of transition code
+    lea     rax, [L_mTransitionEnd]         ; rax <- end of transition code
     sub     rax, rsi                    ; rax <- The size of transition piece code
     add     rax, 4                      ; Round RAX up to the next 4 byte boundary
     and     al, 0xfc
@@ -61,7 +63,7 @@ ASM_PFX(InternalX86DisablePaging64):
     retf                                ; Use far return to load CS register from stack
 
 ; Start of transition code
-.0:
+L_0:
     mov     esp, eax                    ; set up new stack
     mov     rax, cr0
     btr     eax, 31                     ; Clear CR0.PG
@@ -80,5 +82,5 @@ ASM_PFX(InternalX86DisablePaging64):
     call    rbx                         ; transfer control to EntryPoint
     hlt                                 ; no one should get here
 
-mTransitionEnd:
+L_mTransitionEnd:
 

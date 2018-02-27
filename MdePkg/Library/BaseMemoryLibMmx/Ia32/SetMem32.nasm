@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -39,17 +41,17 @@ ASM_PFX(InternalMemSetMem32):
     movd    mm0, dword [esp + 12]             ; mm0 <- Value
     shr     ecx, 1                      ; ecx <- number of qwords to set
     mov     edx, eax                    ; edx <- Buffer
-    jz      @SetDwords
+    jz      L_SetDwords
     movq    mm1, mm0
     psllq   mm1, 32
     por     mm0, mm1
-.0:
+L_0:
     movq    qword [edx], mm0
     lea     edx, [edx + 8]              ; use "lea" to avoid change in flags
-    loop    .0
-@SetDwords:
-    jnc     .1
+    loop    L_0
+L_SetDwords:
+    jnc     L_1
     movd    dword [edx], mm0
-.1:
+L_1:
     ret
 

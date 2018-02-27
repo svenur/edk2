@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -41,14 +43,14 @@ ASM_PFX(InternalMemIsZeroBuffer):
     and     edx, 3                     ; edx <- number of trailing bytes
     xor     eax, eax                   ; eax <- 0, also set ZF
     repe    scasd
-    jnz     @ReturnFalse               ; ZF=0 means non-zero element found
+    jnz     L_ReturnFalse               ; ZF=0 means non-zero element found
     mov     ecx, edx
     repe    scasb
-    jnz     @ReturnFalse
+    jnz     L_ReturnFalse
     pop     edi
     mov     eax, 1                     ; return TRUE
     ret
-@ReturnFalse:
+L_ReturnFalse:
     pop     edi
     xor     eax, eax
     ret                                ; return FALSE

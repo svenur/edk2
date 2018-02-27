@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     DEFAULT REL
     SECTION .text
 
@@ -40,23 +42,23 @@ ASM_PFX(InternalMemZeroMem):
     sub     rcx, rdi
     and     rcx, 15
     mov     r8, rdi
-    jz      .0
+    jz      L_0
     cmp     rcx, rdx
     cmova   rcx, rdx
     sub     rdx, rcx
     rep     stosb
-.0:
+L_0:
     mov     rcx, rdx
     and     edx, 15
     shr     rcx, 4
-    jz      @ZeroBytes
+    jz      L_ZeroBytes
     pxor    xmm0, xmm0
-.1:
+L_1:
     movntdq [rdi], xmm0                 ; rdi should be 16-byte aligned
     add     rdi, 16
-    loop    .1
+    loop    L_1
     mfence
-@ZeroBytes:
+L_ZeroBytes:
     mov     ecx, edx
     rep     stosb
     mov     rax, r8

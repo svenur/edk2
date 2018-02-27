@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     DEFAULT REL
     SECTION .text
@@ -42,20 +44,20 @@ ASM_PFX(InternalMemCopyMem):
     lea     r9, [rsi + r8 - 1]          ; r9 <- End of Source
     cmp     rsi, rdi
     mov     rax, rdi                    ; rax <- Destination as return value
-    jae     .0
+    jae     L_0
     cmp     r9, rdi
-    jae     @CopyBackward               ; Copy backward if overlapped
-.0:
+    jae     L_CopyBackward               ; Copy backward if overlapped
+L_0:
     mov     rcx, r8
     and     r8, 7
     shr     rcx, 3
     rep     movsq                       ; Copy as many Qwords as possible
-    jmp     @CopyBytes
-@CopyBackward:
+    jmp     L_CopyBytes
+L_CopyBackward:
     mov     rsi, r9                     ; rsi <- End of Source
     lea     rdi, [rdi + r8 - 1]         ; esi <- End of Destination
     std                                 ; set direction flag
-@CopyBytes:
+L_CopyBytes:
     mov     rcx, r8
     rep     movsb                       ; Copy bytes backward
     cld

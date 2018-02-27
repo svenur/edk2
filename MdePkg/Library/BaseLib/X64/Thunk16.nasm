@@ -1,9 +1,11 @@
 
+%pragma macho subsections_via_symbols
+
 #include "BaseLibInternals.h"
 
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2013, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -57,24 +59,24 @@ SECTION .data
 ; These are global constant to convey information to C code.
 ;
 ASM_PFX(m16Size)         DW      ASM_PFX(InternalAsmThunk16) - ASM_PFX(m16Start)
-ASM_PFX(mThunk16Attr)    DW      _BackFromUserCode_ThunkAttrEnd - 4 - ASM_PFX(m16Start)
+ASM_PFX(mThunk16Attr)    DW      L_BackFromUserCode_ThunkAttrEnd - 4 - ASM_PFX(m16Start)
 ASM_PFX(m16Gdt)          DW      _NullSeg - ASM_PFX(m16Start)
-ASM_PFX(m16GdtrBase)     DW      _16GdtrBase - ASM_PFX(m16Start)
-ASM_PFX(mTransition)     DW      _EntryPoint - ASM_PFX(m16Start)
+ASM_PFX(m16GdtrBase)     DW      L_16GdtrBase - ASM_PFX(m16Start)
+ASM_PFX(mTransition)     DW      L_EntryPoint - ASM_PFX(m16Start)
 
 SECTION .text
 
 ASM_PFX(m16Start):
 
-SavedGdt:
+L_SavedGdt:
             dw  0
             dq  0
 
 ;------------------------------------------------------------------------------
-; _BackFromUserCode() takes control in real mode after 'retf' has been executed
+; L_BackFromUserCode() takes control in real mode after 'retf' has been executed
 ; by user code. It will be shadowed to somewhere in memory below 1MB.
 ;------------------------------------------------------------------------------
-_BackFromUserCode:
+L_BackFromUserCode:
     ;
     ; The order of saved registers on the stack matches the order they appears
     ; in IA32_REGS structure. This facilitates wrapper function to extract them
@@ -87,8 +89,8 @@ BITS    16
     ; Note: We can't use o32 on the next instruction because of a bug
     ; in NASM 2.09.04 through 2.10rc1.
     ;
-    call    dword _BackFromUserCode_Base                 ; push eip
-_BackFromUserCode_Base:
+    call    dword L_BackFromUserCode_Base                 ; push eip
+L_BackFromUserCode_Base:
     push    dword 0                     ; reserved high order 32 bits of EFlags
     pushfd
     cli                                 ; disable interrupts
@@ -98,20 +100,20 @@ _BackFromUserCode_Base:
     push    ds
     pushad
     mov     edx, strict dword 0
-_BackFromUserCode_ThunkAttrEnd:
+L_BackFromUserCode_ThunkAttrEnd:
     test    dl, THUNK_ATTRIBUTE_DISABLE_A20_MASK_INT_15
-    jz      .1
+    jz      L_1
     mov     ax, 2401h
     int     15h
     cli                                 ; disable interrupts
-    jnc     .2
-.1:
+    jnc     L_2
+L_1:
     test    dl, THUNK_ATTRIBUTE_DISABLE_A20_MASK_KBD_CTRL
-    jz      .2
+    jz      L_2
     in      al, 92h
     or      al, 2
     out     92h, al                     ; deactivate A20M#
-.2:
+L_2:
     xor     eax, eax
     mov     ax, ss
     lea     ebp, [esp + IA32_REGS.size]
@@ -121,44 +123,44 @@ _BackFromUserCode_ThunkAttrEnd:
     add     ebp, eax                    ; add ebp, eax
     mov     eax, cs
     shl     eax, 4
-    lea     eax, [eax + ebx + (_BackFromUserCode_X64JmpEnd - _BackFromUserCode_Base)]
-    mov     [cs:bx + (_BackFromUserCode_X64JmpEnd - 6 - _BackFromUserCode_Base)], eax
+    lea     eax, [eax + ebx + (L_BackFromUserCode_X64JmpEnd - L_BackFromUserCode_Base)]
+    mov     [cs:bx + (L_BackFromUserCode_X64JmpEnd - 6 - L_BackFromUserCode_Base)], eax
     mov     eax, strict dword 0
-_BackFromUserCode_SavedCr4End:
+L_BackFromUserCode_SavedCr4End:
     mov     cr4, eax
-o32 lgdt [cs:bx + (SavedGdt - _BackFromUserCode_Base)]
+o32 lgdt [cs:bx + (L_SavedGdt - L_BackFromUserCode_Base)]
     mov     ecx, 0c0000080h
     rdmsr
     or      ah, 1
     wrmsr
     mov     eax, strict dword 0
-_BackFromUserCode_SavedCr0End:
+L_BackFromUserCode_SavedCr0End:
     mov     cr0, eax
     jmp     0:strict dword 0
-_BackFromUserCode_X64JmpEnd:
+L_BackFromUserCode_X64JmpEnd:
 BITS    64
     nop
     mov rsp, strict qword 0
-_BackFromUserCode_SavedSpEnd:
+L_BackFromUserCode_SavedSpEnd:
     nop
     ret
 
-_EntryPoint:
-        DD      _ToUserCode - ASM_PFX(m16Start)
+L_EntryPoint:
+        DD      L_ToUserCode - ASM_PFX(m16Start)
         DW      CODE16
-_16Gdtr:
+L_16Gdtr:
         DW      GDT_SIZE - 1
-_16GdtrBase:
+L_16GdtrBase:
         DQ      0
-_16Idtr:
+L_16Idtr:
         DW      (1 << 10) - 1
         DD      0
 
 ;------------------------------------------------------------------------------
-; _ToUserCode() takes control in real mode before passing control to user code.
+; L_ToUserCode() takes control in real mode before passing control to user code.
 ; It will be shadowed to somewhere in memory below 1MB.
 ;------------------------------------------------------------------------------
-_ToUserCode:
+L_ToUserCode:
 BITS    16
     mov     ss, dx                      ; set new segment selectors
     mov     ds, dx
@@ -173,16 +175,16 @@ BITS    16
     mov     cr4, ebp
     mov     ss, si                      ; set up 16-bit stack segment
     mov     esp, ebx                    ; set up 16-bit stack pointer
-    call    dword _ToUserCode_Base                ; push eip
-_ToUserCode_Base:
-    pop     ebp                         ; ebp <- address of _ToUserCode_Base
+    call    dword L_ToUserCode_Base                ; push eip
+L_ToUserCode_Base:
+    pop     ebp                         ; ebp <- address of L_ToUserCode_Base
     push    word [dword esp + IA32_REGS.size + 2]
-    lea     ax, [bp + (.RealMode - _ToUserCode_Base)]
+    lea     ax, [bp + (L_RealMode - L_ToUserCode_Base)]
     push    ax
     retf                                ; execution begins at next instruction
-.RealMode:
+L_RealMode:
 
-o32 lidt    [cs:bp + (_16Idtr - _ToUserCode_Base)]
+o32 lidt    [cs:bp + (L_16Idtr - L_ToUserCode_Base)]
 
     popad
     pop     ds
@@ -196,26 +198,26 @@ o32 retf                                ; transfer control to user code
 
 ALIGN   8
 
-CODE16  equ _16Code - $
-DATA16  equ _16Data - $
-DATA32  equ _32Data - $
+CODE16  equ L_16Code - $
+DATA16  equ L_16Data - $
+DATA32  equ L_32Data - $
 
 _NullSeg    DQ      0
-_16Code:
+L_16Code:
             DW      -1
             DW      0
             DB      0
             DB      9bh
             DB      8fh                 ; 16-bit segment, 4GB limit
             DB      0
-_16Data:
+L_16Data:
             DW      -1
             DW      0
             DB      0
             DB      93h
             DB      8fh                 ; 16-bit segment, 4GB limit
             DB      0
-_32Data:
+L_32Data:
             DW      -1
             DW      0
             DB      0
@@ -260,20 +262,20 @@ BITS    64
     add     edi, eax                    ; edi <- linear address of 16-bit stack
     pop     rcx
     rep     movsd                       ; copy RegSet
-    lea     ecx, [rdx + (_BackFromUserCode_SavedCr4End - ASM_PFX(m16Start))]
+    lea     ecx, [rdx + (L_BackFromUserCode_SavedCr4End - ASM_PFX(m16Start))]
     mov     eax, edx                    ; eax <- transition code address
     and     edx, 0fh
     shl     eax, 12                     ; segment address in high order 16 bits
-    lea     ax, [rdx + (_BackFromUserCode - ASM_PFX(m16Start))]  ; offset address
+    lea     ax, [rdx + (L_BackFromUserCode - ASM_PFX(m16Start))]  ; offset address
     stosd                               ; [edi] <- return address of user code
   
     sgdt    [rsp + 60h]       ; save GDT stack in argument space
     movzx   r10, word [rsp + 60h]   ; r10 <- GDT limit 
-    lea     r11, [rcx + (ASM_PFX(InternalAsmThunk16) - _BackFromUserCode_SavedCr4End) + 0xf]
+    lea     r11, [rcx + (ASM_PFX(InternalAsmThunk16) - L_BackFromUserCode_SavedCr4End) + 0xf]
     and     r11, ~0xf            ; r11 <- 16-byte aligned shadowed GDT table in real mode buffer
     
-    mov     [rcx + (SavedGdt - _BackFromUserCode_SavedCr4End)], r10w      ; save the limit of shadowed GDT table
-    mov     [rcx + (SavedGdt - _BackFromUserCode_SavedCr4End) + 2], r11  ; save the base address of shadowed GDT table
+    mov     [rcx + (L_SavedGdt - L_BackFromUserCode_SavedCr4End)], r10w      ; save the limit of shadowed GDT table
+    mov     [rcx + (L_SavedGdt - L_BackFromUserCode_SavedCr4End) + 2], r11  ; save the base address of shadowed GDT table
     
     mov     rsi, [rsp + 62h]  ; rsi <- the original GDT base address
     xchg    rcx, r10                    ; save rcx to r10 and initialize rcx to be the limit of GDT table
@@ -285,25 +287,25 @@ BITS    64
     
     sidt    [rsp + 50h]       ; save IDT stack in argument space
     mov     rax, cr0
-    mov     [rcx + (_BackFromUserCode_SavedCr0End - 4 - _BackFromUserCode_SavedCr4End)], eax
+    mov     [rcx + (L_BackFromUserCode_SavedCr0End - 4 - L_BackFromUserCode_SavedCr4End)], eax
     and     eax, 7ffffffeh              ; clear PE, PG bits
     mov     rbp, cr4
-    mov     [rcx - 4], ebp              ; save CR4 in _BackFromUserCode_SavedCr4End - 4
+    mov     [rcx - 4], ebp              ; save CR4 in L_BackFromUserCode_SavedCr4End - 4
     and     ebp, ~30h                ; clear PAE, PSE bits
     mov     esi, r8d                    ; esi <- 16-bit stack segment
     push    DATA32
     pop     rdx                         ; rdx <- 32-bit data segment selector
-    lgdt    [rcx + (_16Gdtr - _BackFromUserCode_SavedCr4End)]
+    lgdt    [rcx + (L_16Gdtr - L_BackFromUserCode_SavedCr4End)]
     mov     ss, edx
     pushfq
     lea     edx, [rdx + DATA16 - DATA32]
-    lea     r8, [REL .RetFromRealMode]
+    lea     r8, [REL L_RetFromRealMode]
     push    r8
     mov     r8d, cs
-    mov     [rcx + (_BackFromUserCode_X64JmpEnd - 2 - _BackFromUserCode_SavedCr4End)], r8w
-    mov     [rcx + (_BackFromUserCode_SavedSpEnd - 8 - _BackFromUserCode_SavedCr4End)], rsp
-    jmp     dword far [rcx + (_EntryPoint - _BackFromUserCode_SavedCr4End)]
-.RetFromRealMode:
+    mov     [rcx + (L_BackFromUserCode_X64JmpEnd - 2 - L_BackFromUserCode_SavedCr4End)], r8w
+    mov     [rcx + (L_BackFromUserCode_SavedSpEnd - 8 - L_BackFromUserCode_SavedCr4End)], rsp
+    jmp     dword far [rcx + (L_EntryPoint - L_BackFromUserCode_SavedCr4End)]
+L_RetFromRealMode:
     popfq
     lgdt    [rsp + 60h]       ; restore protected mode GDTR
     lidt    [rsp + 50h]       ; restore protected mode IDTR

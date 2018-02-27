@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     DEFAULT REL
     SECTION .text
 
@@ -38,22 +40,22 @@ ASM_PFX(InternalMemSetMem64):
     xchg    rcx, rdx                    ; rcx <- Count & rdx <- Buffer
     test    dl, 8
     movq    xmm0, r8
-    jz      .0
+    jz      L_0
     mov     [rdx], r8
     add     rdx, 8
     dec     rcx
-.0:
+L_0:
     shr     rcx, 1
-    jz      @SetQwords
+    jz      L_SetQwords
     movlhps xmm0, xmm0
-.1:
+L_1:
     movntdq [rdx], xmm0
     lea     rdx, [rdx + 16]
-    loop    .1
+    loop    L_1
     mfence
-@SetQwords:
-    jnc     .2
+L_SetQwords:
+    jnc     L_2
     mov     [rdx], r8
-.2:
+L_2:
     ret
 

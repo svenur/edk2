@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2008, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
     DEFAULT REL
     SECTION .text
@@ -45,21 +47,21 @@ ASM_PFX(AsmCpuidEx):
     cpuid
     mov     r10, [rsp + 0x38]
     test    r10, r10
-    jz      .0
+    jz      L_0
     mov     [r10], ecx
-.0:
+L_0:
     mov     rcx, r8
-    jrcxz   .1
+    jrcxz   L_1
     mov     [rcx], eax
-.1:
+L_1:
     mov     rcx, r9
-    jrcxz   .2
+    jrcxz   L_2
     mov     [rcx], ebx
-.2:
+L_2:
     mov     rcx, [rsp + 0x40]
-    jrcxz   .3
+    jrcxz   L_3
     mov     [rcx], edx
-.3:
+L_3:
     pop     rax                         ; restore Index to rax as return value
     pop     rbx
     ret

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -39,22 +41,22 @@ ASM_PFX(InternalMemCopyMem):
     mov     edi, [esp+12]                ; edi <- Destination
     mov     edx, [esp+20]                ; edx <- Count
     cmp     esi, edi
-    je      @CopyDone
+    je      L_CopyDone
     cmp     edx, 0
-    je      @CopyDone
+    je      L_CopyDone
     lea     eax, [esi + edx - 1]         ; eax <- End of Source
     cmp     esi, edi
-    jae     @CopyBytes
+    jae     L_CopyBytes
     cmp     eax, edi
-    jb      @CopyBytes                   ; Copy backward if overlapped
+    jb      L_CopyBytes                   ; Copy backward if overlapped
     mov     esi, eax                     ; esi <- End of Source
     lea     edi, [edi + edx - 1]         ; edi <- End of Destination
     std
-@CopyBytes:
+L_CopyBytes:
     mov     ecx, edx
     rep     movsb                        ; Copy bytes backward
     cld
-@CopyDone:
+L_CopyDone:
     mov     eax, [esp + 12]             ; eax <- Destination as return value
     pop     edi
     pop     esi

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -21,6 +21,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -39,35 +41,35 @@ ASM_PFX(InternalMemIsZeroBuffer):
     xor          ecx, ecx              ; ecx <- 0
     sub          ecx, edi
     and          ecx, 15               ; ecx + edi aligns on 16-byte boundary
-    jz           @Is16BytesZero
+    jz           L_Is16BytesZero
     cmp          ecx, edx
     cmova        ecx, edx              ; bytes before the 16-byte boundary
     sub          edx, ecx
     xor          eax, eax              ; eax <- 0, also set ZF
     repe         scasb
-    jnz          @ReturnFalse          ; ZF=0 means non-zero element found
-@Is16BytesZero:
+    jnz          L_ReturnFalse          ; ZF=0 means non-zero element found
+L_Is16BytesZero:
     mov          ecx, edx
     and          edx, 15
     shr          ecx, 4
-    jz           @IsBytesZero
-.0:
+    jz           L_IsBytesZero
+L_0:
     pxor         xmm0, xmm0            ; xmm0 <- 0
     pcmpeqb      xmm0, [edi]           ; check zero for 16 bytes
     pmovmskb     eax, xmm0             ; eax <- compare results
     cmp          eax, 0xffff
-    jnz          @ReturnFalse
+    jnz          L_ReturnFalse
     add          edi, 16
-    loop         .0
-@IsBytesZero:
+    loop         L_0
+L_IsBytesZero:
     mov          ecx, edx
     xor          eax, eax              ; eax <- 0, also set ZF
     repe         scasb
-    jnz          @ReturnFalse          ; ZF=0 means non-zero element found
+    jnz          L_ReturnFalse          ; ZF=0 means non-zero element found
     pop          edi
     mov          eax, 1                ; return TRUE
     ret
-@ReturnFalse:
+L_ReturnFalse:
     pop          edi
     xor          eax, eax
     ret                                ; return FALSE
