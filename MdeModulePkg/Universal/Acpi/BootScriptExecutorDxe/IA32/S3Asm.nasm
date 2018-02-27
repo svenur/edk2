@@ -2,7 +2,7 @@
 ;   This is the assembly code for transferring to control to OS S3 waking vector
 ;   for IA32 platform
 ;
-; Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ;
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
@@ -13,6 +13,8 @@
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
 ;;
+
+%pragma macho subsections_via_symbols
     SECTION .text
 
 global ASM_PFX(AsmFixAddress16)
@@ -32,18 +34,18 @@ ASM_PFX(AsmTransferControl):
     ; AcpiLowMemoryBase :DWORD
     push  ebp
     mov   ebp, esp
-    lea   eax, [.0]
+    lea   eax, [L_0]
     push  0x28               ; CS
     push  eax
     mov   ecx, [ebp + 8]
     shrd  ebx, ecx, 20
     and   ecx, 0xf
     mov   bx, cx
-    mov   [@jmp_addr + 1], ebx
+    mov   [L_jmp_addr + 1], ebx
     retf
 
 BITS 16
-.0:
+L_0:
     mov   ax, 0x30
 o32 mov   ds, eax
 o32 mov   es, eax
@@ -53,7 +55,7 @@ o32 mov   ss, eax
     mov   eax, cr0          ; Get control register 0
     and   eax, 0x0fffffffe  ; Clear PE bit (bit #0)
     mov   cr0, eax          ; Activate real mode
-@jmp_addr:
+L_jmp_addr:
     jmp  0x0:0x0
 
 global ASM_PFX(AsmTransferControl32)

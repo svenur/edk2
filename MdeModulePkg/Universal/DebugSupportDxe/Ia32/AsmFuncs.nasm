@@ -1,7 +1,7 @@
 ;/** @file
 ;  Low leve IA32 specific debug support functions.
 ;
-;  Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
+;  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ;  This program and the accompanying materials
 ;  are licensed and made available under the terms and conditions of the BSD License
 ;  which accompanies this distribution.  The full text of the license may be found at
@@ -11,6 +11,8 @@
 ;  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
 ;**/
+
+%pragma macho subsections_via_symbols
 
 %define EXCPT32_DIVIDE_ERROR 0
 %define EXCPT32_DEBUG 1
@@ -55,12 +57,12 @@ global ASM_PFX(CommonIdtEntry)
 global ASM_PFX(FxStorSupport)
 extern ASM_PFX(InterruptDistrubutionHub)
 
-ASM_PFX(StubSize): dd InterruptEntryStubEnd - ASM_PFX(InterruptEntryStub)
-AppEsp: dd 0x11111111 ; ?
-DebugEsp: dd 0x22222222 ; ?
-ExtraPush: dd 0x33333333 ; ?
-ExceptData: dd 0x44444444 ; ?
-Eflags: dd 0x55555555 ; ?
+ASM_PFX(StubSize): dd L_InterruptEntryStubEnd - ASM_PFX(InterruptEntryStub)
+L_AppEsp: dd 0x11111111 ; ?
+L_DebugEsp: dd 0x22222222 ; ?
+L_ExtraPush: dd 0x33333333 ; ?
+L_ExceptData: dd 0x44444444 ; ?
+L_Eflags: dd 0x55555555 ; ?
 ASM_PFX(OrigVector): dd 0x66666666 ; ?
 
 ;; The declarations below define the memory region that will be used for the debug stack.
@@ -95,15 +97,15 @@ ASM_PFX(OrigVector): dd 0x66666666 ; ?
 ;;      } SYSTEM_CONTEXT_IA32;  // 32 bit system context record
 
 align           16
-DebugStackEnd: db "DbgStkEnd >>>>>>"    ;; 16 byte long string - must be 16 bytes to preserve alignment
+L_DebugStackEnd: db "DbgStkEnd >>>>>>"    ;; 16 byte long string - must be 16 bytes to preserve alignment
                 times 0x1ffc dd    0x0  ;; 32K should be enough stack
                                         ;;   This allocation is coocked to insure
                                         ;;   that the the buffer for the FXSTORE instruction
                                         ;;   will be 16 byte aligned also.
                                         ;;
-ExceptionNumber: dd 0                   ;; first entry will be the vector number pushed by the stub
+L_ExceptionNumber: dd 0                   ;; first entry will be the vector number pushed by the stub
 
-DebugStackBegin: db "<<<< DbgStkBegin"  ;; initial debug ESP == DebugStackBegin, set in stub
+L_DebugStackBegin: db "<<<< DbgStkBegin"  ;; initial debug ESP == L_DebugStackBegin, set in stub
 
 SECTION .text
 
@@ -161,12 +163,12 @@ ASM_PFX(Vect2Desc):
 ;               copied and fixed up once for each IDT entry that is hooked.
 ;
 ASM_PFX(InterruptEntryStub):
-                mov     [AppEsp], esp                ; save stack top
-                mov     esp, DebugStackBegin         ; switch to debugger stack
+                mov     [L_AppEsp], esp                ; save stack top
+                mov     esp, L_DebugStackBegin         ; switch to debugger stack
                 push    0                            ; push vector number - will be modified before installed
                 db      0xe9                         ; jump rel32
                 dd      0                            ; fixed up to relative address of CommonIdtEntry
-InterruptEntryStubEnd:
+L_InterruptEntryStubEnd:
 
 ;------------------------------------------------------------------------------
 ; CommonIdtEntry
@@ -176,7 +178,7 @@ InterruptEntryStubEnd:
 ;
 ASM_PFX(CommonIdtEntry):
 ;;
-;; At this point, the stub has saved the current application stack esp into AppEsp
+;; At this point, the stub has saved the current application stack esp into L_AppEsp
 ;; and switched stacks to the debug stack, where it pushed the vector number
 ;;
 ;; The application stack looks like this:
@@ -219,48 +221,48 @@ ASM_PFX(CommonIdtEntry):
 ;; Save interrupt state eflags register...
                 pushfd
                 pop     eax
-                mov     [Eflags], eax
+                mov     [L_Eflags], eax
 
 ;; We need to determine if any extra data was pushed by the exception, and if so, save it
 ;; To do this, we check the exception number pushed by the stub, and cache the
 ;; result in a variable since we'll need this again.
-                cmp     dword [ExceptionNumber], EXCPT32_DOUBLE_FAULT
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_INVALID_TSS
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_SEG_NOT_PRESENT
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_STACK_FAULT
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_GP_FAULT
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_PAGE_FAULT
-                jz      ExtraPushOne
-                cmp     dword [ExceptionNumber], EXCPT32_ALIGNMENT_CHECK
-                jz      ExtraPushOne
-                mov     dword [ExtraPush], 0
-                mov     dword [ExceptData], 0
-                jmp     ExtraPushDone
+                cmp     dword [L_ExceptionNumber], EXCPT32_DOUBLE_FAULT
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_INVALID_TSS
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_SEG_NOT_PRESENT
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_STACK_FAULT
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_GP_FAULT
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_PAGE_FAULT
+                jz      L_ExtraPushOne
+                cmp     dword [L_ExceptionNumber], EXCPT32_ALIGNMENT_CHECK
+                jz      L_ExtraPushOne
+                mov     dword [L_ExtraPush], 0
+                mov     dword [L_ExceptData], 0
+                jmp     L_ExtraPushDone
 
-ExtraPushOne:
-                mov     dword [ExtraPush], 1
+L_ExtraPushOne:
+                mov     dword [L_ExtraPush], 1
 
-;; If there's some extra data, save it also, and modify the saved AppEsp to effectively
+;; If there's some extra data, save it also, and modify the saved L_AppEsp to effectively
 ;; pop this value off the application's stack.
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 mov     ebx, [eax]
-                mov     [ExceptData], ebx
+                mov     [L_ExceptData], ebx
                 add     eax, 4
-                mov     [AppEsp], eax
+                mov     [L_AppEsp], eax
 
-ExtraPushDone:
+L_ExtraPushDone:
 
 ;; The "pushad" above pushed the debug stack esp.  Since what we're actually doing
 ;; is building the context record on the debug stack, we need to save the pushed
 ;; debug ESP, and replace it with the application's last stack entry...
                 mov     eax, [esp + 12]
-                mov     [DebugEsp], eax
-                mov     eax, [AppEsp]
+                mov     [L_DebugEsp], eax
+                mov     eax, [L_AppEsp]
                 add     eax, 12
                 ; application stack has eflags, cs, & eip, so
                 ; last actual application stack entry is
@@ -273,7 +275,7 @@ ExtraPushDone:
                 push    eax
 
                 ; CS from application is one entry back in application stack
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 movzx   eax, word [eax + 4]
                 push    eax
 
@@ -288,7 +290,7 @@ ExtraPushDone:
 
 ;; UINT32  Eip;
                 ; Eip from application is on top of application stack
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 push    dword [eax]
 
 ;; UINT32  Gdtr[2], Idtr[2];
@@ -307,8 +309,8 @@ ExtraPushDone:
                 push    eax
 
 ;; UINT32  EFlags;
-;; Eflags from application is two entries back in application stack
-                mov     eax, [AppEsp]
+;; L_Eflags from application is two entries back in application stack
+                mov     eax, [L_AppEsp]
                 push    dword [eax + 8]
 
 ;; UINT32  Cr0, Cr1, Cr2, Cr3, Cr4;
@@ -360,14 +362,14 @@ ExtraPushDone:
                 cld
 
 ;; UINT32  ExceptionData;
-                mov     eax, [ExceptData]
+                mov     eax, [L_ExceptData]
                 push    eax
 
 ; call to C code which will in turn call registered handler
 ; pass in the vector number
                 mov     eax, esp
                 push    eax
-                mov     eax, [ExceptionNumber]
+                mov     eax, [L_ExceptionNumber]
                 push    eax
                 call    ASM_PFX(InterruptDistrubutionHub)
                 add     esp, 8
@@ -407,7 +409,7 @@ ExtraPushDone:
                 mov     cr4, eax
 
 ;; UINT32  EFlags;
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 pop     dword [eax + 8]
 
 ;; UINT32  Ldtr, Tr;
@@ -439,13 +441,13 @@ ExtraPushDone:
 ;; itself. It may have been modified by the debug agent, so we need to
 ;; determine if we need to relocate the application stack.
 
-                mov     ebx, [esp + 12]  ; move the potentially modified AppEsp into ebx
-                mov     eax, [AppEsp]
+                mov     ebx, [esp + 12]  ; move the potentially modified L_AppEsp into ebx
+                mov     eax, [L_AppEsp]
                 add     eax, 12
                 cmp     ebx, eax
-                je      NoAppStackMove
+                je      L_NoAppStackMove
 
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 mov     ecx, [eax]       ; EIP
                 mov     [ebx], ecx
 
@@ -455,44 +457,44 @@ ExtraPushDone:
                 mov     ecx, [eax + 8]   ; EFLAGS
                 mov     [ebx + 8], ecx
 
-                mov     eax, ebx         ; modify the saved AppEsp to the new AppEsp
-                mov     [AppEsp], eax
-NoAppStackMove:
-                mov     eax, [DebugEsp]  ; restore the DebugEsp on the debug stack
+                mov     eax, ebx         ; modify the saved L_AppEsp to the new L_AppEsp
+                mov     [L_AppEsp], eax
+L_NoAppStackMove:
+                mov     eax, [L_DebugEsp]  ; restore the L_DebugEsp on the debug stack
                                          ; so our "popad" will not cause a stack switch
                 mov     [esp + 12], eax
 
-                cmp     dword [ExceptionNumber], 0x68
-                jne     NoChain
+                cmp     dword [L_ExceptionNumber], 0x68
+                jne     L_NoChain
 
-Chain:
+L_Chain:
 
 ;; Restore eflags so when we chain, the flags will be exactly as if we were never here.
 ;; We gin up the stack to do an iretd so we can get ALL the flags.
-                mov     eax, [AppEsp]
+                mov     eax, [L_AppEsp]
                 mov     ebx, [eax + 8]
                 and     ebx, ~ 0x300 ; special handling for IF and TF
                 push    ebx
                 push    cs
-                push    PhonyIretd
+                push    L_PhonyIretd
                 iretd
-PhonyIretd:
+L_PhonyIretd:
 
 ;; UINT32  Edi, Esi, Ebp, Esp, Ebx, Edx, Ecx, Eax;
                 popad
 
 ;; Switch back to application stack
-                mov     esp, [AppEsp]
+                mov     esp, [L_AppEsp]
 
 ;; Jump to original handler
                 jmp     [ASM_PFX(OrigVector)]
 
-NoChain:
+L_NoChain:
 ;; UINT32  Edi, Esi, Ebp, Esp, Ebx, Edx, Ecx, Eax;
                 popad
 
 ;; Switch back to application stack
-                mov     esp, [AppEsp]
+                mov     esp, [L_AppEsp]
 
 ;; We're outa here...
                 iretd

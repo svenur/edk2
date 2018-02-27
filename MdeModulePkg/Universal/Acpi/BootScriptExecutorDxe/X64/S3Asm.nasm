@@ -2,7 +2,7 @@
 ;   This is the assembly code for transferring to control to OS S3 waking vector
 ;   for X64 platform
 ;
-; Copyright (c) 2006 - 2012, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ;
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
@@ -13,6 +13,8 @@
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
 ;;
+
+%pragma macho subsections_via_symbols
 
 extern ASM_PFX(mOriginalHandler)
 extern ASM_PFX(PageFaultHandler)
@@ -27,17 +29,17 @@ global ASM_PFX(AsmTransferControl)
 ASM_PFX(AsmTransferControl):
     ; rcx S3WakingVector    :DWORD
     ; rdx AcpiLowMemoryBase :DWORD
-    lea   eax, [.0]
+    lea   eax, [L_0]
     mov   r8, 0x2800000000
     or    rax, r8
     push  rax
     shrd  ebx, ecx, 20
     and   ecx, 0xf
     mov   bx, cx
-    mov   [@jmp_addr + 1], ebx
+    mov   [L_jmp_addr + 1], ebx
     retf
 BITS 16
-.0:
+L_0:
     mov ax, 0x30
     mov   ds, ax
     mov   es, ax
@@ -54,7 +56,7 @@ BITS 16
     and   ah, ~ 1
     wrmsr
     mov   cr4, ebx
-@jmp_addr:
+L_jmp_addr:
     jmp   0x0:0x0
 
 global ASM_PFX(AsmTransferControl32)
@@ -128,9 +130,9 @@ BITS 64
     pop     rdx
     pop     rcx
     pop     rax                         ; restore all volatile registers
-    jnz     .1
+    jnz     L_1
     jmp     qword [ASM_PFX(mOriginalHandler)]
-.1:
+L_1:
     add     rsp, 0x8                    ; skip error code for PF
     iretq
 

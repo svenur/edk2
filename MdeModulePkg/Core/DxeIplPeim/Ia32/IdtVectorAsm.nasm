@@ -2,7 +2,7 @@
 ;
 ;    IDT vector entry.
 ;
-;  Copyright (c) 2007 - 2016, Intel Corporation. All rights reserved.<BR>
+;  Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
 ;  This program and the accompanying materials
 ;  are licensed and made available under the terms and conditions of the BSD License
 ;  which accompanies this distribution.  The full text of the license may be found at
@@ -12,6 +12,8 @@
 ;  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
 ;**/
+
+%pragma macho subsections_via_symbols
 
     SECTION .text
 
@@ -25,31 +27,31 @@ ALIGN   8
 global ASM_PFX(AsmGetVectorTemplatInfo)
 global ASM_PFX(AsmVectorFixup)
 
-@VectorTemplateBase:
+L_VectorTemplateBase:
         push  eax
         db    0x6a       ; push #VectorNumber
-@VectorNum:
+L_VectorNum:
         db    0
-        mov   eax, CommonInterruptEntry
+        mov   eax, L_CommonInterruptEntry
         jmp   eax
-@VectorTemplateEnd:
+L_VectorTemplateEnd:
 
 global ASM_PFX(AsmGetVectorTemplatInfo)
 ASM_PFX(AsmGetVectorTemplatInfo):
         mov   ecx, [esp + 4]
-        mov   dword [ecx], @VectorTemplateBase
-        mov   eax, (@VectorTemplateEnd - @VectorTemplateBase)
+        mov   dword [ecx], L_VectorTemplateBase
+        mov   eax, (L_VectorTemplateEnd - L_VectorTemplateBase)
         ret
 
 global ASM_PFX(AsmVectorFixup)
 ASM_PFX(AsmVectorFixup):
         mov   eax, dword [esp + 8]
         mov   ecx, [esp + 4]
-        mov   [ecx + (@VectorNum - @VectorTemplateBase)], al
+        mov   [ecx + (L_VectorNum - L_VectorTemplateBase)], al
         ret
 
 ;---------------------------------------;
-; CommonInterruptEntry                  ;
+; L_CommonInterruptEntry                  ;
 ;---------------------------------------;
 ; The follow algorithm is used for the common interrupt routine.
 
@@ -70,7 +72,7 @@ ASM_PFX(AsmVectorFixup):
 ; +    Vector Number    +
 ; +---------------------+
 
-CommonInterruptEntry:
+L_CommonInterruptEntry:
   cli
 
   jmp $
