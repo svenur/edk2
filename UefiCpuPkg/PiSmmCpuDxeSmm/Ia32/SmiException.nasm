@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2009 - 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 extern  ASM_PFX(FeaturePcdGet (PcdCpuSmmProfileEnable))
 extern  ASM_PFX(SmiPFHandler)
 
@@ -28,66 +30,66 @@ global  ASM_PFX(gcPsd)
 
     SECTION .data
 
-NullSeg: DQ 0                   ; reserved by architecture
-CodeSeg32:
+L_NullSeg: DQ 0                   ; reserved by architecture
+L_CodeSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x9b
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-ProtModeCodeSeg32:
+L_ProtModeCodeSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x9b
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-ProtModeSsSeg32:
+L_ProtModeSsSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x93
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-DataSeg32:
+L_DataSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x93
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-CodeSeg16:
+L_CodeSeg16:
             DW      -1
             DW      0
             DB      0
             DB      0x9b
             DB      0x8f
             DB      0
-DataSeg16:
+L_DataSeg16:
             DW      -1
             DW      0
             DB      0
             DB      0x93
             DB      0x8f
             DB      0
-CodeSeg64:
+L_CodeSeg64:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x9b
             DB      0xaf                ; LimitHigh
             DB      0                   ; BaseHigh
-GDT_SIZE equ $ - NullSeg
+GDT_SIZE equ $ - L_NullSeg
 
-TssSeg:
+L_TssSeg:
             DW      TSS_DESC_SIZE       ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x89
             DB      0x80                ; LimitHigh
             DB      0                   ; BaseHigh
-ExceptionTssSeg:
+L_ExceptionTssSeg:
             DW      TSS_DESC_SIZE       ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
@@ -95,10 +97,10 @@ ExceptionTssSeg:
             DB      0x80                ; LimitHigh
             DB      0                   ; BaseHigh
 
-CODE_SEL          equ CodeSeg32 - NullSeg
-DATA_SEL          equ DataSeg32 - NullSeg
-TSS_SEL           equ TssSeg - NullSeg
-EXCEPTION_TSS_SEL equ ExceptionTssSeg - NullSeg
+CODE_SEL          equ L_CodeSeg32 - L_NullSeg
+DATA_SEL          equ L_DataSeg32 - L_NullSeg
+TSS_SEL           equ L_TssSeg - L_NullSeg
+EXCEPTION_TSS_SEL equ L_ExceptionTssSeg - L_NullSeg
 
 struc IA32_TSS
                     resw 1
@@ -142,7 +144,7 @@ struc IA32_TSS
 endstruc
 
 ; Create 2 TSS segments just after GDT
-TssDescriptor:
+L_TssDescriptor:
             DW      0                   ; PreviousTaskLink
             DW      0                   ; Reserved
             DD      0                   ; ESP0
@@ -181,9 +183,9 @@ TssDescriptor:
             DW      0                   ; Reserved
             DW      0                   ; T
             DW      0                   ; I/O Map Base
-TSS_DESC_SIZE equ $ - TssDescriptor
+TSS_DESC_SIZE equ $ - L_TssDescriptor
 
-ExceptionTssDescriptor:
+L_ExceptionTssDescriptor:
             DW      0                   ; PreviousTaskLink
             DW      0                   ; Reserved
             DD      0                   ; ESP0
@@ -196,7 +198,7 @@ ExceptionTssDescriptor:
             DW      0                   ; SS2
             DW      0                   ; Reserved
             DD      0                   ; CR3
-            DD      PFHandlerEntry ; EIP
+            DD      L_PFHandlerEntry ; EIP
             DD      00000002            ; EFLAGS
             DD      0                   ; EAX
             DD      0                   ; ECX
@@ -237,7 +239,7 @@ ASM_PFX(gcPsd):
             DQ      0
             DQ      0
             DD      0
-            DD      NullSeg
+            DD      L_NullSeg
             DD      GDT_SIZE
             DD      0
             times   24 DB 0
@@ -247,7 +249,7 @@ PSD_SIZE  equ $ - ASM_PFX(gcPsd)
 
 ASM_PFX(gcSmiGdtr):
     DW      GDT_SIZE - 1
-    DD      NullSeg
+    DD      L_NullSeg
 
 ASM_PFX(gcSmiIdtr):
     DW      0
@@ -469,13 +471,13 @@ ASM_PFX(PageFaultIdtHandlerSmmProfile):
     bts     dword [esp + 16], 8  ; EFLAGS
 
     add     esp, 8                      ; skip INT# & ErrCode
-Return:
+L_Return:
     iretd
 ;
 ; Page Fault Exception Handler entry when SMM Stack Guard is enabled
 ; Executiot starts here after a task switch
 ;
-PFHandlerEntry:
+L_PFHandlerEntry:
 ;
 ; Get this processor's TSS
 ;
@@ -674,7 +676,7 @@ o16 mov     [ecx + IA32_TSS._SS], ax
 
 ; Set single step DB# if SMM profile is enabled and page fault exception happens
     cmp     byte [dword ASM_PFX(FeaturePcdGet (PcdCpuSmmProfileEnable))], 0
-    jz      @Done2
+    jz      L_Done2
 
 ; Create return context for iretd in stub function
     mov    eax, dword [ecx + IA32_TSS._ESP]        ; Get old stack pointer
@@ -692,10 +694,10 @@ o16 mov     [ecx + IA32_TSS._SS], ax
     mov    eax, ASM_PFX(PageFaultStubFunction)
     mov    dword [ecx + IA32_TSS.EIP], eax
 ; Jump to the iretd so next page fault handler as a task will start again after iretd.
-@Done2:
+L_Done2:
     add     esp, 4                      ; skip ErrCode
 
-    jmp     Return
+    jmp     L_Return
 
 global ASM_PFX(PageFaultStubFunction)
 ASM_PFX(PageFaultStubFunction):

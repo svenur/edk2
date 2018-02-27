@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 extern ASM_PFX(SmmInitHandler)
 extern ASM_PFX(mRebasedFlag)
 extern ASM_PFX(mSmmRelocationOriginalAddress)
@@ -62,16 +64,16 @@ ASM_PFX(gSmmCr4): DD 0
     or      ah, BIT0                    ; set LME bit
     DB      0x66
     test    ebx, BIT20                  ; check NXE capability
-    jz      .1
+    jz      L_1
     or      ah, BIT3                    ; set NXE bit
-.1:
+L_1:
     wrmsr
     DB      0x66, 0xb8                   ; mov eax, imm32
 ASM_PFX(gSmmCr0): DD 0
     mov     cr0, rax                    ; enable protected mode & paging
     DB      0x66, 0xea                   ; far jmp to long mode
-ASM_PFX(gSmmJmpAddr): DQ 0;@LongMode
-@LongMode:                              ; long-mode starts here
+ASM_PFX(gSmmJmpAddr): DQ 0;L_LongMode
+L_LongMode:                              ; long-mode starts here
     DB      0x48, 0xbc                   ; mov rsp, imm64
 ASM_PFX(gSmmInitStack): DQ 0
     and     sp, 0xfff0                  ; make sure RSP is 16-byte aligned
@@ -105,10 +107,10 @@ ASM_PFX(gSmmInitStack): DQ 0
 
 BITS 16
 ASM_PFX(gcSmmInitTemplate):
-    mov ebp, [cs:@L1 - ASM_PFX(gcSmmInitTemplate) + 0x8000]
+    mov ebp, [cs:L_L1 - ASM_PFX(gcSmmInitTemplate) + 0x8000]
     sub ebp, 0x30000
     jmp ebp
-@L1:
+L_L1:
     DQ     0; ASM_PFX(SmmStartup)
 
 ASM_PFX(gcSmmInitSize): DW $ - ASM_PFX(gcSmmInitTemplate)
@@ -141,11 +143,11 @@ ASM_PFX(mSmmRelocationOriginalAddressPtr32): dd 0
 
 global ASM_PFX(PiSmmCpuSmmInitFixupAddress)
 ASM_PFX(PiSmmCpuSmmInitFixupAddress):
-    lea    rax, [@LongMode]
+    lea    rax, [L_LongMode]
     lea    rcx, [ASM_PFX(gSmmJmpAddr)]
     mov    qword [rcx], rax
 
     lea    rax, [ASM_PFX(SmmStartup)]
-    lea    rcx, [@L1]
+    lea    rcx, [L_L1]
     mov    qword [rcx], rax
     ret

@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 %define MSR_IA32_MISC_ENABLE 0x1A0
 %define MSR_EFER      0xc0000080
 %define MSR_EFER_XD   0x800
@@ -54,8 +56,8 @@ extern ASM_PFX(gSmiHandlerIdtr)
 
 BITS 16
 ASM_PFX(gcSmiHandlerTemplate):
-_SmiEntryPoint:
-    mov     bx, _GdtDesc - _SmiEntryPoint + 0x8000
+L_SmiEntryPoint:
+    mov     bx, L_GdtDesc - L_SmiEntryPoint + 0x8000
     mov     ax,[cs:DSC_OFFSET + DSC_GDTSIZ]
     dec     ax
     mov     [cs:bx], ax
@@ -67,19 +69,19 @@ o32 lgdt    [cs:bx]                       ; lgdt fword ptr cs:[bx]
     mov     [cs:bx-0x2],ax
     DB      0x66, 0xbf                   ; mov edi, SMBASE
 ASM_PFX(gSmbase): DD 0
-    lea     eax, [edi + (@32bit - _SmiEntryPoint) + 0x8000]
+    lea     eax, [edi + (L_32bit - L_SmiEntryPoint) + 0x8000]
     mov     [cs:bx-0x6],eax
     mov     ebx, cr0
     and     ebx, 0x9ffafff3
     or      ebx, 0x23
     mov     cr0, ebx
     jmp     dword 0x0:0x0
-_GdtDesc:
+L_GdtDesc:
     DW 0
     DD 0
 
 BITS 32
-@32bit:
+L_32bit:
     mov     ax, PROTECT_MODE_DS
 o16 mov     ds, ax
 o16 mov     es, ax
@@ -90,9 +92,9 @@ o16 mov     ss, ax
 ASM_PFX(gSmiStack): DD 0
     mov     eax, ASM_PFX(gSmiHandlerIdtr)
     lidt    [eax]
-    jmp     ProtFlatMode
+    jmp     L_ProtFlatMode
 
-ProtFlatMode:
+L_ProtFlatMode:
     DB      0xb8                        ; mov eax, imm32
 ASM_PFX(gSmiCr3): DD 0
     mov     cr3, eax
@@ -103,40 +105,40 @@ ASM_PFX(gSmiCr3): DD 0
     cpuid                               ; use CPUID to determine if specific CR4 bits are supported
     xor     eax, eax                    ; Clear EAX
     test    edx, BIT2                   ; Check for DE capabilities
-    jz      .0
+    jz      L_0
     or      eax, BIT3
-.0:
+L_0:
     test    edx, BIT6                   ; Check for PAE capabilities
-    jz      .1
+    jz      L_1
     or      eax, BIT5
-.1:
+L_1:
     test    edx, BIT7                   ; Check for MCE capabilities
-    jz      .2
+    jz      L_2
     or      eax, BIT6
-.2:
+L_2:
     test    edx, BIT24                  ; Check for FXSR capabilities
-    jz      .3
+    jz      L_3
     or      eax, BIT9
-.3:
+L_3:
     test    edx, BIT25                  ; Check for SSE capabilities
-    jz      .4
+    jz      L_4
     or      eax, BIT10
-.4:                                     ; as cr4.PGE is not set here, refresh cr3
+L_4:                                     ; as cr4.PGE is not set here, refresh cr3
     mov     cr4, eax                    ; in PreModifyMtrrs() to flush TLB.
 
     cmp     byte [dword ASM_PFX(FeaturePcdGet (PcdCpuSmmStackGuard))], 0
-    jz      .6
+    jz      L_6
 ; Load TSS
     mov     byte [ebp + TSS_SEGMENT + 5], 0x89 ; clear busy flag
     mov     eax, TSS_SEGMENT
     ltr     ax
-.6:
+L_6:
 
 ; enable NXE if supported
     DB      0b0h                        ; mov al, imm8
 ASM_PFX(mXdSupported):     DB      1
     cmp     al, 0
-    jz      @SkipXd
+    jz      L_SkipXd
 ;
 ; Check XD disable bit
 ;
@@ -144,18 +146,18 @@ ASM_PFX(mXdSupported):     DB      1
     rdmsr
     push    edx                        ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .5
+    jz      L_5
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.5:
+L_5:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
     wrmsr
-    jmp     @XdDone
-@SkipXd:
+    jmp     L_XdDone
+L_SkipXd:
     sub     esp, 4
-@XdDone:
+L_XdDone:
 
     mov     ebx, cr0
     or      ebx, 0x80010023             ; enable paging + WP + NE + MP + PE
@@ -193,19 +195,19 @@ ASM_PFX(SmiHandler):
     mov     eax, ASM_PFX(mXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      .7
+    jz      L_7
     pop     edx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .7
+    jz      L_7
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.7:
+L_7:
     rsm
 
-ASM_PFX(gcSmiHandlerSize): DW $ - _SmiEntryPoint
+ASM_PFX(gcSmiHandlerSize): DW $ - L_SmiEntryPoint
 
 global ASM_PFX(PiSmmCpuSmiEntryFixupAddress)
 ASM_PFX(PiSmmCpuSmiEntryFixupAddress):

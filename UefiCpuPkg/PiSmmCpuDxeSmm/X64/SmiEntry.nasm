@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 ;
 ; Variables referrenced by C code
 ;
@@ -65,8 +67,8 @@ global ASM_PFX(gcSmiHandlerSize)
 
 BITS 16
 ASM_PFX(gcSmiHandlerTemplate):
-_SmiEntryPoint:
-    mov     bx, _GdtDesc - _SmiEntryPoint + 0x8000
+L_SmiEntryPoint:
+    mov     bx, L_GdtDesc - L_SmiEntryPoint + 0x8000
     mov     ax,[cs:DSC_OFFSET + DSC_GDTSIZ]
     dec     ax
     mov     [cs:bx], ax
@@ -77,19 +79,19 @@ o32 lgdt    [cs:bx]                       ; lgdt fword ptr cs:[bx]
     mov     [cs:bx-0x2],ax
     DB      0x66, 0xbf                   ; mov edi, SMBASE
 ASM_PFX(gSmbase): DD 0
-    lea     eax, [edi + (@ProtectedMode - _SmiEntryPoint) + 0x8000]
+    lea     eax, [edi + (L_ProtectedMode - L_SmiEntryPoint) + 0x8000]
     mov     [cs:bx-0x6],eax
     mov     ebx, cr0
     and     ebx, 0x9ffafff3
     or      ebx, 0x23
     mov     cr0, ebx
     jmp     dword 0x0:0x0
-_GdtDesc:
+L_GdtDesc:
     DW 0
     DD 0
 
 BITS 32
-@ProtectedMode:
+L_ProtectedMode:
     mov     ax, PROTECT_MODE_DS
 o16 mov     ds, ax
 o16 mov     es, ax
@@ -98,10 +100,10 @@ o16 mov     gs, ax
 o16 mov     ss, ax
     DB      0xbc                   ; mov esp, imm32
 ASM_PFX(gSmiStack): DD 0
-    jmp     ProtFlatMode
+    jmp     L_ProtFlatMode
 
 BITS 64
-ProtFlatMode:
+L_ProtFlatMode:
     DB      0xb8                        ; mov eax, offset gSmiCr3
 ASM_PFX(gSmiCr3): DD 0
     mov     cr3, rax
@@ -121,7 +123,7 @@ ASM_PFX(gSmiCr3): DD 0
     DB      0xb0                        ; mov al, imm8
 ASM_PFX(mXdSupported):     DB      1
     cmp     al, 0
-    jz      @SkipXd
+    jz      L_SkipXd
 ;
 ; Check XD disable bit
 ;
@@ -130,24 +132,24 @@ ASM_PFX(mXdSupported):     DB      1
     sub     esp, 4
     push    rdx                        ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .0
+    jz      L_0
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.0:
+L_0:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD            ; enable NXE
     wrmsr
-    jmp     @XdDone
-@SkipXd:
+    jmp     L_XdDone
+L_SkipXd:
     sub     esp, 8
-@XdDone:
+L_XdDone:
 
-; Switch into @LongMode
+; Switch into L_LongMode
     push    LONG_MODE_CS                ; push cs hardcore here
-    call    Base                       ; push return address for retf later
-Base:
-    add     dword [rsp], @LongMode - Base; offset for far retf, seg is the 1st arg
+    call    L_Base                       ; push return address for retf later
+L_Base:
+    add     dword [rsp], L_LongMode - L_Base; offset for far retf, seg is the 1st arg
 
     mov     ecx, MSR_EFER
     rdmsr
@@ -157,9 +159,9 @@ Base:
     or      ebx, 0x80010023            ; enable paging + WP + NE + MP + PE
     mov     cr0, rbx
     retf
-@LongMode:                              ; long mode (64-bit code) starts here
+L_LongMode:                              ; long mode (64-bit code) starts here
     mov     rax, strict qword 0         ;  mov     rax, ASM_PFX(gSmiHandlerIdtr)
-SmiHandlerIdtrAbsAddr:
+L_SmiHandlerIdtrAbsAddr:
     lidt    [rax]
     lea     ebx, [rdi + DSC_OFFSET]
     mov     ax, [rbx + DSC_DS]
@@ -170,11 +172,11 @@ SmiHandlerIdtrAbsAddr:
     mov     gs, eax
     mov     ax, [rbx + DSC_SS]
     mov     ss, eax
-    mov     rax, strict qword 0         ;   mov     rax, _SmiHandler
-_SmiHandlerAbsAddr:
+    mov     rax, strict qword 0         ;   mov     rax, L_SmiHandler
+L_SmiHandlerAbsAddr:
     jmp     rax
 
-_SmiHandler:
+L_SmiHandler:
     mov     rbx, [rsp + 0x8]             ; rcx <- CpuIndex
 
     ;
@@ -208,27 +210,27 @@ _SmiHandler:
     lea     rax, [ASM_PFX(mXdSupported)]
     mov     al, [rax]
     cmp     al, 0
-    jz      .1
+    jz      L_1
     pop     rdx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .1
+    jz      L_1
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.1:
+L_1:
     rsm
 
-ASM_PFX(gcSmiHandlerSize)    DW      $ - _SmiEntryPoint
+ASM_PFX(gcSmiHandlerSize)    DW      $ - L_SmiEntryPoint
 
 global ASM_PFX(PiSmmCpuSmiEntryFixupAddress)
 ASM_PFX(PiSmmCpuSmiEntryFixupAddress):
     lea    rax, [ASM_PFX(gSmiHandlerIdtr)]
-    lea    rcx, [SmiHandlerIdtrAbsAddr]
+    lea    rcx, [L_SmiHandlerIdtrAbsAddr]
     mov    qword [rcx - 8], rax
 
-    lea    rax, [_SmiHandler]
-    lea    rcx, [_SmiHandlerAbsAddr]
+    lea    rax, [L_SmiHandler]
+    lea    rcx, [L_SmiHandlerAbsAddr]
     mov    qword [rcx - 8], rax
     ret

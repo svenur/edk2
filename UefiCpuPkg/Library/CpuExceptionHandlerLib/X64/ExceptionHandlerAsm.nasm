@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 ;
 ; CommonExceptionHandler()
 ;
@@ -35,34 +37,34 @@ SECTION .text
 
 ALIGN   8
 
-AsmIdtVectorBegin:
+L_AsmIdtVectorBegin:
 %rep  32
     db      0x6a        ; push  #VectorNum
-    db      ($ - AsmIdtVectorBegin) / ((AsmIdtVectorEnd - AsmIdtVectorBegin) / 32) ; VectorNum
+    db      ($ - L_AsmIdtVectorBegin) / ((L_AsmIdtVectorEnd - L_AsmIdtVectorBegin) / 32) ; VectorNum
     push    rax
     mov     rax, strict qword 0 ;    mov     rax, ASM_PFX(CommonInterruptEntry)
     jmp     rax
 %endrep
-AsmIdtVectorEnd:
+L_AsmIdtVectorEnd:
 
-HookAfterStubHeaderBegin:
+L_HookAfterStubHeaderBegin:
     db      0x6a        ; push
-@VectorNum:
+L_VectorNum:
     db      0          ; 0 will be fixed
     push    rax
-    mov     rax, strict qword 0 ;     mov     rax, HookAfterStubHeaderEnd
-JmpAbsoluteAddress:
+    mov     rax, strict qword 0 ;     mov     rax, L_HookAfterStubHeaderEnd
+L_JmpAbsoluteAddress:
     jmp     rax
-HookAfterStubHeaderEnd:
+L_HookAfterStubHeaderEnd:
     mov     rax, rsp
     and     sp,  0xfff0        ; make sure 16-byte aligned for exception context
     sub     rsp, 0x18           ; reserve room for filling exception data later
     push    rcx
     mov     rcx, [rax + 8]
     bt      [ASM_PFX(mErrorCodeFlag)], ecx
-    jnc     .0
+    jnc     L_0
     push    qword [rsp]             ; push additional rcx to make stack alignment
-.0:
+L_0:
     xchg    rcx, [rsp]        ; restore rcx, save Exception Number in stack
     push    qword [rax]             ; push rax into stack to keep code consistence
 
@@ -102,11 +104,11 @@ ASM_PFX(CommonInterruptEntry):
     xchg    rcx, [rsp]      ; Save rcx into stack and save vector number into rcx
     and     rcx, 0xFF
     cmp     ecx, 32         ; Intel reserved vector for exceptions?
-    jae     NoErrorCode
+    jae     L_NoErrorCode
     bt      [ASM_PFX(mErrorCodeFlag)], ecx
-    jc      HasErrorCode
+    jc      L_HasErrorCode
 
-NoErrorCode:
+L_NoErrorCode:
 
     ;
     ; Push a dummy error code on the stack
@@ -114,7 +116,7 @@ NoErrorCode:
     ;
     push    qword [rsp]
     mov     qword [rsp + 8], 0
-HasErrorCode:
+L_HasErrorCode:
     push    rbp
     mov     rbp, rsp
     push    0             ; clear EXCEPTION_HANDLER_CONTEXT.OldIdtHandler
@@ -339,17 +341,17 @@ HasErrorCode:
     pop     rbp
     add     rsp, 16
     cmp     qword [rsp - 32], 0  ; check EXCEPTION_HANDLER_CONTEXT.OldIdtHandler
-    jz      DoReturn
+    jz      L_DoReturn
     cmp     qword [rsp - 40], 1  ; check EXCEPTION_HANDLER_CONTEXT.ExceptionDataFlag
-    jz      ErrorCode
+    jz      L_ErrorCode
     jmp     qword [rsp - 32]
-ErrorCode:
+L_ErrorCode:
     sub     rsp, 8
     jmp     qword [rsp - 24]
 
-DoReturn:
+L_DoReturn:
     cmp     qword [ASM_PFX(mDoFarReturnFlag)], 0   ; Check if need to do far return instead of IRET
-    jz      DoIret
+    jz      L_DoIret
     push    rax
     mov     rax, rsp          ; save old RSP to rax
     mov     rsp, [rsp + 0x20]
@@ -360,7 +362,7 @@ DoReturn:
     popfq                     ; restore EFLAGS
     DB      0x48               ; prefix to composite "retq" with next "retf"
     retf                      ; far return
-DoIret:
+L_DoIret:
     iretq
 
 ;-------------------------------------------------------------------------------------
@@ -369,22 +371,22 @@ DoIret:
 ; comments here for definition of address map
 global ASM_PFX(AsmGetTemplateAddressMap)
 ASM_PFX(AsmGetTemplateAddressMap):
-    lea     rax, [AsmIdtVectorBegin]
+    lea     rax, [L_AsmIdtVectorBegin]
     mov     qword [rcx], rax
-    mov     qword [rcx + 0x8],  (AsmIdtVectorEnd - AsmIdtVectorBegin) / 32
-    lea     rax, [HookAfterStubHeaderBegin]
+    mov     qword [rcx + 0x8],  (L_AsmIdtVectorEnd - L_AsmIdtVectorBegin) / 32
+    lea     rax, [L_HookAfterStubHeaderBegin]
     mov     qword [rcx + 0x10], rax
 
 ; Fix up CommonInterruptEntry address
     lea    rax, [ASM_PFX(CommonInterruptEntry)]
-    lea    rcx, [AsmIdtVectorBegin]
+    lea    rcx, [L_AsmIdtVectorBegin]
 %rep  32
-    mov    qword [rcx + (JmpAbsoluteAddress - 8 - HookAfterStubHeaderBegin)], rax
-    add    rcx, (AsmIdtVectorEnd - AsmIdtVectorBegin) / 32
+    mov    qword [rcx + (L_JmpAbsoluteAddress - 8 - L_HookAfterStubHeaderBegin)], rax
+    add    rcx, (L_AsmIdtVectorEnd - L_AsmIdtVectorBegin) / 32
 %endrep
-; Fix up HookAfterStubHeaderEnd
-    lea    rax, [HookAfterStubHeaderEnd]
-    lea    rcx, [JmpAbsoluteAddress]
+; Fix up L_HookAfterStubHeaderEnd
+    lea    rax, [L_HookAfterStubHeaderEnd]
+    lea    rcx, [L_JmpAbsoluteAddress]
     mov    qword [rcx - 8], rax
 
     ret
@@ -395,6 +397,6 @@ ASM_PFX(AsmGetTemplateAddressMap):
 global ASM_PFX(AsmVectorNumFixup)
 ASM_PFX(AsmVectorNumFixup):
     mov     rax, rdx
-    mov     [rcx + (@VectorNum - HookAfterStubHeaderBegin)], al
+    mov     [rcx + (L_VectorNum - L_HookAfterStubHeaderBegin)], al
     ret
 

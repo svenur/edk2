@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -20,6 +20,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 ;
 ; CommonExceptionHandler()
 ;
@@ -37,32 +39,32 @@ ALIGN   8
 ;
 ; exception handler stub table
 ;
-AsmIdtVectorBegin:
+L_AsmIdtVectorBegin:
 %rep  32
-    db      0x6a        ; push  #VectorNum
-    db      ($ - AsmIdtVectorBegin) / ((AsmIdtVectorEnd - AsmIdtVectorBegin) / 32) ; VectorNum
+    db      0x6a        ; push  #L_VectorNum
+    db      ($ - L_AsmIdtVectorBegin) / ((L_AsmIdtVectorEnd - L_AsmIdtVectorBegin) / 32) ; L_VectorNum
     push    eax
     mov     eax, ASM_PFX(CommonInterruptEntry)
     jmp     eax
 %endrep
-AsmIdtVectorEnd:
+L_AsmIdtVectorEnd:
 
-HookAfterStubBegin:
+L_HookAfterStubBegin:
     db      0x6a        ; push
-VectorNum:
+L_VectorNum:
     db      0          ; 0 will be fixed
     push    eax
-    mov     eax, HookAfterStubHeaderEnd
+    mov     eax, L_HookAfterStubHeaderEnd
     jmp     eax
-HookAfterStubHeaderEnd:
+L_HookAfterStubHeaderEnd:
     pop     eax
     sub     esp, 8     ; reserve room for filling exception data later
     push    dword [esp + 8]
     xchg    ecx, [esp] ; get vector number
     bt      [ASM_PFX(mErrorCodeFlag)], ecx
-    jnc     .0
+    jnc     L_0
     push    dword [esp]      ; addition push if exception data needed
-.0:
+L_0:
     xchg    ecx, [esp] ; restore ecx
     push    eax
 
@@ -100,11 +102,11 @@ ASM_PFX(CommonInterruptEntry):
     xchg    ecx, [esp]
     and     ecx, 0xFF       ; Vector number should be less than 256
     cmp     ecx, 32         ; Intel reserved vector for exceptions?
-    jae     NoErrorCode
+    jae     L_NoErrorCode
     bt      [ASM_PFX(mErrorCodeFlag)], ecx
-    jc      HasErrorCode
+    jc      L_HasErrorCode
 
-NoErrorCode:
+L_NoErrorCode:
 
     ;
     ; Stack:
@@ -133,9 +135,9 @@ NoErrorCode:
     xor     ecx, ecx  ; ECX = 0
     xchg    ecx, [esp+4]
 
-    jmp     ErrorCodeAndVectorOnStack
+    jmp     L_ErrorCodeAndVectorOnStack
 
-HasErrorCode:
+L_HasErrorCode:
 
     ;
     ; Stack:
@@ -160,7 +162,7 @@ HasErrorCode:
     ;
     xchg    ecx, [esp]
 
-ErrorCodeAndVectorOnStack:
+L_ErrorCodeAndVectorOnStack:
     push    ebp
     mov     ebp, esp
 
@@ -256,13 +258,13 @@ ErrorCodeAndVectorOnStack:
     mov     eax, cr4
     push    eax         ; push cr4 firstly
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support
-    jz      .1
+    jz      L_1
     or      eax, BIT9   ; Set CR4.OSFXSR
-.1:
+L_1:
     test    edx, BIT2   ; Test for Debugging Extensions support
-    jz      .2
+    jz      L_2
     or      eax, BIT3   ; Set CR4.DE
-.2:
+L_2:
     mov     cr4, eax
     mov     eax, cr3
     push    eax
@@ -292,9 +294,9 @@ ErrorCodeAndVectorOnStack:
     mov     edi, esp
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support.
                         ; edx still contains result from CPUID above
-    jz      .3
+    jz      L_3
     db      0xf, 0xae, 0x7 ;fxsave [edi]
-.3:
+L_3:
 
 ;; UEFI calling convention for IA32 requires that Direction flag in EFLAGs is clear
     cld
@@ -325,9 +327,9 @@ ErrorCodeAndVectorOnStack:
     cpuid               ; use CPUID to determine if FXSAVE/FXRESTOR
                         ; are supported
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support
-    jz      .4
+    jz      L_4
     db      0xf, 0xae, 0xe ; fxrstor [esi]
-.4:
+L_4:
     add     esp, 512
 
 ;; UINT32  Dr0, Dr1, Dr2, Dr3, Dr6, Dr7;
@@ -385,17 +387,17 @@ ErrorCodeAndVectorOnStack:
     pop     ebp
     add     esp, 8
     cmp     dword [esp - 16], 0   ; check EXCEPTION_HANDLER_CONTEXT.OldIdtHandler
-    jz      DoReturn
+    jz      L_DoReturn
     cmp     dword [esp - 20], 1   ; check EXCEPTION_HANDLER_CONTEXT.ExceptionDataFlag
-    jz      ErrorCode
+    jz      L_ErrorCode
     jmp     dword [esp - 16]
-ErrorCode:
+L_ErrorCode:
     sub     esp, 4
     jmp     dword [esp - 12]
 
-DoReturn:
+L_DoReturn:
     cmp     dword [ASM_PFX(mDoFarReturnFlag)], 0   ; Check if need to do far return instead of IRET
-    jz      DoIret
+    jz      L_DoIret
     push    dword [esp + 8]    ; save EFLAGS
     add     esp, 16
     push    dword [esp - 8]    ; save CS in new location
@@ -404,7 +406,7 @@ DoReturn:
     popfd                ; restore EFLAGS
     retf                 ; far return
 
-DoIret:
+L_DoIret:
     iretd
 
 ;---------------------------------------;
@@ -443,20 +445,20 @@ ASM_PFX(AsmGetTemplateAddressMap):
     pushad
 
     mov ebx, dword [ebp + 0x8]
-    mov dword [ebx],      AsmIdtVectorBegin
-    mov dword [ebx + 0x4], (AsmIdtVectorEnd - AsmIdtVectorBegin) / 32
-    mov dword [ebx + 0x8], HookAfterStubBegin
+    mov dword [ebx],      L_AsmIdtVectorBegin
+    mov dword [ebx + 0x4], (L_AsmIdtVectorEnd - L_AsmIdtVectorBegin) / 32
+    mov dword [ebx + 0x8], L_HookAfterStubBegin
 
     popad
     pop     ebp
     ret
 
 ;-------------------------------------------------------------------------------------
-;  AsmVectorNumFixup (*NewVectorAddr, VectorNum, *OldVectorAddr);
+;  AsmVectorNumFixup (*NewVectorAddr, L_VectorNum, *OldVectorAddr);
 ;-------------------------------------------------------------------------------------
 global ASM_PFX(AsmVectorNumFixup)
 ASM_PFX(AsmVectorNumFixup):
     mov     eax, dword [esp + 8]
     mov     ecx, [esp + 4]
-    mov     [ecx + (VectorNum - HookAfterStubBegin)], al
+    mov     [ecx + (L_VectorNum - L_HookAfterStubBegin)], al
     ret

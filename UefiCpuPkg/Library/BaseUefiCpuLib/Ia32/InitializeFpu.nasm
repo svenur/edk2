@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;*
-;*   Copyright (c) 2016 - 2017, Intel Corporation. All rights reserved.<BR>
+;*   Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ;*   This program and the accompanying materials
 ;*   are licensed and made available under the terms and conditions of the BSD License
 ;*   which accompanies this distribution.  The full text of the license may be found at
@@ -12,18 +12,20 @@
 ;*
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .rodata
 
 ;
 ; Float control word initial value:
 ; all exceptions masked, double-precision, round-to-nearest
 ;
-mFpuControlWord: DW 0x27F
+L_mFpuControlWord: DW 0x27F
 ;
 ; Multimedia-extensions control word:
 ; all exceptions masked, round-to-nearest, flush to zero for masked underflow
 ;
-mMmxControlWord: DD 0x1F80
+L_mMmxControlWord: DD 0x1F80
 
     SECTION .text
 
@@ -44,7 +46,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     ; Initialize floating point units
     ;
     finit
-    fldcw   [mFpuControlWord]
+    fldcw   [L_mFpuControlWord]
 
     ;
     ; Use CpuId instructuion (CPUID.01H:EDX.SSE[bit 25] = 1) to test
@@ -53,7 +55,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     mov     eax, 1
     cpuid
     bt      edx, 25
-    jnc     Done
+    jnc     L_Done
 
     ;
     ; Set OSFXSR bit 9 in CR4
@@ -66,8 +68,8 @@ ASM_PFX(InitializeFloatingPointUnits):
     ; The processor should support SSE instruction and we can use
     ; ldmxcsr instruction
     ;
-    ldmxcsr [mMmxControlWord]
-Done:
+    ldmxcsr [L_mMmxControlWord]
+L_Done:
     pop     ebx
 
     ret

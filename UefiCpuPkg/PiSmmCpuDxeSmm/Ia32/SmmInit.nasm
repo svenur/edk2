@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 extern ASM_PFX(SmmInitHandler)
 extern ASM_PFX(mRebasedFlag)
 extern ASM_PFX(mSmmRelocationOriginalAddress)
@@ -66,11 +68,11 @@ ASM_PFX(gSmmCr0): DD 0
     mov     cr0, eax
     DB      0x66, 0xea                  ; jmp far [ptr48]
 ASM_PFX(gSmmJmpAddr):
-    DD      @32bit
+    DD      L_32bit
     DW      PROTECT_MODE_CS
 
 BITS 32
-@32bit:
+L_32bit:
     mov     ds, edi
     mov     es, edi
     mov     fs, edi

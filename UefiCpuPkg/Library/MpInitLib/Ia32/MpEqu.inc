@@ -25,7 +25,7 @@ CPU_SWITCH_STATE_IDLE         equ        0
 CPU_SWITCH_STATE_STORED       equ        1
 CPU_SWITCH_STATE_LOADED       equ        2
 
-LockLocation                  equ        (RendezvousFunnelProcEnd - RendezvousFunnelProcStart)
+LockLocation                  equ        (L_RendezvousFunnelProcEnd - L_RendezvousFunnelProcStart)
 StackStartAddressLocation     equ        LockLocation + 04h
 StackSizeLocation             equ        LockLocation + 08h
 ApProcedureLocation           equ        LockLocation + 0Ch

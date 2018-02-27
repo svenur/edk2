@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 SECTION .text
 
 extern ASM_PFX(InitializeFloatingPointUnits)
@@ -25,7 +27,7 @@ extern ASM_PFX(InitializeFloatingPointUnits)
 %define VacantFlag 0x0
 %define NotVacantFlag 0xff
 
-%define LockLocation RendezvousFunnelProcEnd - RendezvousFunnelProcStart
+%define LockLocation L_RendezvousFunnelProcEnd - L_RendezvousFunnelProcStart
 %define StackStart LockLocation + 0x4
 %define StackSize LockLocation + 0x8
 %define RendezvousProc LockLocation + 0xC
@@ -45,7 +47,7 @@ extern ASM_PFX(InitializeFloatingPointUnits)
 BITS 16
 global ASM_PFX(RendezvousFunnelProc)
 ASM_PFX(RendezvousFunnelProc):
-RendezvousFunnelProcStart:
+L_RendezvousFunnelProcStart:
 
 ; At this point CS = 0x(vv00) and ip= 0x0.
 
@@ -57,7 +59,7 @@ RendezvousFunnelProcStart:
         mov        fs,  ax
         mov        gs,  ax
 
-flat32Start:
+L_flat32Start:
 
         mov        si, BufferStart
         mov        edx,dword [si]          ; EDX is keeping the start address of wakeup buffer
@@ -75,12 +77,12 @@ o32     lidt       [cs:si]
         or         eax, 0x000000001            ; Set PE bit (bit #0)
         mov        cr0, eax
 
-FLAT32_JUMP:
+L_FLAT32_JUMP:
 
 a32     jmp   dword 0x20:0x0
 
 BITS 32
-PMODE_ENTRY:                         ; protected mode entry point
+L_PMODE_ENTRY:                         ; protected mode entry point
 
         mov         ax,  0x8
 o16     mov         ds,  ax
@@ -94,12 +96,12 @@ o16     mov         ss,  ax           ; Flat mode setup.
         mov         edi, esi
         add         edi, LockLocation
         mov         al,  NotVacantFlag
-TestLock:
+L_TestLock:
         xchg        byte [edi], al
         cmp         al, NotVacantFlag
-        jz          TestLock
+        jz          L_TestLock
 
-ProgramStack:
+L_ProgramStack:
 
         mov         edi, esi
         add         edi, StackSize
@@ -110,7 +112,7 @@ ProgramStack:
         mov         esp, eax
         mov         dword [edi], eax
 
-Releaselock:
+L_Releaselock:
 
         mov         al,  VacantFlag
         mov         edi, esi
@@ -130,15 +132,15 @@ Releaselock:
         mov         eax, dword [edi]
 
         test        eax, eax
-        jz          GoToSleep
+        jz          L_GoToSleep
         call        eax                           ; Call C function
 
-GoToSleep:
+L_GoToSleep:
         cli
         hlt
         jmp         $-2
 
-RendezvousFunnelProcEnd:
+L_RendezvousFunnelProcEnd:
 ;-------------------------------------------------------------------------------------
 ;  AsmGetAddressMap (&AddressMap);
 ;-------------------------------------------------------------------------------------
@@ -149,10 +151,10 @@ ASM_PFX(AsmGetAddressMap):
         mov         ebp,esp
 
         mov         ebx, dword [ebp+0x24]
-        mov         dword [ebx], RendezvousFunnelProcStart
-        mov         dword [ebx+0x4], PMODE_ENTRY - RendezvousFunnelProcStart
-        mov         dword [ebx+0x8], FLAT32_JUMP - RendezvousFunnelProcStart
-        mov         dword [ebx+0xc], RendezvousFunnelProcEnd - RendezvousFunnelProcStart
+        mov         dword [ebx], L_RendezvousFunnelProcStart
+        mov         dword [ebx+0x4], L_PMODE_ENTRY - L_RendezvousFunnelProcStart
+        mov         dword [ebx+0x8], L_FLAT32_JUMP - L_RendezvousFunnelProcStart
+        mov         dword [ebx+0xc], L_RendezvousFunnelProcEnd - L_RendezvousFunnelProcStart
 
         popad
         ret

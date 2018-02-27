@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2009 - 2017, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -17,6 +17,8 @@
 ;   Exception handlers used in SM mode
 ;
 ;-------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
 global  ASM_PFX(gcStmPsd)
 
@@ -99,20 +101,20 @@ ASM_PFX(OnStmSetup):
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      @StmXdDone1
+    jz      L_StmXdDone1
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     mov     esi, edx                   ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .51
+    jz      L_51
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.51:
+L_51:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
     wrmsr
-@StmXdDone1:
+L_StmXdDone1:
     push    esi
 
   call ASM_PFX(SmmStmSetup)
@@ -120,16 +122,16 @@ ASM_PFX(OnStmSetup):
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      .71
+    jz      L_71
     pop     edx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .71
+    jz      L_71
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.71:
+L_71:
   rsm
 
 global  ASM_PFX(OnStmTeardown)
@@ -141,20 +143,20 @@ ASM_PFX(OnStmTeardown):
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      @StmXdDone2
+    jz      L_StmXdDone2
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     mov     esi, edx                   ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .52
+    jz      L_52
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.52:
+L_52:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
     wrmsr
-@StmXdDone2:
+L_StmXdDone2:
     push    esi
 
   call ASM_PFX(SmmStmTeardown)
@@ -162,14 +164,14 @@ ASM_PFX(OnStmTeardown):
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      .72
+    jz      L_72
     pop     edx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .72
+    jz      L_72
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.72:
+L_72:
   rsm

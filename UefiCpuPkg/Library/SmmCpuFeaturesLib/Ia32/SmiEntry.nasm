@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 %define MSR_IA32_MISC_ENABLE 0x1A0
 %define MSR_EFER      0xc0000080
 %define MSR_EFER_XD   0x800
@@ -51,17 +53,17 @@ global ASM_PFX(gStmSmbase)
 global ASM_PFX(gStmXdSupported)
 extern ASM_PFX(gStmSmiHandlerIdtr)
 
-ASM_PFX(gStmSmiCr3)      EQU StmSmiCr3Patch - 4
-ASM_PFX(gStmSmiStack)    EQU StmSmiStackPatch - 4
-ASM_PFX(gStmSmbase)      EQU StmSmbasePatch - 4
-ASM_PFX(gStmXdSupported) EQU StmXdSupportedPatch - 1
+ASM_PFX(gStmSmiCr3)      EQU L_StmSmiCr3Patch - 4
+ASM_PFX(gStmSmiStack)    EQU L_StmSmiStackPatch - 4
+ASM_PFX(gStmSmbase)      EQU L_StmSmbasePatch - 4
+ASM_PFX(gStmXdSupported) EQU L_StmXdSupportedPatch - 1
 
     SECTION .text
 
 BITS 16
 ASM_PFX(gcStmSmiHandlerTemplate):
-_StmSmiEntryPoint:
-    mov     bx, _StmGdtDesc - _StmSmiEntryPoint + 0x8000
+L_StmSmiEntryPoint:
+    mov     bx, L_StmGdtDesc - L_StmSmiEntryPoint + 0x8000
     mov     ax,[cs:DSC_OFFSET + DSC_GDTSIZ]
     dec     ax
     mov     [cs:bx], ax
@@ -72,20 +74,20 @@ o32 lgdt    [cs:bx]                       ; lgdt fword ptr cs:[bx]
     mov     ax, PROTECT_MODE_CS
     mov     [cs:bx-0x2],ax
 o32 mov     edi, strict dword 0
-StmSmbasePatch:
-    lea     eax, [edi + (@32bit - _StmSmiEntryPoint) + 0x8000]
+L_StmSmbasePatch:
+    lea     eax, [edi + (L_32bit - L_StmSmiEntryPoint) + 0x8000]
     mov     [cs:bx-0x6],eax
     mov     ebx, cr0
     and     ebx, 0x9ffafff3
     or      ebx, 0x23
     mov     cr0, ebx
     jmp     dword 0x0:0x0
-_StmGdtDesc:
+L_StmGdtDesc:
     DW 0
     DD 0
 
 BITS 32
-@32bit:
+L_32bit:
     mov     ax, PROTECT_MODE_DS
 o16 mov     ds, ax
 o16 mov     es, ax
@@ -93,14 +95,14 @@ o16 mov     fs, ax
 o16 mov     gs, ax
 o16 mov     ss, ax
     mov     esp, strict dword 0
-StmSmiStackPatch:
+L_StmSmiStackPatch:
     mov     eax, ASM_PFX(gStmSmiHandlerIdtr)
     lidt    [eax]
-    jmp     ProtFlatMode
+    jmp     L_ProtFlatMode
 
-ProtFlatMode:
+L_ProtFlatMode:
     mov eax, strict dword 0
-StmSmiCr3Patch:
+L_StmSmiCr3Patch:
     mov     cr3, eax
 ;
 ; Need to test for CR4 specific bit support
@@ -109,40 +111,40 @@ StmSmiCr3Patch:
     cpuid                               ; use CPUID to determine if specific CR4 bits are supported
     xor     eax, eax                    ; Clear EAX
     test    edx, BIT2                   ; Check for DE capabilities
-    jz      .0
+    jz      L_0
     or      eax, BIT3
-.0:
+L_0:
     test    edx, BIT6                   ; Check for PAE capabilities
-    jz      .1
+    jz      L_1
     or      eax, BIT5
-.1:
+L_1:
     test    edx, BIT7                   ; Check for MCE capabilities
-    jz      .2
+    jz      L_2
     or      eax, BIT6
-.2:
+L_2:
     test    edx, BIT24                  ; Check for FXSR capabilities
-    jz      .3
+    jz      L_3
     or      eax, BIT9
-.3:
+L_3:
     test    edx, BIT25                  ; Check for SSE capabilities
-    jz      .4
+    jz      L_4
     or      eax, BIT10
-.4:                                     ; as cr4.PGE is not set here, refresh cr3
+L_4:                                     ; as cr4.PGE is not set here, refresh cr3
     mov     cr4, eax                    ; in PreModifyMtrrs() to flush TLB.
 
     cmp     byte [dword ASM_PFX(FeaturePcdGet (PcdCpuSmmStackGuard))], 0
-    jz      .6
+    jz      L_6
 ; Load TSS
     mov     byte [ebp + TSS_SEGMENT + 5], 0x89 ; clear busy flag
     mov     eax, TSS_SEGMENT
     ltr     ax
-.6:
+L_6:
 
 ; enable NXE if supported
     mov     al, strict byte 1
-StmXdSupportedPatch:
+L_StmXdSupportedPatch:
     cmp     al, 0
-    jz      @SkipXd
+    jz      L_SkipXd
 ;
 ; Check XD disable bit
 ;
@@ -150,18 +152,18 @@ StmXdSupportedPatch:
     rdmsr
     push    edx                        ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .5
+    jz      L_5
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.5:
+L_5:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
     wrmsr
-    jmp     @XdDone
-@SkipXd:
+    jmp     L_XdDone
+L_SkipXd:
     sub     esp, 4
-@XdDone:
+L_XdDone:
 
     mov     ebx, cr0
     or      ebx, 0x80010023             ; enable paging + WP + NE + MP + PE
@@ -176,7 +178,7 @@ StmXdSupportedPatch:
     mov     ax, [ebx + DSC_SS]
     mov     ss, eax
 
-CommonHandler:
+L_CommonHandler:
     mov     ebx, [esp + 4]                  ; CPU Index
     push    ebx
     mov     eax, ASM_PFX(CpuSmmDebugEntry)
@@ -196,20 +198,20 @@ CommonHandler:
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      .7
+    jz      L_7
     pop     edx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .7
+    jz      L_7
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.7:
+L_7:
     rsm
 
 
-_StmSmiHandler:
+L_StmSmiHandler:
 ;
 ; Check XD disable bit
 ;
@@ -217,20 +219,20 @@ _StmSmiHandler:
     mov     eax, ASM_PFX(gStmXdSupported)
     mov     al, [eax]
     cmp     al, 0
-    jz      @StmXdDone
+    jz      L_StmXdDone
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     mov     esi, edx                   ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .8
+    jz      L_8
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.8:
+L_8:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD             ; enable NXE
     wrmsr
-@StmXdDone:
+L_StmXdDone:
     push    esi
 
     ; below step is needed, because STM does not run above code.
@@ -248,31 +250,31 @@ _StmSmiHandler:
     cpuid                               ; use CPUID to determine if specific CR4 bits are supported
     mov     eax, cr4                    ; init EAX
     test    edx, BIT2                   ; Check for DE capabilities
-    jz      .10
+    jz      L_10
     or      eax, BIT3
-.10:
+L_10:
     test    edx, BIT6                   ; Check for PAE capabilities
-    jz      .11
+    jz      L_11
     or      eax, BIT5
-.11:
+L_11:
     test    edx, BIT7                   ; Check for MCE capabilities
-    jz      .12
+    jz      L_12
     or      eax, BIT6
-.12:
+L_12:
     test    edx, BIT24                  ; Check for FXSR capabilities
-    jz      .13
+    jz      L_13
     or      eax, BIT9
-.13:
+L_13:
     test    edx, BIT25                  ; Check for SSE capabilities
-    jz      .14
+    jz      L_14
     or      eax, BIT10
-.14:                                    ; as cr4.PGE is not set here, refresh cr3
+L_14:                                    ; as cr4.PGE is not set here, refresh cr3
     mov     cr4, eax                    ; in PreModifyMtrrs() to flush TLB.
     ; STM init finish
-    jmp     CommonHandler
+    jmp     L_CommonHandler
 
-ASM_PFX(gcStmSmiHandlerSize)   : DW        $ - _StmSmiEntryPoint
-ASM_PFX(gcStmSmiHandlerOffset) : DW        _StmSmiHandler - _StmSmiEntryPoint
+ASM_PFX(gcStmSmiHandlerSize)   : DW        $ - L_StmSmiEntryPoint
+ASM_PFX(gcStmSmiHandlerOffset) : DW        L_StmSmiHandler - L_StmSmiEntryPoint
 
 global ASM_PFX(SmmCpuFeaturesLibStmSmiEntryFixupAddress)
 ASM_PFX(SmmCpuFeaturesLibStmSmiEntryFixupAddress):

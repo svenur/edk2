@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2017, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2017 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -19,6 +19,8 @@
 ; Notes:
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
 ;
 ; IA32 TSS Memory Layout Description
@@ -78,7 +80,7 @@ ALIGN   8
 ;
 ; Exception handler stub table
 ;
-AsmExceptionEntryBegin:
+L_AsmExceptionEntryBegin:
 %assign Vector 0
 %rep  32
 
@@ -94,7 +96,7 @@ ASM_PFX(ExceptionTaskSwtichEntry%[Vector]):
 
 %assign Vector Vector+1
 %endrep
-AsmExceptionEntryEnd:
+L_AsmExceptionEntryEnd:
 
 ;
 ; Common part of exception handler
@@ -209,13 +211,13 @@ ASM_PFX(CommonTaskSwtichEntryPoint):
 
     mov     edx, [ebp - 4]  ; cpuid.edx
     test    edx, BIT24      ; Test for FXSAVE/FXRESTOR support
-    jz      .1
+    jz      L_1
     or      eax, BIT9       ; Set CR4.OSFXSR
-.1:
+L_1:
     test    edx, BIT2       ; Test for Debugging Extensions support
-    jz      .2
+    jz      L_2
     or      eax, BIT3       ; Set CR4.DE
-.2:
+L_2:
     mov     cr4, eax
 
     mov     eax, cr3
@@ -246,12 +248,12 @@ ASM_PFX(CommonTaskSwtichEntryPoint):
 ;; when executing fxsave/fxrstor instruction
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support.
                         ; edx still contains result from CPUID above
-    jz      .3
+    jz      L_3
     clts
     sub     esp, 512
     mov     edi, esp
     db      0xf, 0xae, 0x7 ;fxsave [edi]
-.3:
+L_3:
 
 ;; UINT32  ExceptionData;
     push    dword [ebp + 8]
@@ -281,10 +283,10 @@ ASM_PFX(CommonTaskSwtichEntryPoint):
 ;; FX_SAVE_STATE_IA32 FxSaveState;
     mov     edx, [ebp - 4]  ; cpuid.edx
     test    edx, BIT24      ; Test for FXSAVE/FXRESTOR support
-    jz      .4
+    jz      L_4
     mov     esi, esp
     db      0xf, 0xae, 0xe  ; fxrstor [esi]
-.4:
+L_4:
     add     esp, 512
 
 ;; UINT32  Dr0, Dr1, Dr2, Dr3, Dr6, Dr7;
@@ -389,7 +391,7 @@ ASM_PFX(AsmGetTssTemplateMap):
 
     mov ebx, dword [ebp + 0x8]
     mov dword [ebx],       ASM_PFX(ExceptionTaskSwtichEntry0)
-    mov dword [ebx + 0x4], (AsmExceptionEntryEnd - AsmExceptionEntryBegin) / 32
+    mov dword [ebx + 0x4], (L_AsmExceptionEntryEnd - L_AsmExceptionEntryBegin) / 32
     mov dword [ebx + 0x8], 0
 
     popad

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;*
-;*   Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+;*   Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ;*   This program and the accompanying materials
 ;*   are licensed and made available under the terms and conditions of the BSD License
 ;*   which accompanies this distribution.  The full text of the license may be found at
@@ -15,6 +15,8 @@
 ;*
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .text
 
 ;------------------------------------------------------------------------------
@@ -27,11 +29,11 @@ global ASM_PFX(SetCodeSelector)
 ASM_PFX(SetCodeSelector):
     mov     ecx, [esp+4]
     sub     esp, 0x10
-    lea     eax, [setCodeSelectorLongJump]
+    lea     eax, [L_setCodeSelectorLongJump]
     mov     [esp], eax
     mov     [esp+4], cx
     jmp     dword far [esp]
-setCodeSelectorLongJump:
+L_setCodeSelectorLongJump:
     add     esp, 0x10
     ret
 

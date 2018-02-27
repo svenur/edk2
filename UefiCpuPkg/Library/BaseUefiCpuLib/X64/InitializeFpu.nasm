@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;*
-;*   Copyright (c) 2009 - 2017, Intel Corporation. All rights reserved.<BR>
+;*   Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
 ;*   This program and the accompanying materials
 ;*   are licensed and made available under the terms and conditions of the BSD License
 ;*   which accompanies this distribution.  The full text of the license may be found at
@@ -12,17 +12,19 @@
 ;*
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
     SECTION .rodata
 ;
 ; Float control word initial value:
 ; all exceptions masked, double-extended-precision, round-to-nearest
 ;
-mFpuControlWord: DW 0x37F
+L_mFpuControlWord: DW 0x37F
 ;
 ; Multimedia-extensions control word:
 ; all exceptions masked, round-to-nearest, flush to zero for masked underflow
 ;
-mMmxControlWord: DD 0x1F80
+L_mMmxControlWord: DD 0x1F80
 
 DEFAULT REL
 SECTION .text
@@ -42,7 +44,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     ; Initialize floating point units
     ;
     finit
-    fldcw   [mFpuControlWord]
+    fldcw   [L_mFpuControlWord]
 
     ;
     ; Set OSFXSR bit 9 in CR4
@@ -51,7 +53,7 @@ ASM_PFX(InitializeFloatingPointUnits):
     or      rax, BIT9
     mov     cr4, rax
 
-    ldmxcsr [mMmxControlWord]
+    ldmxcsr [L_mMmxControlWord]
 
     ret
 

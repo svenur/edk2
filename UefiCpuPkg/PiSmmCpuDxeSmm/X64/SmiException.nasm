@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 extern  ASM_PFX(SmiPFHandler)
 
 global  ASM_PFX(gcSmiIdtr)
@@ -26,50 +28,50 @@ global  ASM_PFX(gcPsd)
 
     SECTION .data
 
-NullSeg: DQ 0                   ; reserved by architecture
-CodeSeg32:
+L_NullSeg: DQ 0                   ; reserved by architecture
+L_CodeSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x9b
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-ProtModeCodeSeg32:
+L_ProtModeCodeSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x9b
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-ProtModeSsSeg32:
+L_ProtModeSsSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x93
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-DataSeg32:
+L_DataSeg32:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
             DB      0x93
             DB      0xcf                ; LimitHigh
             DB      0                   ; BaseHigh
-CodeSeg16:
+L_CodeSeg16:
             DW      -1
             DW      0
             DB      0
             DB      0x9b
             DB      0x8f
             DB      0
-DataSeg16:
+L_DataSeg16:
             DW      -1
             DW      0
             DB      0
             DB      0x93
             DB      0x8f
             DB      0
-CodeSeg64:
+L_CodeSeg64:
             DW      -1                  ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
@@ -77,7 +79,7 @@ CodeSeg64:
             DB      0xaf                ; LimitHigh
             DB      0                   ; BaseHigh
 ; TSS Segment for X64 specially
-TssSeg:
+L_TssSeg:
             DW      TSS_DESC_SIZE       ; LimitLow
             DW      0                   ; BaseLow
             DB      0                   ; BaseMid
@@ -86,10 +88,10 @@ TssSeg:
             DB      0                   ; BaseHigh
             DD      0                   ; BaseUpper
             DD      0                   ; Reserved
-GDT_SIZE equ $ -   NullSeg
+GDT_SIZE equ $ -   L_NullSeg
 
 ; Create TSS Descriptor just after GDT
-TssDescriptor:
+L_TssDescriptor:
             DD      0                   ; Reserved
             DQ      0                   ; RSP0
             DQ      0                   ; RSP1
@@ -107,7 +109,7 @@ TssDescriptor:
             DD      0                   ; Reserved
             DW      0                   ; Reserved
             DW      0                   ; I/O Map Base Address
-TSS_DESC_SIZE equ $ -   TssDescriptor
+TSS_DESC_SIZE equ $ -   L_TssDescriptor
 
 ;
 ; This structure serves as a template for all processors.
@@ -125,7 +127,7 @@ ASM_PFX(gcPsd):
             DQ      0
             DQ      0
             DQ      0                   ; fixed in InitializeMpServiceData()
-            DQ        NullSeg
+            DQ        L_NullSeg
             DD      GDT_SIZE
             DD      0
             times   24 DB 0
@@ -135,13 +137,13 @@ PSD_SIZE  equ $ -   ASM_PFX(gcPsd)
 ;
 ; CODE & DATA segments for SMM runtime
 ;
-CODE_SEL    equ   CodeSeg64 -   NullSeg
-DATA_SEL    equ   DataSeg32 -   NullSeg
-CODE32_SEL  equ   CodeSeg32 -   NullSeg
+CODE_SEL    equ   L_CodeSeg64 -   L_NullSeg
+DATA_SEL    equ   L_DataSeg32 -   L_NullSeg
+CODE32_SEL  equ   L_CodeSeg32 -   L_NullSeg
 
 ASM_PFX(gcSmiGdtr):
     DW      GDT_SIZE - 1
-    DQ        NullSeg
+    DQ        L_NullSeg
 
 ASM_PFX(gcSmiIdtr):
     DW      0
@@ -180,10 +182,10 @@ global ASM_PFX(PageFaultIdtHandlerSmmProfile)
 ASM_PFX(PageFaultIdtHandlerSmmProfile):
     push    0xe                         ; Page Fault
     test    spl, 8                      ; odd multiple of 8 => ErrCode present
-    jnz     .0
+    jnz     L_0
     push    qword [rsp]                       ; duplicate INT# if no ErrCode
     mov     qword [rsp + 8], 0
-.0:
+L_0:
     push    rbp
     mov     rbp, rsp
 
@@ -300,9 +302,9 @@ ASM_PFX(PageFaultIdtHandlerSmmProfile):
     sub     rsp, 4 * 8 + 8
     call    rax
     add     rsp, 4 * 8 + 8
-    jmp     .1
+    jmp     L_1
 
-.1:
+L_1:
 ;; UINT64  ExceptionData;
     add     rsp, 8
 

@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 global  ASM_PFX(gcStmPsd)
 
 extern  ASM_PFX(SmmStmExceptionHandler)
@@ -98,20 +100,20 @@ ASM_PFX(OnStmSetup):
     lea     rax, [ASM_PFX(gStmXdSupported)]
     mov     al, [rax]
     cmp     al, 0
-    jz      @StmXdDone1
+    jz      L_StmXdDone1
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     mov     r8, rdx                    ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .01
+    jz      L_01
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.01:
+L_01:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD            ; enable NXE
     wrmsr
-@StmXdDone1:
+L_StmXdDone1:
     push    r8
 
   add  rsp, -0x20
@@ -121,16 +123,16 @@ ASM_PFX(OnStmSetup):
     lea     rax, [ASM_PFX(gStmXdSupported)]
     mov     al, [rax]
     cmp     al, 0
-    jz      .11
+    jz      L_11
     pop     rdx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .11
+    jz      L_11
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.11:
+L_11:
   rsm
 
 global ASM_PFX(OnStmTeardown)
@@ -142,20 +144,20 @@ ASM_PFX(OnStmTeardown):
     lea     rax, [ASM_PFX(gStmXdSupported)]
     mov     al, [rax]
     cmp     al, 0
-    jz      @StmXdDone2
+    jz      L_StmXdDone2
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     mov     r8, rdx                    ; save MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2                  ; MSR_IA32_MISC_ENABLE[34]
-    jz      .02
+    jz      L_02
     and     dx, 0xFFFB                 ; clear XD Disable bit if it is set
     wrmsr
-.02:
+L_02:
     mov     ecx, MSR_EFER
     rdmsr
     or      ax, MSR_EFER_XD            ; enable NXE
     wrmsr
-@StmXdDone2:
+L_StmXdDone2:
     push    r8
 
   add  rsp, -0x20
@@ -165,14 +167,14 @@ ASM_PFX(OnStmTeardown):
     lea     rax, [ASM_PFX(gStmXdSupported)]
     mov     al, [rax]
     cmp     al, 0
-    jz      .12
+    jz      L_12
     pop     rdx                       ; get saved MSR_IA32_MISC_ENABLE[63-32]
     test    edx, BIT2
-    jz      .12
+    jz      L_12
     mov     ecx, MSR_IA32_MISC_ENABLE
     rdmsr
     or      dx, BIT2                  ; set XD Disable bit if it was set before entering into SMM
     wrmsr
 
-.12:
+L_12:
   rsm

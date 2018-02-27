@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------ ;
-; Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;
 ;-------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 %include "MpEqu.inc"
 extern ASM_PFX(InitializeFloatingPointUnits)
 
@@ -32,7 +34,7 @@ SECTION .text
 ;-------------------------------------------------------------------------------------
 global ASM_PFX(RendezvousFunnelProc)
 ASM_PFX(RendezvousFunnelProc):
-RendezvousFunnelProcStart:
+L_RendezvousFunnelProcStart:
 ; At this point CS = 0x(vv00) and ip= 0x0.
 BITS 16
     mov        ebp, eax                        ; save BIST information
@@ -78,7 +80,7 @@ o32 jmp far    [cs:di]
 ; memory.
 ;
 BITS 32
-Flat32Start:                                   ; protected mode entry point
+L_Flat32Start:                                   ; protected mode entry point
     mov        ds, dx
     mov        es, dx
     mov        fs, dx
@@ -96,7 +98,7 @@ Flat32Start:                                   ; protected mode entry point
     mov         edi, esi
     add         edi, EnableExecuteDisableLocation
     cmp         byte [edi], 0
-    jz          SkipEnableExecuteDisable
+    jz          L_SkipEnableExecuteDisable
 
     ;
     ; Enable IA32 PAE execute disable
@@ -120,28 +122,28 @@ Flat32Start:                                   ; protected mode entry point
     bts         eax, 31
     mov         cr0, eax
 
-SkipEnableExecuteDisable:
+L_SkipEnableExecuteDisable:
     mov        edi, esi
     add        edi, InitFlagLocation
     cmp        dword [edi], 1       ; 1 == ApInitConfig
-    jnz        GetApicId
+    jnz        L_GetApicId
 
     ; AP init
     mov        edi, esi
     add        edi, LockLocation
     mov        eax, NotVacantFlag
 
-TestLock:
+L_TestLock:
     xchg       [edi], eax
     cmp        eax, NotVacantFlag
-    jz         TestLock
+    jz         L_TestLock
 
     mov        ecx, esi
     add        ecx, ApIndexLocation
     inc        dword [ecx]
     mov        ebx, [ecx]
 
-Releaselock:
+L_Releaselock:
     mov        eax, VacantFlag
     xchg       [edi], eax
 
@@ -155,31 +157,31 @@ Releaselock:
     add        edi, StackStartAddressLocation
     add        eax, [edi]
     mov        esp, eax
-    jmp        CProcedureInvoke
+    jmp        L_CProcedureInvoke
 
-GetApicId:
+L_GetApicId:
     mov        eax, 0
     cpuid
     cmp        eax, 0bh
-    jb         NoX2Apic             ; CPUID level below CPUID_EXTENDED_TOPOLOGY
+    jb         L_NoX2Apic             ; CPUID level below CPUID_EXTENDED_TOPOLOGY
 
     mov        eax, 0bh
     xor        ecx, ecx
     cpuid
     test       ebx, 0ffffh
-    jz         NoX2Apic             ; CPUID.0BH:EBX[15:0] is zero
+    jz         L_NoX2Apic             ; CPUID.0BH:EBX[15:0] is zero
 
     ; Processor is x2APIC capable; 32-bit x2APIC ID is already in EDX
-    jmp        GetProcessorNumber
+    jmp        L_GetProcessorNumber
 
-NoX2Apic:
+L_NoX2Apic:
     ; Processor is not x2APIC capable, so get 8-bit APIC ID
     mov        eax, 1
     cpuid
     shr        ebx, 24
     mov        edx, ebx
 
-GetProcessorNumber:
+L_GetProcessorNumber:
     ;
     ; Get processor number for this AP
     ; Note that BSP may become an AP due to SwitchBsp()
@@ -188,17 +190,17 @@ GetProcessorNumber:
     lea         eax, [esi + CpuInfoLocation]
     mov         edi, [eax]
 
-GetNextProcNumber:
+L_GetNextProcNumber:
     cmp         [edi], edx                       ; APIC ID match?
-    jz          ProgramStack
+    jz          L_ProgramStack
     add         edi, 20
     inc         ebx
-    jmp         GetNextProcNumber    
+    jmp         L_GetNextProcNumber
 
-ProgramStack:
+L_ProgramStack:
     mov         esp, [edi + 12]
    
-CProcedureInvoke:
+L_CProcedureInvoke:
     push       ebp               ; push BIST data at top of AP stack
     xor        ebp, ebp          ; clear ebp for call stack trace
     push       ebp
@@ -219,14 +221,14 @@ CProcedureInvoke:
     call       eax               ; Invoke C function
 
     jmp        $                 ; Never reach here
-RendezvousFunnelProcEnd:
+L_RendezvousFunnelProcEnd:
 
 ;-------------------------------------------------------------------------------------
 ;  AsmRelocateApLoop (MwaitSupport, ApTargetCState, PmCodeSegment, TopOfApStack, CountTofinish);
 ;-------------------------------------------------------------------------------------
 global ASM_PFX(AsmRelocateApLoop)
 ASM_PFX(AsmRelocateApLoop):
-AsmRelocateApLoopStart:
+L_AsmRelocateApLoopStart:
     mov        eax, esp
     mov        esp, [eax + 16]     ; TopOfApStack
     push       dword [eax]         ; push return address for stack trace
@@ -237,8 +239,8 @@ AsmRelocateApLoopStart:
     mov        eax, [eax + 20]     ; CountTofinish
     lock dec   dword [eax]         ; (*CountTofinish)--
     cmp        cl,  1              ; Check mwait-monitor support
-    jnz        HltLoop
-MwaitLoop:
+    jnz        L_HltLoop
+L_MwaitLoop:
     mov        eax, esp
     xor        ecx, ecx
     xor        edx, edx
@@ -246,12 +248,12 @@ MwaitLoop:
     mov        eax, ebx            ; Mwait Cx, Target C-State per eax[7:4]
     shl        eax, 4
     mwait
-    jmp        MwaitLoop
-HltLoop:
+    jmp        L_MwaitLoop
+L_HltLoop:
     cli
     hlt
-    jmp        HltLoop
-AsmRelocateApLoopEnd:
+    jmp        L_HltLoop
+L_AsmRelocateApLoopEnd:
 
 ;-------------------------------------------------------------------------------------
 ;  AsmGetAddressMap (&AddressMap);
@@ -262,12 +264,12 @@ ASM_PFX(AsmGetAddressMap):
     mov        ebp,esp
 
     mov        ebx,  [ebp + 24h]
-    mov        dword [ebx], RendezvousFunnelProcStart
-    mov        dword [ebx +  4h], Flat32Start - RendezvousFunnelProcStart
-    mov        dword [ebx +  8h], RendezvousFunnelProcEnd - RendezvousFunnelProcStart
-    mov        dword [ebx + 0Ch], AsmRelocateApLoopStart
-    mov        dword [ebx + 10h], AsmRelocateApLoopEnd - AsmRelocateApLoopStart
-    mov        dword [ebx + 14h], Flat32Start - RendezvousFunnelProcStart
+    mov        dword [ebx], L_RendezvousFunnelProcStart
+    mov        dword [ebx +  4h], L_Flat32Start - L_RendezvousFunnelProcStart
+    mov        dword [ebx +  8h], L_RendezvousFunnelProcEnd - L_RendezvousFunnelProcStart
+    mov        dword [ebx + 0Ch], L_AsmRelocateApLoopStart
+    mov        dword [ebx + 10h], L_AsmRelocateApLoopEnd - L_AsmRelocateApLoopStart
+    mov        dword [ebx + 14h], L_Flat32Start - L_RendezvousFunnelProcStart
 
     popad
     ret
@@ -306,14 +308,14 @@ ASM_PFX(AsmExchangeRole):
     ; update its switch state to STORED
     mov        byte [esi], CPU_SWITCH_STATE_STORED
 
-WaitForOtherStored:
+L_WaitForOtherStored:
     ; wait until the other CPU finish storing its state
     cmp        byte [edi], CPU_SWITCH_STATE_STORED
-    jz         OtherStored
+    jz         L_OtherStored
     pause
-    jmp        WaitForOtherStored
+    jmp        L_WaitForOtherStored
 
-OtherStored:
+L_OtherStored:
     ; Since another CPU already stored its state, load them
     ; load GDTR value
     lgdt       [edi + 8]
@@ -327,15 +329,15 @@ OtherStored:
     ; update the other CPU's switch state to LOADED
     mov        byte [edi], CPU_SWITCH_STATE_LOADED
 
-WaitForOtherLoaded:
+L_WaitForOtherLoaded:
     ; wait until the other CPU finish loading new state,
     ; otherwise the data in stack may corrupt
     cmp        byte [esi], CPU_SWITCH_STATE_LOADED
-    jz         OtherLoaded
+    jz         L_OtherLoaded
     pause
-    jmp        WaitForOtherLoaded
+    jmp        L_WaitForOtherLoaded
 
-OtherLoaded:
+L_OtherLoaded:
     ; since the other CPU already get the data it want, leave this procedure
     pop        eax
     mov        cr0, eax
