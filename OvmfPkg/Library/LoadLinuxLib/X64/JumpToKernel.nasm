@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2006 - 2013, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 ;
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
@@ -11,6 +11,8 @@
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
   DEFAULT REL
   SECTION .text
@@ -33,11 +35,11 @@ ASM_PFX(JumpToKernel):
 
     ; Jump into the compatibility mode CS
     push    0x10
-    lea     rax, [.0]
+    lea     rax, [L_0]
     push    rax
     DB 0x48, 0xcb                      ; retfq
 
-.0:
+L_0:
     ; Now in compatibility mode.
 
     DB 0xb8, 0x18, 0x0, 0x0, 0x0    ; movl    $0x18, %eax
