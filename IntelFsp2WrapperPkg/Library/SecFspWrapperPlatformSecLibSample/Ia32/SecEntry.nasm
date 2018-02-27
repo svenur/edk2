@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -19,6 +19,8 @@
 ;  It consumes the reset vector, calls TempRamInit API from FSP binary.
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
 #include "Fsp.h"
 
@@ -78,9 +80,9 @@ ASM_PFX(ModuleEntryPoint):
   movd    mm6, eax
 
   ;
-  ; Load the GDT table in GdtDesc
+  ; Load the GDT table in L_GdtDesc
   ;
-  mov     esi,  GdtDesc
+  mov     esi,  L_GdtDesc
   DB      66h
   lgdt    [cs:si]
 
@@ -110,12 +112,12 @@ ASM_PFX(ModuleEntryPoint):
   ; Transition to Flat 32 bit protected mode
   ; The jump to a far pointer causes the transition to 32 bit mode
   ;
-  mov esi, ProtectedModeEntryLinearAddress
+  mov esi, L_ProtectedModeEntryLinearAddress
   jmp   dword far  [cs:si]
 
 ;----------------------------------------------------------------------------
 ;
-; Procedure:    ProtectedModeEntryPoint
+; Procedure:    L_ProtectedModeEntryPoint
 ;
 ; Input:        None
 ;
@@ -135,26 +137,26 @@ ASM_PFX(ModuleEntryPoint):
 
 BITS 32
 align 4
-ProtectedModeEntryPoint:
+L_ProtectedModeEntryPoint:
 
   ; Find the fsp info header
   mov  edi, [ASM_PFX(PcdGet32 (PcdFsptBaseAddress))]
 
   mov  eax, dword [edi + FVH_SIGINATURE_OFFSET]
   cmp  eax, FVH_SIGINATURE_VALID_VALUE
-  jnz  FspHeaderNotFound
+  jnz  L_FspHeaderNotFound
 
   xor  eax, eax
   mov  ax, word [edi + FVH_EXTHEADER_OFFSET_OFFSET]
   cmp  ax, 0
-  jnz  FspFvExtHeaderExist
+  jnz  L_FspFvExtHeaderExist
 
   xor  eax, eax
   mov  ax, word [edi + FVH_HEADER_LENGTH_OFFSET]   ; Bypass Fv Header
   add  edi, eax
-  jmp  FspCheckFfsHeader
+  jmp  L_FspCheckFfsHeader
 
-FspFvExtHeaderExist:
+L_FspFvExtHeaderExist:
   add  edi, eax
   mov  eax, dword [edi + FVH_EXTHEADER_SIZE_OFFSET]  ; Bypass Ext Fv Header
   add  edi, eax
@@ -162,63 +164,63 @@ FspFvExtHeaderExist:
   ; Round up to 8 byte alignment
   mov  eax, edi
   and  al,  07h
-  jz   FspCheckFfsHeader
+  jz   L_FspCheckFfsHeader
 
   and  edi, 0FFFFFFF8h
   add  edi, 08h
 
-FspCheckFfsHeader:
+L_FspCheckFfsHeader:
   ; Check the ffs guid
   mov  eax, dword [edi]
   cmp  eax, FSP_HEADER_GUID_DWORD1
-  jnz  FspHeaderNotFound
+  jnz  L_FspHeaderNotFound
 
   mov  eax, dword [edi + 4]
   cmp  eax, FSP_HEADER_GUID_DWORD2
-  jnz  FspHeaderNotFound
+  jnz  L_FspHeaderNotFound
 
   mov  eax, dword [edi + 8]
   cmp  eax, FSP_HEADER_GUID_DWORD3
-  jnz  FspHeaderNotFound
+  jnz  L_FspHeaderNotFound
 
   mov  eax, dword [edi + 0Ch]
   cmp  eax, FSP_HEADER_GUID_DWORD4
-  jnz  FspHeaderNotFound
+  jnz  L_FspHeaderNotFound
 
   add  edi, FFS_HEADER_SIZE_VALUE       ; Bypass the ffs header
 
   ; Check the section type as raw section
   mov  al, byte [edi + SECTION_HEADER_TYPE_OFFSET]
   cmp  al, 019h
-  jnz FspHeaderNotFound
+  jnz L_FspHeaderNotFound
 
   add  edi, RAW_SECTION_HEADER_SIZE_VALUE ; Bypass the section header
-  jmp FspHeaderFound
+  jmp L_FspHeaderFound
 
-FspHeaderNotFound:
+L_FspHeaderNotFound:
   jmp  $
 
-FspHeaderFound:
+L_FspHeaderFound:
   ; Get the fsp TempRamInit Api address
   mov eax, dword [edi + FSP_HEADER_IMAGEBASE_OFFSET]
   add eax, dword [edi + FSP_HEADER_TEMPRAMINIT_OFFSET]
 
   ; Setup the hardcode stack
-  mov esp, TempRamInitStack
+  mov esp, L_TempRamInitStack
 
   ; Call the fsp TempRamInit Api
   jmp eax
 
-TempRamInitDone:
+L_TempRamInitDone:
   cmp eax, 8000000Eh      ;Check if EFI_NOT_FOUND returned. Error code for Microcode Update not found.
-  je  CallSecFspInit      ;If microcode not found, don't hang, but continue.
+  je  L_CallSecFspInit      ;If microcode not found, don't hang, but continue.
 
   cmp eax, 0              ;Check if EFI_SUCCESS retuned.
-  jnz FspApiFailed
+  jnz L_FspApiFailed
 
   ;   ECX: start of range
   ;   EDX: end of range
-CallSecFspInit:
+L_CallSecFspInit:
   xor     eax, eax
   mov     esp, edx
 
@@ -231,12 +233,12 @@ CallSecFspInit:
   push    eax ; zero - no hob list yet
   call    ASM_PFX(CallPeiCoreEntryPoint)
 
-FspApiFailed:
+L_FspApiFailed:
   jmp $
 
 align 10h
-TempRamInitStack:
-    DD  TempRamInitDone
+L_TempRamInitStack:
+    DD  L_TempRamInitDone
     DD  ASM_PFX(FsptUpdDataPtr); TempRamInitParams
 
 ;
@@ -248,15 +250,15 @@ global  ASM_PFX(BootGdtTable)
 ;
 ; GDT[0]: 0x00: Null entry, never used.
 ;
-NULL_SEL            EQU $ - GDT_BASE    ; Selector [0]
-GDT_BASE:
+NULL_SEL            EQU $ - L_GDT_BASE    ; Selector [0]
+L_GDT_BASE:
 ASM_PFX(BootGdtTable):
                     DD  0
                     DD  0
 ;
 ; Linear data segment descriptor
 ;
-LINEAR_SEL          EQU $ - GDT_BASE    ; Selector [0x8]
+LINEAR_SEL          EQU $ - L_GDT_BASE    ; Selector [0x8]
     DW  0FFFFh                          ; limit 0xFFFFF
     DW  0                               ; base 0
     DB  0
@@ -266,7 +268,7 @@ LINEAR_SEL          EQU $ - GDT_BASE    ; Selector [0x8]
 ;
 ; Linear code segment descriptor
 ;
-LINEAR_CODE_SEL     EQU $ - GDT_BASE    ; Selector [0x10]
+LINEAR_CODE_SEL     EQU $ - L_GDT_BASE    ; Selector [0x10]
     DW  0FFFFh                          ; limit 0xFFFFF
     DW  0                               ; base 0
     DB  0
@@ -276,7 +278,7 @@ LINEAR_CODE_SEL     EQU $ - GDT_BASE    ; Selector [0x10]
 ;
 ; System data segment descriptor
 ;
-SYS_DATA_SEL        EQU $ - GDT_BASE    ; Selector [0x18]
+SYS_DATA_SEL        EQU $ - L_GDT_BASE    ; Selector [0x18]
     DW  0FFFFh                          ; limit 0xFFFFF
     DW  0                               ; base 0
     DB  0
@@ -287,7 +289,7 @@ SYS_DATA_SEL        EQU $ - GDT_BASE    ; Selector [0x18]
 ;
 ; System code segment descriptor
 ;
-SYS_CODE_SEL        EQU $ - GDT_BASE    ; Selector [0x20]
+SYS_CODE_SEL        EQU $ - L_GDT_BASE    ; Selector [0x20]
     DW  0FFFFh                          ; limit 0xFFFFF
     DW  0                               ; base 0
     DB  0
@@ -297,7 +299,7 @@ SYS_CODE_SEL        EQU $ - GDT_BASE    ; Selector [0x20]
 ;
 ; Spare segment descriptor
 ;
-SYS16_CODE_SEL      EQU $ - GDT_BASE    ; Selector [0x28]
+SYS16_CODE_SEL      EQU $ - L_GDT_BASE    ; Selector [0x28]
     DW  0FFFFh                          ; limit 0xFFFFF
     DW  0                               ; base 0
     DB  0Eh                             ; Changed from F000 to E000.
@@ -307,7 +309,7 @@ SYS16_CODE_SEL      EQU $ - GDT_BASE    ; Selector [0x28]
 ;
 ; Spare segment descriptor
 ;
-SYS16_DATA_SEL      EQU $ - GDT_BASE    ; Selector [0x30]
+SYS16_DATA_SEL      EQU $ - L_GDT_BASE    ; Selector [0x30]
     DW  0FFFFh                          ; limit 0xFFFF
     DW  0                               ; base 0
     DB  0
@@ -318,24 +320,24 @@ SYS16_DATA_SEL      EQU $ - GDT_BASE    ; Selector [0x30]
 ;
 ; Spare segment descriptor
 ;
-SPARE5_SEL          EQU $ - GDT_BASE    ; Selector [0x38]
+SPARE5_SEL          EQU $ - L_GDT_BASE    ; Selector [0x38]
     DW  0                               ; limit 0
     DW  0                               ; base 0
     DB  0
     DB  0                               ; present, ring 0, data, expand-up, writable
     DB  0                               ; page-granular, 32-bit
     DB  0
-GDT_SIZE            EQU $ - GDT_BASE    ; Size, in bytes
+GDT_SIZE            EQU $ - L_GDT_BASE    ; Size, in bytes
 
 ;
 ; GDT Descriptor
 ;
-GdtDesc:                                ; GDT descriptor
+L_GdtDesc:                                ; GDT descriptor
     DW  GDT_SIZE - 1                    ; GDT limit
-    DD  GDT_BASE                        ; GDT base address
+    DD  L_GDT_BASE                        ; GDT base address
 
 
-ProtectedModeEntryLinearAddress:
-ProtectedModeEntryLinear:
-  DD      ProtectedModeEntryPoint  ; Offset of our 32 bit code
+L_ProtectedModeEntryLinearAddress:
+L_ProtectedModeEntryLinear:
+  DD      L_ProtectedModeEntryPoint  ; Offset of our 32 bit code
   DW      LINEAR_CODE_SEL

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -18,6 +18,8 @@
 ;   Find and call SecStartup
 ;
 ;------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
 
 SECTION .text
 
@@ -78,7 +80,7 @@ ASM_PFX(CallPeiCoreEntryPoint):
   shr     ebx, 16
   and     ebx, 0xFF
   cmp     bl, 1
-  jae     PushProcessorCount
+  jae     L_PushProcessorCount
 
   ;
   ; Some processors report 0 logical processors.  Effectively 0 = 1.
@@ -86,7 +88,7 @@ ASM_PFX(CallPeiCoreEntryPoint):
   ;
   inc     ebx
 
-PushProcessorCount:
+L_PushProcessorCount:
   push    ebx
 
   ;
@@ -95,10 +97,10 @@ PushProcessorCount:
   ;
   xor     ecx, ecx
   mov     cl, bl
-PushBist:
+L_PushBist:
   movd    eax, mm0
   push    eax
-  loop    PushBist
+  loop    L_PushBist
 
   ; Save Time-Stamp Counter
   movd eax, mm5

@@ -19,6 +19,8 @@
 ;   transit back to long mode.
 ;
 ;-------------------------------------------------------------------------------
+
+%pragma macho subsections_via_symbols
     DEFAULT REL
     SECTION .text
 ;----------------------------------------------------------------------------
@@ -81,7 +83,7 @@ ASM_PFX(AsmExecute32BitCode):
     ;
     mov     rax, dword 0x10              ; load long mode selector
     shl     rax, 32
-    lea     r9,  [ReloadCS]          ;Assume the ReloadCS is under 4G
+    lea     r9,  [L_ReloadCS]          ;Assume the L_ReloadCS is under 4G
     or      rax, r9
     push    rax
     ;
@@ -95,7 +97,7 @@ ASM_PFX(AsmExecute32BitCode):
     ; save the 32-bit function entry and the return address into stack which will be
     ; retrieve in compatibility mode.
     ;
-    lea     rax, [ReturnBack]   ;Assume the ReloadCS is under 4G
+    lea     rax, [L_ReturnBack]   ;Assume the L_ReloadCS is under 4G
     shl     rax, 32
     or      rax, rcx
     push    rax
@@ -106,16 +108,16 @@ ASM_PFX(AsmExecute32BitCode):
     mov     rax, dword 0x18
 
     ;
-    ; Change to Compatible Segment
+    ; Change to L_Compatible Segment
     ;
     mov     rcx, dword 0x8               ; load compatible mode selector
     shl     rcx, 32
-    lea     rdx, [Compatible] ; assume address < 4G
+    lea     rdx, [L_Compatible] ; assume address < 4G
     or      rcx, rdx
     push    rcx
     retf
 
-Compatible:
+L_Compatible:
     ; reload DS/ES/SS to make sure they are correct referred to current GDT
     mov     ds, ax
     mov     es, ax
@@ -144,7 +146,7 @@ Compatible:
     ; Now the parameter is at the bottom of the stack,  then call in to IA32 function.
     ;
     jmp   rax
-ReturnBack:
+L_ReturnBack:
     mov   ebx, eax             ; save return status
     pop   rcx                  ; drop param1
     pop   rcx                  ; drop param2
@@ -181,7 +183,7 @@ ReturnBack:
     ; Reload cs register
     ;
     retf
-ReloadCS:
+L_ReloadCS:
     ;
     ; Now we're in Long Mode
     ;
@@ -208,11 +210,11 @@ ReloadCS:
     ;
     pop     r9                 ; get  CS
     shl     r9,  32            ; rcx[32..47] <- Cs
-    lea     rcx, [.0]
+    lea     rcx, [L_0]
     or      rcx, r9
     push    rcx
     retf
-.0:
+L_0:
     ;
     ; Reload original DS/ES/SS
     ;
