@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -19,6 +19,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 #include "DebugException.h"
 
 SECTION .data
@@ -32,8 +34,8 @@ global ASM_PFX(ExceptionStubHeaderSize)
   db   0x41, 0x47, 0x54, 0x48       ; SIGNATURE_32('A','G','T','H')
 %endmacro
 
-ASM_PFX(ExceptionStubHeaderSize): dd Exception1Handle - ASM_PFX(Exception0Handle) ;
-CommonEntryAddr: dq CommonEntry ;
+ASM_PFX(ExceptionStubHeaderSize): dd L_Exception1Handle - ASM_PFX(Exception0Handle) ;
+L_CommonEntryAddr: dq L_CommonEntry ;
 
 DEFAULT REL
 SECTION .text
@@ -43,149 +45,149 @@ ASM_PFX(Exception0Handle):
     cli
     push    rcx
     mov     rcx, dword 0
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception1Handle:
+L_Exception1Handle:
     cli
     push    rcx
     mov     rcx, dword 1
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception2Handle:
+L_Exception2Handle:
     cli
     push    rcx
     mov     rcx, dword 2
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception3Handle:
+L_Exception3Handle:
     cli
     push    rcx
     mov     rcx, dword 3
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception4Handle:
+L_Exception4Handle:
     cli
     push    rcx
     mov     rcx, dword 4
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception5Handle:
+L_Exception5Handle:
     cli
     push    rcx
     mov     rcx, dword 5
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception6Handle:
+L_Exception6Handle:
     cli
     push    rcx
     mov     rcx, dword 6
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception7Handle:
+L_Exception7Handle:
     cli
     push    rcx
     mov     rcx, dword 7
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception8Handle:
+L_Exception8Handle:
     cli
     push    rcx
     mov     rcx, dword 8
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception9Handle:
+L_Exception9Handle:
     cli
     push    rcx
     mov     rcx, dword 9
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception10Handle:
+L_Exception10Handle:
     cli
     push    rcx
     mov     rcx, dword 10
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception11Handle:
+L_Exception11Handle:
     cli
     push    rcx
     mov     rcx, dword 11
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception12Handle:
+L_Exception12Handle:
     cli
     push    rcx
     mov     rcx, dword 12
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception13Handle:
+L_Exception13Handle:
     cli
     push    rcx
     mov     rcx, dword 13
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception14Handle:
+L_Exception14Handle:
     cli
     push    rcx
     mov     rcx, dword 14
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception15Handle:
+L_Exception15Handle:
     cli
     push    rcx
     mov     rcx, dword 15
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception16Handle:
+L_Exception16Handle:
     cli
     push    rcx
     mov     rcx, dword 16
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception17Handle:
+L_Exception17Handle:
     cli
     push    rcx
     mov     rcx, dword 17
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception18Handle:
+L_Exception18Handle:
     cli
     push    rcx
     mov     rcx, dword 18
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception19Handle:
+L_Exception19Handle:
     cli
     push    rcx
     mov     rcx, dword 19
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
 ASM_PFX(TimerInterruptHandle):
     cli
     push    rcx
     mov     rcx, dword 32
-    jmp     qword [CommonEntryAddr]
+    jmp     qword [L_CommonEntryAddr]
 
-CommonEntry:
+L_CommonEntry:
     ; We need to determine if any extra data was pushed by the exception
     cmp     rcx, DEBUG_EXCEPT_DOUBLE_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_INVALID_TSS
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_SEG_NOT_PRESENT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_STACK_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_GP_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_PAGE_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     rcx, DEBUG_EXCEPT_ALIGNMENT_CHECK
-    je      NoExtrPush
+    je      L_NoExtrPush
 
     push    qword [rsp]
     mov     qword [rsp + 8], 0
 
-NoExtrPush:
+L_NoExtrPush:
     push    rbp
     mov     rbp, rsp
 

@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ;
-; Copyright (c) 2010 - 2015, Intel Corporation. All rights reserved.<BR>
+; Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved.<BR>
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
 ; which accompanies this distribution.  The full text of the license may be found at
@@ -19,6 +19,8 @@
 ;
 ;------------------------------------------------------------------------------
 
+%pragma macho subsections_via_symbols
+
 #include "DebugException.h"
 
 ;
@@ -36,8 +38,8 @@ global ASM_PFX(ExceptionStubHeaderSize)
 
 SECTION .data
 
-ASM_PFX(ExceptionStubHeaderSize): DD Exception1Handle - ASM_PFX(Exception0Handle)
-CommonEntryAddr: DD CommonEntry
+ASM_PFX(ExceptionStubHeaderSize): DD L_Exception1Handle - ASM_PFX(Exception0Handle)
+L_CommonEntryAddr: DD L_CommonEntry
 
 SECTION .text
 
@@ -46,129 +48,129 @@ ASM_PFX(Exception0Handle):
     cli
     push    eax
     mov     eax, 0
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception1Handle:
+L_Exception1Handle:
     cli
     push    eax
     mov     eax, 1
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception2Handle:
+L_Exception2Handle:
     cli
     push    eax
     mov     eax, 2
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception3Handle:
+L_Exception3Handle:
     cli
     push    eax
     mov     eax, 3
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception4Handle:
+L_Exception4Handle:
     cli
     push    eax
     mov     eax, 4
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception5Handle:
+L_Exception5Handle:
     cli
     push    eax
     mov     eax, 5
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception6Handle:
+L_Exception6Handle:
     cli
     push    eax
     mov     eax, 6
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception7Handle:
+L_Exception7Handle:
     cli
     push    eax
     mov     eax, 7
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception8Handle:
+L_Exception8Handle:
     cli
     push    eax
     mov     eax, 8
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception9Handle:
+L_Exception9Handle:
     cli
     push    eax
     mov     eax, 9
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception10Handle:
+L_Exception10Handle:
     cli
     push    eax
     mov     eax, 10
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception11Handle:
+L_Exception11Handle:
     cli
     push    eax
     mov     eax, 11
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception12Handle:
+L_Exception12Handle:
     cli
     push    eax
     mov     eax, 12
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception13Handle:
+L_Exception13Handle:
     cli
     push    eax
     mov     eax, 13
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception14Handle:
+L_Exception14Handle:
     cli
     push    eax
     mov     eax, 14
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception15Handle:
+L_Exception15Handle:
     cli
     push    eax
     mov     eax, 15
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception16Handle:
+L_Exception16Handle:
     cli
     push    eax
     mov     eax, 16
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception17Handle:
+L_Exception17Handle:
     cli
     push    eax
     mov     eax, 17
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception18Handle:
+L_Exception18Handle:
     cli
     push    eax
     mov     eax, 18
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
-Exception19Handle:
+L_Exception19Handle:
     cli
     push    eax
     mov     eax, 19
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 AGENT_HANDLER_SIGNATURE
 ASM_PFX(TimerInterruptHandle):
     cli
     push    eax
     mov     eax, 32
-    jmp     dword [CommonEntryAddr]
+    jmp     dword [L_CommonEntryAddr]
 
-CommonEntry:
+L_CommonEntry:
 ;
 ; +---------------------+
 ; +    EFlags           +
@@ -185,24 +187,24 @@ CommonEntry:
 ; +---------------------+ <-- EBP
 ;
     cmp     eax, DEBUG_EXCEPT_DOUBLE_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_INVALID_TSS
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_SEG_NOT_PRESENT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_STACK_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_GP_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_PAGE_FAULT
-    je      NoExtrPush
+    je      L_NoExtrPush
     cmp     eax, DEBUG_EXCEPT_ALIGNMENT_CHECK
-    je      NoExtrPush
+    je      L_NoExtrPush
 
     push    dword [esp]
     mov     dword [esp + 4], 0
 
-NoExtrPush:
+L_NoExtrPush:
 
     push    ebp
     mov     ebp, esp        ; save esp in ebp
@@ -236,13 +238,13 @@ NoExtrPush:
     mov     eax, cr4
     push    eax         ; push cr4 firstly
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support
-    jz      .0
+    jz      L_0
     or      eax, BIT9   ; Set CR4.OSFXSR
-.0:
+L_0:
     test    edx, BIT2   ; Test for Debugging Extensions support
-    jz      .1
+    jz      L_1
     or      eax, BIT3   ; Set CR4.DE
-.1:
+L_1:
     mov     cr4, eax
     mov     eax, cr3
     push    eax
@@ -326,9 +328,9 @@ NoExtrPush:
 
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support.
                         ; edx still contains result from CPUID above
-    jz      .2
+    jz      L_2
     db 0xf, 0xae, 00000111y ;fxsave [edi]
-.2:
+L_2:
 
     ;; save the exception data
     push    dword [ebp + 8]
@@ -347,9 +349,9 @@ NoExtrPush:
     mov     eax, 1
     cpuid               ; use CPUID to determine if FXSAVE/FXRESTOR are supported
     test    edx, BIT24  ; Test for FXSAVE/FXRESTOR support
-    jz      .3
+    jz      L_3
     db 0xf, 0xae, 00001110y ; fxrstor [esi]
-.3:
+L_3:
     add esp, 512
 
     ;; UINT32  Dr0, Dr1, Dr2, Dr3, Dr6, Dr7;
