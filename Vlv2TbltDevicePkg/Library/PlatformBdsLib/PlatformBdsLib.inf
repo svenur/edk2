@@ -1,16 +1,17 @@
 #/** @file
 # Component name for module PlatformBootManagerLib
 #
-# Copyright (c) 2008  - 2016, Intel Corporation. All rights reserved.<BR>
-#                                                                                  
-# This program and the accompanying materials are licensed and made available under
-# the terms and conditions of the BSD License that accompanies this distribution.  
-# The full text of the license may be found at                                     
-# http://opensource.org/licenses/bsd-license.php.                                  
-#                                                                                  
-# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,            
-# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.    
-#                                                                                  
+# Copyright (c) 2008  - 2018, Intel Corporation. All rights reserved.<BR>
+#
+# This program and the accompanying materials are licensed and made available under
+# the terms and conditions of the BSD License that accompanies this distribution.
+# The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php.
+#
+
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
 #
 #
 #
@@ -108,6 +109,7 @@
   gEfiSignedCapsulePkgTokenSpaceGuid.PcdEdkiiPkcs7TestPublicKeyFileGuid
   gEfiSecurityPkgTokenSpaceGuid.PcdRsa2048Sha256PublicKeyBuffer
   gEfiSecurityPkgTokenSpaceGuid.PcdPkcs7CertBuffer
+  gEfiSecurityPkgTokenSpaceGuid.PcdPkcs7CertBufferXdr
   gEfiMdeModulePkgTokenSpaceGuid.PcdTestKeyUsed
   gPlatformModuleTokenSpaceGuid.PcdFlashFvRecovery2Base
   gPlatformModuleTokenSpaceGuid.PcdFlashFvMainBase

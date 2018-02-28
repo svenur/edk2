@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2004  - 2016, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2004  - 2018, Intel Corporation. All rights reserved.<BR>
                                                                                    
   This program and the accompanying materials are licensed and made available under
   the terms and conditions of the BSD License that accompanies this distribution.  
@@ -2417,6 +2417,10 @@ ShowProgressHotKey (
   UINTN                         TmpStrSize;
   VOID                          *Buffer;
   UINTN                         Size;
+  VOID                          *PublicKeyData;
+  UINTN                         PublicKeyDataLength;
+  UINT8                         *PublicKeyDataXdr;
+  UINT8                         *PublicKeyDataXdrEnd;
 
   if (TimeoutDefault == 0) {
     return EFI_TIMEOUT;
@@ -2484,6 +2488,57 @@ ShowProgressHotKey (
       }
       PcdSetBoolS(PcdTestKeyUsed, TRUE);
     }
+
+    //
+    // Make sure none of the keys in PcdPkcs7CertBufferXdr match the test key
+    //
+    PublicKeyDataXdr    = PcdGetPtr (PcdPkcs7CertBufferXdr);
+    PublicKeyDataXdrEnd = PublicKeyDataXdr + PcdGetSize (PcdPkcs7CertBufferXdr);
+
+    ASSERT (PublicKeyDataXdr != NULL);
+    ASSERT (PublicKeyDataXdr != PublicKeyDataXdrEnd);
+
+    //
+    // Try each key from PcdPkcs7CertBufferXdr
+    //
+    while (PublicKeyDataXdr < PublicKeyDataXdrEnd) {
+      if (PublicKeyDataXdr + sizeof (UINT32) > PublicKeyDataXdrEnd) {
+        //
+        // Key data extends beyond end of PCD
+        //
+        break;
+      }
+      //
+      // Read key length stored in big endian format
+      //
+      PublicKeyDataLength = SwapBytes32 (*(UINT32 *)(PublicKeyDataXdr));
+      //
+      // Point to the start of the key data
+      //
+      PublicKeyDataXdr += sizeof (UINT32);
+      if (PublicKeyDataXdr + PublicKeyDataLength > PublicKeyDataXdrEnd) {
+        //
+        // Key data extends beyond end of PCD
+        //
+        break;
+      }
+      PublicKeyData = PublicKeyDataXdr;
+
+      if ((Size == PublicKeyDataLength) &&
+          (CompareMem(Buffer, PublicKeyData, Size) == 0)) {
+        TmpStr3 = L"WARNING: Capsule Test Key is used.\r\n";
+        if (DebugAssertEnabled()) {
+          DEBUG ((DEBUG_INFO, "\n\nWARNING: Capsule Test Key is used.\r\n"));
+        } else {
+          SerialPortWrite((UINT8 *)"\n\nWARNING: Capsule Test Key is used.", sizeof("\n\nWARNING: Capsule Test Key is used."));
+        }
+        PcdSetBoolS(PcdTestKeyUsed, TRUE);
+      }
+
+      PublicKeyDataXdr += PublicKeyDataLength;
+      PublicKeyDataXdr = (UINT8 *)ALIGN_POINTER (PublicKeyDataXdr, sizeof(UINT32));
+    }
+
     FreePool(Buffer);
   }
 
