@@ -2,7 +2,7 @@
 This file include all platform action which can be customized
 by IBV/OEM.
 
-Copyright (c) 2015 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2015 - 2018, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -347,6 +347,10 @@ PlatformBootManagerAfterConsole (
   ESRT_MANAGEMENT_PROTOCOL       *EsrtManagement;
   VOID                           *Buffer;
   UINTN                          Size;
+  VOID                           *PublicKeyData;
+  UINTN                          PublicKeyDataLength;
+  UINT8                          *PublicKeyDataXdr;
+  UINT8                          *PublicKeyDataXdrEnd;
 
   Status = gBS->LocateProtocol(&gEsrtManagementProtocolGuid, NULL, (VOID **)&EsrtManagement);
   if (EFI_ERROR(Status)) {
@@ -433,6 +437,51 @@ PlatformBootManagerAfterConsole (
       Print(L"WARNING: Capsule Test Key is used.\n");
       PcdSetBoolS(PcdTestKeyUsed, TRUE);
     }
+
+    //
+    // Make sure none of the keys in PcdPkcs7CertBufferXdr match the test key
+    //
+    PublicKeyDataXdr    = PcdGetPtr (PcdPkcs7CertBufferXdr);
+    PublicKeyDataXdrEnd = PublicKeyDataXdr + PcdGetSize (PcdPkcs7CertBufferXdr);
+
+    ASSERT (PublicKeyDataXdr != NULL);
+    ASSERT (PublicKeyDataXdr != PublicKeyDataXdrEnd);
+
+    //
+    // Try each key from PcdPkcs7CertBufferXdr
+    //
+    while (PublicKeyDataXdr < PublicKeyDataXdrEnd) {
+      if (PublicKeyDataXdr + sizeof (UINT32) > PublicKeyDataXdrEnd) {
+        //
+        // Key data extends beyond end of PCD
+        //
+        break;
+      }
+      //
+      // Read key length stored in big endian format
+      //
+      PublicKeyDataLength = SwapBytes32 (*(UINT32 *)(PublicKeyDataXdr));
+      //
+      // Point to the start of the key data
+      //
+      PublicKeyDataXdr += sizeof (UINT32);
+      if (PublicKeyDataXdr + PublicKeyDataLength > PublicKeyDataXdrEnd) {
+        //
+        // Key data extends beyond end of PCD
+        //
+        break;
+      }
+      PublicKeyData = PublicKeyDataXdr;
+      if ((Size == PublicKeyDataLength) &&
+          (CompareMem(Buffer, PublicKeyData, Size) == 0)) {
+        Print(L"WARNING: Capsule Test Key is used.\n");
+        PcdSetBoolS(PcdTestKeyUsed, TRUE);
+      }
+
+      PublicKeyDataXdr += PublicKeyDataLength;
+      PublicKeyDataXdr = (UINT8 *)ALIGN_POINTER (PublicKeyDataXdr, sizeof(UINT32));
+    }
+
     FreePool(Buffer);
   }
 
