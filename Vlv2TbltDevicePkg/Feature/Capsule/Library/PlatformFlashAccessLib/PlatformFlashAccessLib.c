@@ -1,7 +1,7 @@
 /** @file
   Platform Flash Access library.
 
-  Copyright (c) 2017, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -381,7 +381,7 @@ InternalWriteBlock (
 }
 
 /**
-  Perform flash write opreation.
+  Perform flash write operation with progress indicator.
 
   @param[in] FirmwareType      The type of firmware.
   @param[in] FlashAddress      The address of flash device to be accessed.
@@ -396,12 +396,15 @@ InternalWriteBlock (
 **/
 EFI_STATUS
 EFIAPI
-PerformFlashWrite (
-  IN PLATFORM_FIRMWARE_TYPE       FirmwareType,
-  IN EFI_PHYSICAL_ADDRESS         FlashAddress,
-  IN FLASH_ADDRESS_TYPE           FlashAddressType,
-  IN VOID                         *Buffer,
-  IN UINTN                        Length
+PerformFlashWriteWithProgress (
+  IN PLATFORM_FIRMWARE_TYPE                         FirmwareType,
+  IN EFI_PHYSICAL_ADDRESS                           FlashAddress,
+  IN FLASH_ADDRESS_TYPE                             FlashAddressType,
+  IN VOID                                           *Buffer,
+  IN UINTN                                          Length,
+  IN EFI_FIRMWARE_MANAGEMENT_UPDATE_IMAGE_PROGRESS  Progress,
+  IN UINTN                                          StartPercentage,
+  IN UINTN                                          EndPercentage
   )
 {
   EFI_STATUS            Status = EFI_SUCCESS;
@@ -456,9 +459,12 @@ PerformFlashWrite (
     // Raise TPL to TPL_NOTIFY to block any event handler,
     // while still allowing RaiseTPL(TPL_NOTIFY) within
     // output driver during Print()
-  //
+    //
     OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
     for (Index = 0; Index < CountOfBlocks; Index++) {
+      if (Progress != NULL) {
+        Progress (StartPercentage + ((Index * (EndPercentage - StartPercentage)) / CountOfBlocks));
+      }
       //
       // Handle block based on address and contents.
       //
@@ -466,32 +472,27 @@ PerformFlashWrite (
         DEBUG((DEBUG_INFO, "Skipping block at 0x%lx (already programmed)\n", Address));
       } else {
         //
-        // Display a dot for each block being updated.
-        //
-        Print (L".");
-
-        //
         // Make updating process uninterruptable,
         // so that the flash memory area is not accessed by other entities
         // which may interfere with the updating process
         //
         Status  = InternalEraseBlock (Address);
-  if (EFI_ERROR(Status)) {
+        if (EFI_ERROR(Status)) {
           gBS->RestoreTPL (OldTpl);
           FlashError = TRUE;
           goto Done;
-  }
+        }
         Status = InternalWriteBlock (
                   Address,
                   Buf,
                   (UINT32)(Length > BLOCK_SIZE ? BLOCK_SIZE : Length)
                   );
-  if (EFI_ERROR(Status)) {
+        if (EFI_ERROR(Status)) {
           gBS->RestoreTPL (OldTpl);
           FlashError = TRUE;
           goto Done;
         }
-  }
+      }
 
       //
       // Move to next block to update.
@@ -506,26 +507,55 @@ PerformFlashWrite (
     }
     gBS->RestoreTPL (OldTpl);
 
-  Done:
+Done:
   if ((BiosCntl & B_PCH_LPC_BIOS_CNTL_SMM_BWP) == B_PCH_LPC_BIOS_CNTL_SMM_BWP) {
     //
     // Restore original control setting
     //
     MmioWrite8 (LpcBaseAddress + R_PCH_LPC_BIOS_CNTL, BiosCntl);
-    }
-
-  //
-  // Print flash update failure message if error detected.
-  //
-  if (FlashError) {
-    Print (L"No %r\n", Status);
   }
 
   return EFI_SUCCESS;
 }
 
 /**
-  Perform microcode write opreation.
+  Perform flash write operation.
+
+  @param[in] FirmwareType      The type of firmware.
+  @param[in] FlashAddress      The address of flash device to be accessed.
+  @param[in] FlashAddressType  The type of flash device address.
+  @param[in] Buffer            The pointer to the data buffer.
+  @param[in] Length            The length of data buffer in bytes.
+
+  @retval EFI_SUCCESS           The operation returns successfully.
+  @retval EFI_WRITE_PROTECTED   The flash device is read only.
+  @retval EFI_UNSUPPORTED       The flash device access is unsupported.
+  @retval EFI_INVALID_PARAMETER The input parameter is not valid.
+**/
+EFI_STATUS
+EFIAPI
+PerformFlashWrite (
+  IN PLATFORM_FIRMWARE_TYPE       FirmwareType,
+  IN EFI_PHYSICAL_ADDRESS         FlashAddress,
+  IN FLASH_ADDRESS_TYPE           FlashAddressType,
+  IN VOID                         *Buffer,
+  IN UINTN                        Length
+  )
+{
+  return PerformFlashWriteWithProgress (
+           FirmwareType,
+           FlashAddress,
+           FlashAddressType,
+           Buffer,
+           Length,
+           NULL,
+           0,
+           0
+           );
+}
+
+/**
+  Perform microcode write operation.
 
   @param[in] FlashAddress      The address of flash device to be accessed.
   @param[in] Buffer            The pointer to the data buffer.
