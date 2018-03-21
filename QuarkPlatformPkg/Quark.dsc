@@ -241,6 +241,7 @@
   FmpAuthenticationLib|MdeModulePkg/Library/FmpAuthenticationLibNull/FmpAuthenticationLibNull.inf
   IniParsingLib|SignedCapsulePkg/Library/IniParsingLib/IniParsingLib.inf
   PlatformFlashAccessLib|QuarkPlatformPkg/Feature/Capsule/Library/PlatformFlashAccessLib/PlatformFlashAccessLibDxe.inf
+  DisplayUpdateProgressLib|MdeModulePkg/Library/DisplayUpdateProgressTextLib/DisplayUpdateProgressTextLib.inf
 
 [LibraryClasses.common.SEC]
   #
