@@ -57,12 +57,13 @@ class FmpCapsuleImageHeaderClass (object):
     #
     #  #define EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER_INIT_VERSION 0x00000002
 
-    _StructFormat = '=I16sB3BIIQ'
+    _StructFormat = '<I16sB3BIIQ'
     _StructSize   = struct.calcsize (_StructFormat)
 
     EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER_INIT_VERSION = 0x00000002
 
     def __init__ (self):
+        self._Valid                 = False
         self.Version                = self.EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER_INIT_VERSION
         self.UpdateImageTypeId      = uuid.UUID ('00000000-0000-0000-0000-000000000000')
         self.UpdateImageIndex       = 0
@@ -78,13 +79,14 @@ class FmpCapsuleImageHeaderClass (object):
         FmpCapsuleImageHeader = struct.pack (
                                          self._StructFormat,
                                          self.Version,
-                                         self.UpdateImageTypeId.bytes,
+                                         self.UpdateImageTypeId.bytes_le,
                                          self.UpdateImageIndex,
                                          0,0,0,
                                          self.UpdateImageSize,
                                          self.UpdateVendorCodeSize,
                                          self.UpdateHardwareInstance
                                          )
+        self._Valid = True
         return FmpCapsuleImageHeader + self.Payload + self.VendorCodeBytes
 
     def Decode (self, Buffer):
@@ -104,22 +106,27 @@ class FmpCapsuleImageHeaderClass (object):
             raise ValueError
 
         self.Version                = Version
-        self.UpdateImageTypeId      = uuid.UUID (bytes = UpdateImageTypeId)
+        self.UpdateImageTypeId      = uuid.UUID (bytes_le = UpdateImageTypeId)
         self.UpdateImageIndex       = UpdateImageIndex
         self.UpdateImageSize        = UpdateImageSize
         self.UpdateVendorCodeSize   = UpdateVendorCodeSize
         self.UpdateHardwareInstance = UpdateHardwareInstance
         self.Payload                = Buffer[self._StructSize:self._StructSize + UpdateImageSize]
         self.VendorCodeBytes        = Buffer[self._StructSize + UpdateImageSize:]
+        self._Valid                 = True
         return Buffer[self._StructSize:]
 
     def DumpInfo (self):
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.Version                = {Version:08x}'.format (Version = self.Version))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageTypeId      = {UpdateImageTypeId}'.format (UpdateImageTypeId = self.UpdateImageTypeId))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageIndex       = {UpdateImageIndex:08x}'.format (UpdateImageIndex = self.UpdateImageIndex))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageSize        = {UpdateImageSize:08x}'.format (UpdateImageSize = self.UpdateImageSize))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateVendorCodeSize   = {UpdateVendorCodeSize:08x}'.format (UpdateVendorCodeSize = self.UpdateVendorCodeSize))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateHardwareInstance = {UpdateHardwareInstance:016x}'.format (UpdateHardwareInstance = self.UpdateHardwareInstance))
+        if not self._Valid:
+            raise ValueError
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.Version                = {Version:08X}'.format (Version = self.Version))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageTypeId      = {UpdateImageTypeId}'.format (UpdateImageTypeId = str(self.UpdateImageTypeId).upper()))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageIndex       = {UpdateImageIndex:08X}'.format (UpdateImageIndex = self.UpdateImageIndex))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateImageSize        = {UpdateImageSize:08X}'.format (UpdateImageSize = self.UpdateImageSize))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateVendorCodeSize   = {UpdateVendorCodeSize:08X}'.format (UpdateVendorCodeSize = self.UpdateVendorCodeSize))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_IMAGE_HEADER.UpdateHardwareInstance = {UpdateHardwareInstance:016X}'.format (UpdateHardwareInstance = self.UpdateHardwareInstance))
+        print ('sizeof (Payload)                                                    = {Size:08X}'.format (Size = len (self.Payload)))
+        print ('sizeof (VendorCodeBytes)                                            = {Size:08X}'.format (Size = len (self.VendorCodeBytes)))
 
 class FmpCapsuleHeaderClass (object):
     # typedef struct {
@@ -145,10 +152,10 @@ class FmpCapsuleHeaderClass (object):
     # } EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER;
     #
     #  #define EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER_INIT_VERSION       0x00000001
-    _StructFormat = '=IHH'
+    _StructFormat = '<IHH'
     _StructSize   = struct.calcsize (_StructFormat)
 
-    _ItemOffsetFormat = '=Q'
+    _ItemOffsetFormat = '<Q'
     _ItemOffsetSize   = struct.calcsize (_ItemOffsetFormat)
 
     EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER_INIT_VERSION = 0x00000001
@@ -285,11 +292,11 @@ class FmpCapsuleHeaderClass (object):
     def DumpInfo (self):
         if not self._Valid:
             raise ValueError
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.Version             = {Version:08x}'.format (Version = self.Version))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.EmbeddedDriverCount = {EmbeddedDriverCount:08x}'.format (EmbeddedDriverCount = self.EmbeddedDriverCount))
-        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.PayloadItemCount    = {PayloadItemCount:08x}'.format (PayloadItemCount = self.PayloadItemCount))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.Version             = {Version:08X}'.format (Version = self.Version))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.EmbeddedDriverCount = {EmbeddedDriverCount:08X}'.format (EmbeddedDriverCount = self.EmbeddedDriverCount))
+        print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.PayloadItemCount    = {PayloadItemCount:08X}'.format (PayloadItemCount = self.PayloadItemCount))
         print ('EFI_FIRMWARE_MANAGEMENT_CAPSULE_HEADER.ItemOffsetList      = ')
         for Offset in self._ItemOffsetList:
-            print ('  {Offset:016x}'.format (Offset = Offset))
+            print ('  {Offset:016X}'.format (Offset = Offset))
         for FmpCapsuleImageHeader in self._FmpCapsuleImageHeaderList:
             FmpCapsuleImageHeader.DumpInfo ()

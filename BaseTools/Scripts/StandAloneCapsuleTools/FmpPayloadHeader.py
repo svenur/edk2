@@ -36,18 +36,20 @@ class FmpPayloadHeaderClass (object):
     #
     # #define FMP_PAYLOAD_HEADER_SIGNATURE SIGNATURE_32 ('M', 'S', 'S', '1')
     #
-    _StructFormat = '=IIII'
+    _StructFormat = '<IIII'
     _StructSize   = struct.calcsize (_StructFormat)
 
     _FMP_PAYLOAD_HEADER_SIGNATURE = _SIGNATURE_32 ('M', 'S', 'S', '1')
 
     def __init__ (self):
+        self._Valid                 = False
         self.Signature              = self._FMP_PAYLOAD_HEADER_SIGNATURE
         self.HeaderSize             = self._StructSize
         self.FwVersion              = 0x00000000
         self.LowestSupportedVersion = 0x00000000
+        self.Payload                = b''
 
-    def Encode (self, Payload):
+    def Encode (self):
         FmpPayloadHeader = struct.pack (
                                      self._StructFormat,
                                      self.Signature,
@@ -55,7 +57,8 @@ class FmpPayloadHeaderClass (object):
                                      self.FwVersion,
                                      self.LowestSupportedVersion
                                      )
-        return FmpPayloadHeader + Payload
+        self._Valid = True
+        return FmpPayloadHeader + self.Payload
 
     def Decode (self, Buffer):
         if len (Buffer) < self._StructSize:
@@ -73,10 +76,16 @@ class FmpPayloadHeaderClass (object):
         self.HeaderSize             = HeaderSize
         self.FwVersion              = FwVersion
         self.LowestSupportedVersion = LowestSupportedVersion
-        return Buffer[self.HeaderSize:]
+        self.Payload                = Buffer[self.HeaderSize:]
+
+        self._Valid                 = True
+        return self.Payload
 
     def DumpInfo (self):
-        print ('FMP_PAYLOAD_HEADER.Signature              = {Signature:08x} ({SignatureString})'.format (Signature = self.Signature, SignatureString = _SIGNATURE_32_TO_STRING (self.Signature)))
-        print ('FMP_PAYLOAD_HEADER.HeaderSize             = {HeaderSize:08x}'.format (HeaderSize = self.HeaderSize))
-        print ('FMP_PAYLOAD_HEADER.FwVersion              = {FwVersion:08x}'.format (FwVersion = self.FwVersion))
-        print ('FMP_PAYLOAD_HEADER.LowestSupportedVersion = {LowestSupportedVersion:08x}'.format (LowestSupportedVersion = self.LowestSupportedVersion))
+        if not self._Valid:
+            raise ValueError
+        print ('FMP_PAYLOAD_HEADER.Signature              = {Signature:08X} ({SignatureString})'.format (Signature = self.Signature, SignatureString = _SIGNATURE_32_TO_STRING (self.Signature)))
+        print ('FMP_PAYLOAD_HEADER.HeaderSize             = {HeaderSize:08X}'.format (HeaderSize = self.HeaderSize))
+        print ('FMP_PAYLOAD_HEADER.FwVersion              = {FwVersion:08X}'.format (FwVersion = self.FwVersion))
+        print ('FMP_PAYLOAD_HEADER.LowestSupportedVersion = {LowestSupportedVersion:08X}'.format (LowestSupportedVersion = self.LowestSupportedVersion))
+        print ('sizeof (Payload)                          = {Size:08X}'.format (Size = len (self.Payload)))

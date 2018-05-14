@@ -19,7 +19,6 @@ import sys
 import argparse
 import uuid
 from FmpCapsuleHeader import FmpCapsuleHeaderClass
-from FmpCapsuleHeader import FmpCapsuleImageHeaderClass
 
 #
 # Globals for help information
@@ -85,8 +84,8 @@ if __name__ == '__main__':
     #
     # Add optional arguments for this command
     #
-    parser.add_argument("--embedded-driver", dest = 'EmbeddedDriver', type = argparse.FileType('rb'), action = 'append',
-                        help = "Embedded driver filename.  This option may be repeated to provide multiple drivers.")
+    parser.add_argument ("--embedded-driver", dest = 'EmbeddedDriver', type = argparse.FileType('rb'), action = 'append',
+                         help = "Embedded driver filename.  This option may be repeated to provide multiple drivers.")
 
     parser.add_argument ("--guid", dest = 'Guid', type = ValidateRegistryFormatGuid, action = 'append',
                          help = "The FMP/ESRT GUID in registry format.  Always required.")
