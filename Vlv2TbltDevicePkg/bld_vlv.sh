@@ -40,20 +40,20 @@ if [ -e $(pwd)/Unitool.log ]; then
   rm $(pwd)/Unitool.log
 fi
 
-if [ -e $(pwd)/Conf/target.txt ]; then
-  rm $(pwd)/Conf/target.txt
+if [ -e $WORKSPACE/Conf/target.txt ]; then
+  rm $WORKSPACE/Conf/target.txt
 fi
 
-if [ -e $(pwd)/Conf/BiosId.env ]; then
-  rm $(pwd)/Conf/BiosId.env
+if [ -e $WORKSPACE/Conf/BiosId.env ]; then
+  rm $WORKSPACE/Conf/BiosId.env
 fi
 
-if [ -e $(pwd)/Conf/tools_def.txt ]; then
-  rm $(pwd)/Conf/tools_def.txt
+if [ -e $WORKSPACE/Conf/tools_def.txt ]; then
+  rm $WORKSPACE/Conf/tools_def.txt
 fi
 
-if [ -e $(pwd)/Conf/build_rule.txt ]; then
-  rm $(pwd)/Conf/build_rule.txt
+if [ -e $WORKSPACE/Conf/build_rule.txt ]; then
+  rm $WORKSPACE/Conf/build_rule.txt
 fi
 
 
@@ -64,11 +64,11 @@ make -C BaseTools
 
 ## Define platform specific environment variables.
 PLATFORM_PACKAGE=Vlv2TbltDevicePkg
-config_file=$WORKSPACE/$PLATFORM_PACKAGE/PlatformPkgConfig.dsc
-auto_config_inc=$WORKSPACE/$PLATFORM_PACKAGE/AutoPlatformCFG.txt
+config_file=./$PLATFORM_PACKAGE/PlatformPkgConfig.dsc
+auto_config_inc=./$PLATFORM_PACKAGE/AutoPlatformCFG.txt
 
 ## default ECP (override with /ECP flag)
-EDK_SOURCE=$WORKSPACE/EdkCompatibilityPkg
+# EDK_SOURCE=$WORKSPACE/EdkCompatibilityPkg
 
 ## create new AutoPlatformCFG.txt file
 if [ -f "$auto_config_inc" ]; then
@@ -124,14 +124,14 @@ fi
 
 ## Remove the values for Platform_Type and Build_Target from BiosIdX.env and stage in Conf
 if [ $Arch == "IA32" ]; then
-  cp $PLATFORM_PACKAGE/BiosIdR.env    Conf/BiosId.env
+  cp $PLATFORM_PACKAGE/BiosIdR.env    $WORKSPACE/Conf/BiosId.env
   echo DEFINE X64_CONFIG = FALSE      >> $auto_config_inc
 else
-  cp $PLATFORM_PACKAGE/BiosIdx64R.env  Conf/BiosId.env
+  cp $PLATFORM_PACKAGE/BiosIdx64R.env  $WORKSPACE/Conf/BiosId.env
   echo DEFINE X64_CONFIG = TRUE       >> $auto_config_inc
 fi
-sed -i '/^BOARD_ID/d' Conf/BiosId.env
-sed -i '/^BUILD_TYPE/d' Conf/BiosId.env
+sed -i '/^BOARD_ID/d' $WORKSPACE/Conf/BiosId.env
+sed -i '/^BUILD_TYPE/d' $WORKSPACE/Conf/BiosId.env
 
 
 
@@ -144,7 +144,7 @@ sed -i '/^BUILD_TYPE/d' Conf/BiosId.env
 ##            FFD8 (BLAK):  SVP_PF_BUILD = FALSE,  ENBDT_PF_BUILD = FALSE,  TABLET_PF_BUILD = TRUE,   BYTI_PF_BUILD = FALSE, IVI_PF_BUILD = FALSE
 echo "Setting  $1  platform configuration and BIOS ID..."
 if [ "$(echo $1 | tr 'a-z' 'A-Z')" == "MNW2" ]; then
-  echo BOARD_ID = MNW2MAX             >> Conf/BiosId.env
+  echo BOARD_ID = MNW2MAX             >> $WORKSPACE/Conf/BiosId.env
   echo DEFINE ENBDT_PF_BUILD = TRUE  >> $auto_config_inc
 else
   echo "Error - Unsupported PlatformType: $1"
@@ -156,11 +156,11 @@ Platform_Type=$1
 if [ "$(echo $2 | tr 'a-z' 'A-Z')" == "RELEASE" ]; then
   TARGET=RELEASE
   BUILD_TYPE=R
-  echo BUILD_TYPE = R >> Conf/BiosId.env
+  echo BUILD_TYPE = R >> $WORKSPACE/Conf/BiosId.env
 else
   TARGET=DEBUG
   BUILD_TYPE=D
-  echo BUILD_TYPE = D >> Conf/BiosId.env
+  echo BUILD_TYPE = D >> $WORKSPACE/Conf/BiosId.env
 fi
 
 
@@ -171,11 +171,11 @@ echo "Ensuring correct build directory is present for GenBiosId..."
 
 echo Modifing Conf files for this build...
 ## Remove lines with these tags from target.txt
-sed -i '/^ACTIVE_PLATFORM/d' Conf/target.txt
-sed -i '/^TARGET /d' Conf/target.txt
-sed -i '/^TARGET_ARCH/d' Conf/target.txt
-sed -i '/^TOOL_CHAIN_TAG/d' Conf/target.txt
-sed -i '/^MAX_CONCURRENT_THREAD_NUMBER/d' Conf/target.txt
+sed -i '/^ACTIVE_PLATFORM/d' $WORKSPACE/Conf/target.txt
+sed -i '/^TARGET /d' $WORKSPACE/Conf/target.txt
+sed -i '/^TARGET_ARCH/d' $WORKSPACE/Conf/target.txt
+sed -i '/^TOOL_CHAIN_TAG/d' $WORKSPACE/Conf/target.txt
+sed -i '/^MAX_CONCURRENT_THREAD_NUMBER/d' $WORKSPACE/Conf/target.txt
 
 gcc_version=$(gcc -v 2>&1 | tail -1 | awk '{print $3}')
 case $gcc_version in
@@ -202,14 +202,14 @@ esac
 ACTIVE_PLATFORM=$PLATFORM_PACKAGE/PlatformPkgGcc"$Arch".dsc
 TOOL_CHAIN_TAG=$TARGET_TOOLS
 MAX_CONCURRENT_THREAD_NUMBER=1
-echo ACTIVE_PLATFORM = $ACTIVE_PLATFORM                           >> Conf/target.txt
-echo TARGET          = $TARGET                                    >> Conf/target.txt
-echo TOOL_CHAIN_TAG  = $TOOL_CHAIN_TAG                            >> Conf/target.txt
-echo MAX_CONCURRENT_THREAD_NUMBER = $MAX_CONCURRENT_THREAD_NUMBER >> Conf/target.txt
+echo ACTIVE_PLATFORM = $ACTIVE_PLATFORM                           >> $WORKSPACE/Conf/target.txt
+echo TARGET          = $TARGET                                    >> $WORKSPACE/Conf/target.txt
+echo TOOL_CHAIN_TAG  = $TOOL_CHAIN_TAG                            >> $WORKSPACE/Conf/target.txt
+echo MAX_CONCURRENT_THREAD_NUMBER = $MAX_CONCURRENT_THREAD_NUMBER >> $WORKSPACE/Conf/target.txt
 if [ $Arch == "IA32" ]; then
-  echo TARGET_ARCH   = IA32                                       >> Conf/target.txt
+  echo TARGET_ARCH   = IA32                                       >> $WORKSPACE/Conf/target.txt
 else
-  echo TARGET_ARCH   = IA32 X64                                   >> Conf/target.txt
+  echo TARGET_ARCH   = IA32 X64                                   >> $WORKSPACE/Conf/target.txt
 fi
 
 ##**********************************************************************
@@ -217,7 +217,7 @@ fi
 ##**********************************************************************
 echo Skip "Running UniTool..."
 echo "Make GenBiosId Tool..."
-BUILD_PATH=Build/$PLATFORM_PACKAGE/"$TARGET"_"$TOOL_CHAIN_TAG"
+BUILD_PATH=$WORKSPACE/Build/$PLATFORM_PACKAGE/"$TARGET"_"$TOOL_CHAIN_TAG"
 if [ ! -d "$BUILD_PATH/$Arch" ]; then
   mkdir -p $BUILD_PATH/$Arch
 fi
@@ -226,16 +226,16 @@ if [ -e "$BUILD_PATH/$Arch/BiosId.bin" ]; then
 fi
 
 
-./$PLATFORM_PACKAGE/GenBiosId -i Conf/BiosId.env -o $BUILD_PATH/$Arch/BiosId.bin
+./$PLATFORM_PACKAGE/GenBiosId -i $WORKSPACE/Conf/BiosId.env -o $BUILD_PATH/$Arch/BiosId.bin
 
 
 echo "Invoking EDK2 build..."
 build
 
 if [ $SpiLock == "1" ]; then
-  IFWI_HEADER_FILE=./$PLATFORM_PACKAGE/Stitch/IFWIHeader/IFWI_HEADER_SPILOCK.bin
+  IFWI_HEADER_FILE=$WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/IFWIHeader/IFWI_HEADER_SPILOCK.bin
 else
-  IFWI_HEADER_FILE=./$PLATFORM_PACKAGE/Stitch/IFWIHeader/IFWI_HEADER.bin
+  IFWI_HEADER_FILE=$WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/IFWIHeader/IFWI_HEADER.bin
 fi
 
 echo $IFWI_HEADER_FILE
@@ -249,14 +249,15 @@ echo Skip "Running fce..."
 echo Skip "Running KeyEnroll..."
 
 ## Set the Board_Id, Build_Type, Version_Major, and Version_Minor environment variables
-VERSION_MAJOR=$(grep '^VERSION_MAJOR' Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-4)
-VERSION_MINOR=$(grep '^VERSION_MINOR' Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-2)
-BOARD_ID=$(grep '^BOARD_ID' Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-7)
+VERSION_MAJOR=$(grep '^VERSION_MAJOR' $WORKSPACE/Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-4)
+VERSION_MINOR=$(grep '^VERSION_MINOR' $WORKSPACE/Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-2)
+BOARD_ID=$(grep '^BOARD_ID' $WORKSPACE/Conf/BiosId.env | cut -d ' ' -f 3 | cut -c 1-7)
 BIOS_Name="$BOARD_ID"_"$Arch"_"$BUILD_TYPE"_"$VERSION_MAJOR"_"$VERSION_MINOR".ROM
 BIOS_ID="$BOARD_ID"_"$Arch"_"$BUILD_TYPE"_"$VERSION_MAJOR"_"$VERSION_MINOR"_GCC.bin
 cp -f $BUILD_PATH/FV/VLV.fd  $WORKSPACE/$BIOS_Name
 SEC_VERSION=1.0.2.1060v5
-cat $IFWI_HEADER_FILE ./Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/VLV_SEC_REGION.bin ./Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/Vacant.bin $BIOS_Name > ./$PLATFORM_PACKAGE/Stitch/$BIOS_ID
+echo "cat $IFWI_HEADER_FILE $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/VLV_SEC_REGION.bin $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/Vacant.bin $BIOS_Name > $WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/$BIOS_ID"
+cat $IFWI_HEADER_FILE $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/VLV_SEC_REGION.bin $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/Vacant.bin $WORKSPACE/$BIOS_Name > $WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/$BIOS_ID
 
 
 echo Skip "Running BIOS_Signing ..."
