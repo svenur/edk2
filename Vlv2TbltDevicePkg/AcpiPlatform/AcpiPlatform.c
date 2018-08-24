@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2004  - 2016, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2004  - 2018, Intel Corporation. All rights reserved.<BR>
 
 
   This program and the accompanying materials are licensed and made available under
@@ -790,7 +790,7 @@ AcpiPlatformEntryPoint (
   EFI_ACPI_COMMON_HEADER        *CurrentTable;
   UINTN                         TableHandle;
   UINT32                        FvStatus;
-  UINT32                        Size;
+  UINTN                         Size;
   EFI_EVENT                     Event;
   EFI_ACPI_TABLE_VERSION        TableVersion;
   UINTN                         VarSize;
