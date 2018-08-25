@@ -535,6 +535,10 @@ Done:
     Progress (EndPercentage);
   }
 
+  if (FlashError) {
+    return EFI_WRITE_PROTECTED;
+  }
+
   return EFI_SUCCESS;
 }
 
