@@ -256,9 +256,8 @@ BIOS_Name="$BOARD_ID"_"$Arch"_"$BUILD_TYPE"_"$VERSION_MAJOR"_"$VERSION_MINOR".RO
 BIOS_ID="$BOARD_ID"_"$Arch"_"$BUILD_TYPE"_"$VERSION_MAJOR"_"$VERSION_MINOR"_GCC.bin
 cp -f $BUILD_PATH/FV/VLV.fd  $WORKSPACE/$BIOS_Name
 SEC_VERSION=1.0.2.1060v5
-echo "cat $IFWI_HEADER_FILE $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/VLV_SEC_REGION.bin $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/Vacant.bin $BIOS_Name > $WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/$BIOS_ID"
 cat $IFWI_HEADER_FILE $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/VLV_SEC_REGION.bin $WORKSPACE/Vlv2Binaries/Vlv2MiscBinariesPkg/SEC/$SEC_VERSION/Vacant.bin $WORKSPACE/$BIOS_Name > $WORKSPACE/edk2/$PLATFORM_PACKAGE/Stitch/$BIOS_ID
-
+cp -f $BUILD_PATH/FV/VLV.fd $BUILD_PATH/FV/Vlv.ROM
 
 echo Skip "Running BIOS_Signing ..."
 
@@ -268,3 +267,6 @@ echo BIOS ROM Created:   $BIOS_Name
 echo
 echo -------------------- The EDKII BIOS build has successfully completed. --------------------
 echo
+
+echo > $BUILD_PATH/FV/SYSTEMFIRMWAREUPDATECARGO.Fv
+build -p $PLATFORM_PACKAGE/PlatformCapsuleGcc.dsc
