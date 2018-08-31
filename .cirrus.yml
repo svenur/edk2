@@ -1,0 +1,11 @@
+container:
+  image: gcc:latest
+
+task:
+  env:
+    WORKSPACE: $CIRRUS_WORKING_DIR
+    EDK_TOOLS_PATH: $WORKSPACE/BaseTools
+  tests_script: 
+    - make -C BaseTools
+    - . edksetup.sh BaseTools
+    - build -a IA32 -t GCC5 -p OvmfPkg/OvmfPkg.dsc
