@@ -33,8 +33,8 @@
       gFmpDevicePkgTokenSpaceGuid.PcdFmpDeviceBuildTimeLowestSupportedVersion|0x00000000
 
       gPlatformModuleTokenSpaceGuid.PcdSystemFirmwareFmpLowestSupportedVersion|0x00000000
-      gPlatformModuleTokenSpaceGuid.PcdSystemFirmwareFmpVersion|0x00000000
-      gPlatformModuleTokenSpaceGuid.PcdSystemFirmwareFmpVersionString|"000.000.000.000"
+      gPlatformModuleTokenSpaceGuid.PcdSystemFirmwareFmpVersion|0x00000008
+      gPlatformModuleTokenSpaceGuid.PcdSystemFirmwareFmpVersionString|"000.000.000.008"
 
       gFmpDevicePkgTokenSpaceGuid.PcdFmpDeviceProgressWatchdogTimeInSeconds|4
 
