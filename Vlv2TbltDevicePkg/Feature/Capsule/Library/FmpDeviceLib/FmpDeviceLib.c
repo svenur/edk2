@@ -54,7 +54,7 @@ UPDATE_CONFIG_DATA mUpdateConfigData[] = {
   { PlatformFirmwareTypeSystemFirmware, FlashAddressTypeRelativeAddress, 0x00110000, 0x00210000, 0x00110000 },
   { PlatformFirmwareTypeSystemFirmware, FlashAddressTypeRelativeAddress, 0x00320000, 0x00070000, 0x00320000 },
   { PlatformFirmwareTypeSystemFirmware, FlashAddressTypeRelativeAddress, 0x00390000, 0x00070000, 0x00390000 },
-  { PlatformFirmwareTypeNvRam,          FlashAddressTypeRelativeAddress, 0x00040000, 0x00080000, 0x00040000 }
+//  { PlatformFirmwareTypeNvRam,          FlashAddressTypeRelativeAddress, 0x00040000, 0x00080000, 0x00040000 }
 };
 
 /**
