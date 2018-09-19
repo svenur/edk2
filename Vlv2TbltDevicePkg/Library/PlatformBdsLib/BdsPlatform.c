@@ -1708,6 +1708,8 @@ PlatformBdsPolicyBehavior (
     EsrtManagement = NULL;
   }
 
+  DEBUG ((DEBUG_ERROR, "BDS: BootMode=%02x\n", BootMode));
+
   switch (BootMode) {
 
   case BOOT_WITH_MINIMAL_CONFIGURATION:
@@ -1784,9 +1786,8 @@ PlatformBdsPolicyBehavior (
       goto FULL_CONFIGURATION;
     }
 
-    if (SystemConfiguration.QuietBoot) {
-      EnableQuietBoot (PcdGetPtr(PcdLogoFile));
-    } else {
+    EnableQuietBoot (PcdGetPtr(PcdLogoFile));
+    if (!SystemConfiguration.QuietBoot) {
       PlatformBdsDiagnostics (IGNORE, FALSE, BaseMemoryTest);
     }
 
@@ -1870,8 +1871,7 @@ PlatformBdsPolicyBehavior (
     // Boot with the specific configuration
     //
     PlatformBdsConnectConsole (gPlatformConsole);
-    PlatformBdsDiagnostics (EXTENSIVE, FALSE, BaseMemoryTest);
-    EnableQuietBoot (PcdGetPtr(PcdLogoFile));
+    PlatformBdsDiagnostics (EXTENSIVE, TRUE, BaseMemoryTest);
 
     DEBUG((DEBUG_INFO, "ProcessCapsules Before EndOfDxe......\n"));
     ProcessCapsules ();
@@ -1974,10 +1974,9 @@ FULL_CONFIGURATION:
     // Perform some platform specific connect sequence
     //
     PlatformBdsConnectSequence ();
-    if (SystemConfiguration.QuietBoot) {
-        EnableQuietBoot (PcdGetPtr(PcdLogoFile));
-    } else {
-        PlatformBdsDiagnostics (IGNORE, FALSE, BaseMemoryTest);
+    EnableQuietBoot (PcdGetPtr(PcdLogoFile));
+    if (!SystemConfiguration.QuietBoot) {
+      PlatformBdsDiagnostics (IGNORE, FALSE, BaseMemoryTest);
     }
 
     //
