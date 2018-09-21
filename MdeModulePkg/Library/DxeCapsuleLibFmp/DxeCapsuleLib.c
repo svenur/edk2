@@ -336,6 +336,7 @@ DisplayCapsuleImage (
   // UX capsule doesn't have extended header entries.
   //
   if (CapsuleHeader->HeaderSize != sizeof (EFI_CAPSULE_HEADER)) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: CapsuleHeader->HeaderSize = %08x\n", CapsuleHeader->HeaderSize));
     return EFI_UNSUPPORTED;
   }
   ImagePayload = (DISPLAY_DISPLAY_PAYLOAD *)((UINTN) CapsuleHeader + CapsuleHeader->HeaderSize);
@@ -349,19 +350,23 @@ DisplayCapsuleImage (
   // Further size check is performed by the logic translating BMP to GOP BLT.
   //
   if (PayloadSize <= sizeof (DISPLAY_DISPLAY_PAYLOAD)) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: PayloadSize = %08x\n", PayloadSize));
     return EFI_INVALID_PARAMETER;
   }
 
   if (ImagePayload->Version != 1) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: ImagePayload->Version = %08x\n", ImagePayload->Version));
     return EFI_UNSUPPORTED;
   }
   if (CalculateCheckSum8((UINT8 *)CapsuleHeader, CapsuleHeader->CapsuleImageSize) != 0) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: Bad checksum\n"));
     return EFI_UNSUPPORTED;
   }
   //
   // Only Support Bitmap by now
   //
   if (ImagePayload->ImageType != 0) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: ImagePayload->ImageType = %08x\n", ImagePayload->ImageType));
     return EFI_UNSUPPORTED;
   }
 
@@ -372,11 +377,15 @@ DisplayCapsuleImage (
   if (EFI_ERROR (Status)) {
     Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **)&GraphicsOutput);
     if (EFI_ERROR(Status)) {
+      DEBUG((DEBUG_INFO, "UX Capsule failure: Can not get GOP\n"));
       return EFI_UNSUPPORTED;
     }
   }
 
   if (GraphicsOutput->Mode->Mode != ImagePayload->Mode) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: Mode does not match\n"));
+    DEBUG((DEBUG_INFO, "  GraphicsOutput->Mode->Mode = %02x\n", GraphicsOutput->Mode->Mode));
+    DEBUG((DEBUG_INFO, "  ImagePayload->Mode         = %02x\n", ImagePayload->Mode));
     return EFI_UNSUPPORTED;
   }
 
@@ -393,6 +402,7 @@ DisplayCapsuleImage (
              );
 
   if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: Can not convert BMP to GOP Blt\n"));
     return Status;
   }
 
@@ -408,9 +418,17 @@ DisplayCapsuleImage (
                              Height,
                              Width * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
                              );
+  if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_INFO, "UX Capsule failure: Can not display on GOP\n"));
+    DEBUG((DEBUG_INFO, "  OffsetX = %08x\n", ImagePayload->OffsetX));
+    DEBUG((DEBUG_INFO, "  OffsetY = %08x\n", ImagePayload->OffsetY));
+    DEBUG((DEBUG_INFO, "  Width   = %08x\n", Width));
+    DEBUG((DEBUG_INFO, "  Height  = %08x\n", Height));
+  }
 
   FreePool(Blt);
 
+  DEBUG((DEBUG_INFO, "UX Capsule Status = %r\n", Status));
   return Status;
 }
 
