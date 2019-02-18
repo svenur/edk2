@@ -110,7 +110,8 @@
 [Ppis]
   gEfiPeiMasterBootModePpiGuid
   gEfiPeiMpServicesPpiGuid
+  gEfiPeiCapsulePpiGuid
 
 [Depex]
-  TRUE
+  gEfiPeiCapsulePpiGuid
 
