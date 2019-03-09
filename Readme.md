@@ -3,17 +3,20 @@
 A modern, feature-rich, cross-platform firmware development environment
 for the UEFI and PI specifications from www.uefi.org.
 
-Contributions to the EDK II open source project are covered by the
-[TianoCore Contribution Agreement 1.1](Contributions.txt)
-
 The majority of the content in the EDK II open source project uses a
-[BSD 2-Clause License](License.txt).  The EDK II open source project contains
-the following components that are covered by additional licenses:
+[BSD-2-Clause Plus Patent License](License.txt).  The EDK II open source project
+contains the following components that are covered by additional licenses:
 * [AppPkg/Applications/Python/Python-2.7.2/Tools/pybench](AppPkg/Applications/Python/Python-2.7.2/Tools/pybench/LICENSE)
 * [AppPkg/Applications/Python/Python-2.7.2](AppPkg/Applications/Python/Python-2.7.2/LICENSE)
 * [AppPkg/Applications/Python/Python-2.7.10](AppPkg/Applications/Python/Python-2.7.10/LICENSE)
 * [BaseTools/Source/C/BrotliCompress](BaseTools/Source/C/BrotliCompress/LICENSE)
 * [MdeModulePkg/Library/BrotliCustomDecompressLib](MdeModulePkg/Library/BrotliCustomDecompressLib/LICENSE)
+* [BaseTools/Source/C/LzmaCompress](BaseTools/Source/C/LzmaCompress/LZMA-SDK-README.txt)
+* [MdeModulePkg/Library/LzmaCustomDecompressLib](MdeModulePkg/Library/LzmaCustomDecompressLib/LZMA-SDK-README.txt)
+* [IntelFrameworkModulePkg/Library/LzmaCustomDecompressLib/Sdk](IntelFrameworkModulePkg/Library/LzmaCustomDecompressLib/LZMA-SDK-README.txt)
+* [BaseTools/Source/C/VfrCompile/Pccts](BaseTools/Source/C/VfrCompile/Pccts/RIGHTS)
+* [EdkCompatibilityPkg/Other/Maintained/Tools/Pccts](EdkCompatibilityPkg/Other/Maintained/Tools/Pccts/README)
+* [MdeModulePkg/Universal/RegularExpressionDxe/Oniguruma](MdeModulePkg/Universal/RegularExpressionDxe/Oniguruma/README)
 * [OvmfPkg](OvmfPkg/License.txt)
 * [CryptoPkg/Library/OpensslLib/openssl](CryptoPkg/Library/OpensslLib/openssl/LICENSE)
 
