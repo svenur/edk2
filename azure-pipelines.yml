@@ -7,15 +7,9 @@ trigger:
 - master_pipeline
 
 pool:
-  vmImage: 'vs2015-win2012r2'
+  vmImage: 'vs2017-win2016'
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-#    versionSpec: '3.6.1'
-    addToPath: true
-#    architecture: 'x64'
-
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
@@ -38,7 +32,7 @@ steps:
     set NASM_PREFIX=%WORKSPACE%\nasm-2.13.03\
 
 - script:
-    build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+    build -a IA32 -a X64 -n 0 -t VS2017 -p OvmfPkg/OvmfIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
 
 
 
