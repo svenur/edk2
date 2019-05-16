@@ -20,6 +20,7 @@ steps:
   displayName: 'Run a multi-line script'
 
 - script: |
+    git submodule update --init --recursive
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
     set EDK_TOOLS_BIN=%EDK_TOOLS_PATH%\BinWrappers\WindowsLike
