@@ -7,7 +7,7 @@ trigger:
 - master_pipeline
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'vs2015-win2012r2'
 
 steps:
 - script: echo Hello, world!
@@ -17,3 +17,20 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+
+- script: |
+    powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
+    powershell Expand-Archive nasm-2.13.03-win64.zip .
+    set WORKSPACE=%CD%
+    set EDK_TOOLS_PATH=%WORKSPACE%\edk2\BaseTools
+    set EDK_TOOLS_BIN=%EDK_TOOLS_PATH%\BinWrappers\WindowsLike
+    path=%path%;%EDK_TOOLS_PATH%\Bin\Win32;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
+    set NASM_PREFIX=%WORKSPACE%\nasm-2.13.03\
+    call edkSetup.bat Rebuild
+
+- script:
+    build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+
+
+
+  
