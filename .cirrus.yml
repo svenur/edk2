@@ -2,11 +2,13 @@ container:
   image: cirrusci/windowsservercore:2019
   os_version: 2019
 
-task:
-  env:
-    WORKSPACE: $CIRRUS_WORKING_DIR
-    EDK_TOOLS_PATH: $WORKSPACE/BaseTools
-  tests_script:
-    - choco install microsoft-visual-cpp-build-tools
-    - edksetup Rebuild
-    - build -a IA32 -a X64 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+windows_task:
+  install_script: choco install -y microsoft-visual-cpp-build-tools
+  
+env:
+  WORKSPACE: $CIRRUS_WORKING_DIR
+  EDK_TOOLS_PATH: $WORKSPACE/BaseTools
+
+windows_task:
+  - edksetup Rebuild
+  - build -a IA32 -a X64 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
