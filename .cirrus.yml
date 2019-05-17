@@ -1,6 +1,5 @@
 container:
   image: cirrusci/windowsservercore:2019
-  os_version: 2019
 
 windows_task:
   install_script: choco install -y microsoft-visual-cpp-build-tools
