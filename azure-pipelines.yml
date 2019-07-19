@@ -10,8 +10,6 @@ strategy:
   matrix:
     windows_vs2017:
       imageName: "vs2017-win2016"
-    windows_vs2019:
-      imageName: "windows-2019"
   maxParallel: 2
 
 pool:
@@ -31,7 +29,10 @@ steps:
     powershell Expand-Archive iasl-win-20190509.zip
     set IASL_PREFIX=%WORKSPACE%\iasl-win-20190509\
     %IASL_PREFIX%iasl --version
+    powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip -OutFile openssl-1.0.2r-x64_86-win64.zip"}"
+    powershell Expand-Archive openssl-1.0.2r-x64_86-win64.zip
     path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
+    openssl version
     call edkSetup.bat Rebuild
-    call build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
-    call build -a IA32 -a X64 -n 0 -t VS2017    -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+    call build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+    call build -a IA32 -a X64 -n 0 -t VS2017    -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
