@@ -22,11 +22,10 @@ steps:
 - script: |
     export WORKSPACE=$PWD
     git submodule update --init
-    sudo apt-get install build-essential
     sudo apt-get install uuid-dev
     sudo apt-get install iasl
-    sudo apt-get install nasm
-    sudo apt-get install python3-distutils
+    wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/linux/nasm-2.14.02-0.fc27.x86_64.rpm
+    sudo apt-get install ./nasm-2.14.02-0.fc27.x86_64.rpm
     python --version
     gcc --version
     nasm --v
