@@ -31,6 +31,7 @@ steps:
 - script: |
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
+    set EDK_TOOLS_BIN=%WORKSPACE%\BaseTools\Bin\Win32
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
     powershell Expand-Archive nasm-2.13.03-win64.zip .
     set NASM_PREFIX=%WORKSPACE%\nasm-2.13.03\
@@ -46,6 +47,7 @@ steps:
     %IASL_PREFIX%iasl -v
     openssl version
     call edkSetup.bat Rebuild
+    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
 
 - script: |
@@ -62,6 +64,7 @@ steps:
     openssl version
     make -C BaseTools
     . edksetup.sh
+    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
 
 - script: |
@@ -73,6 +76,7 @@ steps:
     openssl version
     make -C BaseTools
     . edksetup.sh
+    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
 
 - script: |
