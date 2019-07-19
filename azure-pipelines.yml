@@ -21,5 +21,5 @@ pool:
 steps:
 - script: |
     export WORKSPACE=$PWD
-    . edksetup.sh Rebuild
+    . edksetup.sh
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
