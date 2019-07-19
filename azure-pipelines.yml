@@ -17,23 +17,42 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
     python --version
-  displayName: 'Run a multi-line script'
+    displayName: 'Run a multi-line script'
 
 - script: |
-    git submodule update --init --recursive
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
-    set EDK_TOOLS_BIN=%EDK_TOOLS_PATH%\BinWrappers\WindowsLike
-    path=%path%;%EDK_TOOLS_PATH%\Bin\Win32;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
-    call edkSetup.bat Rebuild
+
+    #
+    # Retrieve all submodules
+    #
+    git submodule update --init
+    
+    #
+    # Install NASM
+    #
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
     powershell Expand-Archive nasm-2.13.03-win64.zip .
     set NASM_PREFIX=%WORKSPACE%\nasm-2.13.03\
+    
+    #
+    # Install iASL
+    #
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://acpica.org/sites/acpica/files/iasl-win-20190509.zip -OutFile iasl-win-20190509.zip"}"
     powershell Expand-Archive iasl-win-20190509.zip
     set IASL_PREFIX=%WORKSPACE%\iasl-win-20190509\
+
+    #
+    # Add openssl command line tools to PATH
+    #
+    path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
+    
+    #
+    # Setup EDK II environment and rebuild BaseTools
+    #
+    call edkSetup.bat Rebuild
+    
+    #
+    # Build OVMF
+    #
     build -a IA32 -a X64 -n 0 -t VS2017 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
-
-
-
-  
