@@ -4,7 +4,9 @@
 # https://aka.ms/yaml
 
 trigger:
-- patchset/*
+  branches:
+    include:
+      - patchset/*
 
 strategy:
   matrix:
