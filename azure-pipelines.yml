@@ -23,7 +23,6 @@ steps:
     export WORKSPACE=$PWD
     sudo apt-get install software-properties-common
     sudo add-apt-repository ppa:deadsnakes/ppa
-    sudo apt-get update
     sudo apt-get install python3.7
     sudo apt-get install uuid-dev
     sudo apt-get install iasl
@@ -33,7 +32,7 @@ steps:
     nasm --v
     iasl -v
     openssl version
-#    git submodule update --init
-#    make -C BaseTools
-#    . edksetup.sh
-#    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+    git submodule update --init
+    make -C BaseTools
+    . edksetup.sh
+    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
