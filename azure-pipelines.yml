@@ -25,7 +25,7 @@ steps:
     sudo apt-get install uuid-dev
     sudo apt-get install iasl
     wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/linux/nasm-2.14.02-0.fc27.x86_64.rpm
-    sudo apt-get install ./nasm-2.14.02-0.fc27.x86_64.rpm
+    sudo yum -y install ./nasm-2.14.02-0.fc27.x86_64.rpm
     python --version
     gcc --version
     nasm --v
