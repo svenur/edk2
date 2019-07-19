@@ -31,19 +31,19 @@ steps:
 - script: |
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
-    git submodule update --init
-    python --version
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
     powershell Expand-Archive nasm-2.13.03-win64.zip .
     set NASM_PREFIX=%WORKSPACE%\nasm-2.13.03\
-    %NASM_PREFIX%nasm --version
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://acpica.org/sites/acpica/files/iasl-win-20190509.zip -OutFile iasl-win-20190509.zip"}"
     powershell Expand-Archive iasl-win-20190509.zip
     set IASL_PREFIX=%WORKSPACE%\iasl-win-20190509\
-    %IASL_PREFIX%iasl --version
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip -OutFile openssl-1.0.2r-x64_86-win64.zip"}"
     powershell Expand-Archive openssl-1.0.2r-x64_86-win64.zip
     path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
+    python --version
+    cl
+    %NASM_PREFIX%nasm --v
+    %IASL_PREFIX%iasl -v
     openssl version
     call edkSetup.bat Rebuild
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
