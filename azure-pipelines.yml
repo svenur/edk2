@@ -17,7 +17,7 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
     python --version
-    displayName: 'Run a multi-line script'
+  displayName: 'Run a multi-line script'
 
 - script: |
     set WORKSPACE=%CD%
