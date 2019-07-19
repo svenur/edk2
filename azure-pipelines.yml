@@ -8,10 +8,10 @@ trigger:
 
 strategy:
   matrix:
-    windows_vs2015:
-      imageName: "vs2015-win2012r2"
     windows_vs2017:
       imageName: "vs2017-win2016"
+    windows_vs2019:
+      imageName: "windows-2019"
   maxParallel: 2
 
 pool:
@@ -22,8 +22,8 @@ steps:
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
     git submodule update --init
-    powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.7.4/python-3.7.4.exe -OutFile python-3.7.4.exe"}"
-    python-3.7.4.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+#    powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.7.4/python-3.7.4.exe -OutFile python-3.7.4.exe"}"
+#    python-3.7.4.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
     python --version
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
     powershell Expand-Archive nasm-2.13.03-win64.zip .
@@ -35,4 +35,5 @@ steps:
     %IASL_PREFIX%iasl --version
     path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
     call edkSetup.bat Rebuild
-    build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+    call build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+    call build -a IA32 -a X64 -n 0 -t VS2017    -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
