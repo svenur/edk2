@@ -21,6 +21,7 @@ pool:
 steps:
 - script:
     git submodule update --init
+
 - script: |
     export WORKSPACE=$PWD
     sudo apt-get install uuid-dev
@@ -35,6 +36,7 @@ steps:
     openssl version
     make -C BaseTools
     . edksetup.sh
-  condition: eq('$(imageName)', 'ubuntu-16.04')
+  condition: and (always(), eq('$(imageName)', 'ubuntu-16.04'))
+
 -script: |
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
