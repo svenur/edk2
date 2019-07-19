@@ -8,8 +8,12 @@ trigger:
 
 strategy:
   matrix:
+    windows_vs2015:
+      imageName: 'vs2017-win2016'
+      tool_chain_tag: 'VS2015x86'
     windows_vs2017:
-      imageName: "vs2017-win2016"
+      imageName: 'vs2017-win2016'
+      tool_chain_tag: 'VS2017'
   maxParallel: 2
 
 pool:
@@ -34,5 +38,4 @@ steps:
     path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
     openssl version
     call edkSetup.bat Rebuild
-    call build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
-    call build -a IA32 -a X64 -n 0 -t VS2017    -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
