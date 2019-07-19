@@ -22,8 +22,6 @@ steps:
     set WORKSPACE=%CD%
     set EDK_TOOLS_PATH=%WORKSPACE%\BaseTools
     git submodule update --init
-#    powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.7.4/python-3.7.4.exe -OutFile python-3.7.4.exe"}"
-#    python-3.7.4.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
     python --version
     powershell "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-win64.zip -OutFile nasm-2.13.03-win64.zip"}"
     powershell Expand-Archive nasm-2.13.03-win64.zip .
