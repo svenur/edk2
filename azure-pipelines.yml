@@ -22,7 +22,7 @@ steps:
 - script: |
     export WORKSPACE=$PWD
     git submodule update --init
-    sudi apt-get update
+    sudo apt-get update
     sudo apt-get install uuid-dev
     sudo apt-get install iasl
     sudo apt-get install nasm
