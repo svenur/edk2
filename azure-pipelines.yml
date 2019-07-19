@@ -34,4 +34,4 @@ steps:
     set IASL_PREFIX=%WORKSPACE%\iasl-win-20190509\
     path=%path%;%WORKSPACE%\openssl-1.0.2r-x64_86-win64
     call edkSetup.bat Rebuild
-    build -a IA32 -a X64 -n 0 -t VS2015 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
+    build -a IA32 -a X64 -n 0 -t VS2015x86 -p OvmfPkg/OvmfPkgIa32X64.dsc -D DEBUG_ON_SERIAL_PORT
