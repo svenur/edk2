@@ -22,10 +22,16 @@ steps:
 - script: |
     export WORKSPACE=$PWD
     git submodule update --init
-    sudo apt-get install build-essential uuid-dev iasl gcc-5 nasm python3-distutils
+    sudo apt-get install build-essential
+    sudo apt-get install uuid-dev
+    sudo apt-get install iasl
+    sudo apt-get install nasm
+    sudo apt-get install python3-distutils
     python --version
+    gcc --version
     nasm --v
     iasl -v
     openssl version
+    make -C BaseTools
     . edksetup.sh
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
