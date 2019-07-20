@@ -59,11 +59,6 @@ steps:
     sudo apt-get install uuid-dev                 # UUID
     sudo apt-get install iasl                     # IASL
     sudo apt-get install nasm                     # NASM
-#    sudo apt update                               # Python 3.7
-#    sudo apt install software-properties-common   # Python 3.7
-#    sudo add-apt-repository ppa:deadsnakes/ppa    # Python 3.7
-#    sudo apt update                               # Python 3.7
-#    sudo apt install python3.7                    # Python 3.7
     python --version
     python3.7 --version
     gcc --version
