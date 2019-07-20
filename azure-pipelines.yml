@@ -56,6 +56,7 @@ steps:
 - script: |
     export WORKSPACE=$PWD
     sudo apt-get install gcc-aarch64-linux-gnu    # GCC AARCH64
+    sudo apt-get install gcc-arm-linux-gnu        # GCC ARM
     sudo apt-get install uuid-dev                 # UUID
     sudo apt-get install iasl                     # IASL
     sudo apt-get install nasm                     # NASM
@@ -73,6 +74,7 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
+    export GCC5_ARM_PREFIX=arm-linux-gnu-
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
 #    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
