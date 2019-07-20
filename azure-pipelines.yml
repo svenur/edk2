@@ -56,9 +56,11 @@ steps:
     %IASL_PREFIX%iasl -v
     openssl version
     call edkSetup.bat Rebuild
+    set
     call build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
     call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
     call build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
+    call build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
 
 - script: |
@@ -88,6 +90,7 @@ steps:
     export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
     . edksetup.sh
+    export
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
     build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
@@ -115,6 +118,7 @@ steps:
     export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
     . edksetup.sh
+    export
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
     build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
