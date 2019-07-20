@@ -55,26 +55,31 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
-    sudo apt-get install gcc-aarch64-linux-gnu    # GCC AARCH64
-    sudo apt-get install gcc-arm-none-eabi        # GCC ARM
-    sudo apt-get install uuid-dev                 # UUID
-    sudo apt-get install iasl                     # IASL
-    sudo apt-get install nasm                     # NASM
     sudo apt update                               # Python 3.7
     sudo apt install software-properties-common   # Python 3.7
     sudo add-apt-repository ppa:deadsnakes/ppa    # Python 3.7
     sudo apt update                               # Python 3.7
     sudo apt install python3.7                    # Python 3.7
+    sudo apt-get install gcc-aarch64-linux-gnu    # GCC AARCH64
+    sudo apt-get install gcc-arm-none-eabi        # GCC ARM
+    sudo apt-get install uuid-dev                 # UUID
+    sudo apt-get install iasl                     # IASL
+#    sudo apt-get install nasm                     # NASM
+    wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/linux/nasm-2.14.02-0.fc27.x86_64.rpm
+    sudo apt-get install alien
+    sudo alien -i nasm-2.14.02-0.fc27.x86_64.rpm
+    export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
+    export GCC5_ARM_PREFIX=arm-none-eabi-
     python --version
     python3.7 --version
     gcc --version
+    $(GCC5_AARCH64_PREFIX)gcc --version
+    $(GCC5_ARM_PREFIX)gcc --version
     nasm --v
     iasl -v
     openssl version
     make -C BaseTools
     . edksetup.sh
-    export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
-    export GCC5_ARM_PREFIX=arm-none-eabi-
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
 #    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
