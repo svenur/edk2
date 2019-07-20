@@ -25,7 +25,7 @@ strategy:
     macos_xcode5:
       imageName: 'macOS-10.14'
       tool_chain_tag: 'XCODE5'
-      package_archs: '-a IA32 -a X64 -a ARM -a AARCH64'
+      package_archs: '-a IA32 -a X64'
   maxParallel: 4
 
 pool:
@@ -91,11 +91,12 @@ steps:
 - script: |
     export WORKSPACE=$PWD
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
-    brew install python3
     brew install nasm
     brew install acpica
-    brew install gcc-aarch64-linux-gnu
-    brew install gcc-arm-none-eabi
+    curl https://sourceforge.net/p/cloverefiboot/code/4372/tree/BuildTools/usr/local/bin/mtoc.NEW.zip?format=raw -o mtoc.zip
+    unzip -qu mtoc.zip -d ./tmp
+    sudo cp ./tmp/mtoc.NEW /usr/local/bin/mtoc
+    sudo cp ./tmp/mtoc.NEW /usr/local/bin/mtoc.NEW
     python --version
     python3.7 --version
     gcc --version
@@ -104,6 +105,7 @@ steps:
     nasm --v
     iasl -v
     openssl version
+    mtoc
     export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
     export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
