@@ -55,6 +55,7 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
+    sudo apt-get install gcc-aarch64-linux-gnu
     sudo apt-get install uuid-dev
     sudo apt-get install iasl
     sudo apt-get install nasm
