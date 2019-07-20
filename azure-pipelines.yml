@@ -68,16 +68,16 @@ steps:
     wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/linux/nasm-2.14.02-0.fc27.x86_64.rpm
     sudo apt-get install alien
     sudo alien -i nasm-2.14.02-0.fc27.x86_64.rpm
-    export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
-    export GCC5_ARM_PREFIX=arm-none-eabi-
     python --version
     python3.7 --version
     gcc --version
-    $(GCC5_AARCH64_PREFIX)gcc --version
-    $(GCC5_ARM_PREFIX)gcc --version
+    aarch64-linux-gnu-gcc --version
+    arm-none-eabi-gcc --version
     nasm --v
     iasl -v
     openssl version
+    export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
+    export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
     . edksetup.sh
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
