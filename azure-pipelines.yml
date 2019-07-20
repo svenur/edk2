@@ -25,7 +25,7 @@ strategy:
     macos_xcode5:
       imageName: 'macOS-10.14'
       tool_chain_tag: 'XCODE5'
-      package_archs: '-a IA32 -a X64'
+      package_archs: '-a IA32 -a X64 -a ARM -a AARCH64'
   maxParallel: 4
 
 pool:
@@ -94,11 +94,18 @@ steps:
     brew install python3
     brew install nasm
     brew install acpica
+    brew install gcc-aarch64-linux-gnu
+    brew install gcc-arm-none-eabi
     python --version
+    python3.7 --version
     gcc --version
+    aarch64-linux-gnu-gcc --version
+    arm-none-eabi-gcc --version
     nasm --v
     iasl -v
     openssl version
+    export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
+    export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
     . edksetup.sh
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
