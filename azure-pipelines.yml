@@ -55,6 +55,13 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
+    wget https://acpica.org/sites/acpica/files/acpica-unix2-20190703.tar_0.gz
+    tar xzf acpica-unix2-20190703.tar_0.gz
+    cd acpica-unix2-20190703
+    make clean
+    make iasl
+    make install
+    cd..
     sudo apt update                               # Python 3.7
     sudo apt install software-properties-common   # Python 3.7
     sudo add-apt-repository ppa:deadsnakes/ppa    # Python 3.7
