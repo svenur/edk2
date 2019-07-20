@@ -13,12 +13,15 @@ strategy:
     windows_vs2015:
       imageName: 'vs2017-win2016'
       tool_chain_tag: 'VS2015x86'
+      package_archs: '-a IA32 -a X64'
     windows_vs2017:
       imageName: 'vs2017-win2016'
       tool_chain_tag: 'VS2017'
+      package_archs: '-a IA32 -a X64 -a ARM -a AARCH64'
     ubuntu_gcc5:
       imageName: 'ubuntu-16.04'
       tool_chain_tag: 'GCC5'
+      package_archs: '-a IA32 -a X64 -a ARM -a AARCH64'
   maxParallel: 3
 
 pool:
@@ -46,8 +49,8 @@ steps:
     %IASL_PREFIX%iasl -v
     openssl version
     call edkSetup.bat Rebuild
-    build -a IA32 -a X64 -a ARM -a AARCH64 -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+    call build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
 
 - script: |
@@ -63,7 +66,7 @@ steps:
     openssl version
     make -C BaseTools
     . edksetup.sh
-    build -a IA32 -a X64 -a ARM -a AARCH64 -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
 
@@ -76,6 +79,6 @@ steps:
     openssl version
     make -C BaseTools
     . edksetup.sh
-    build -a IA32 -a X64 -a ARM -a AARCH64 -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
     build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
