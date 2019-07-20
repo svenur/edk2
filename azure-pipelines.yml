@@ -55,13 +55,14 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
+    sudo apt-get install flex
+    sudo apt-get install bison
     wget https://acpica.org/sites/acpica/files/acpica-unix2-20190703.tar_0.gz
     tar xzf acpica-unix2-20190703.tar_0.gz
     cd acpica-unix2-20190703
-    make clean
     make iasl
     make install
-    cd..
+    cd $WORKSPACE
     sudo apt update                               # Python 3.7
     sudo apt install software-properties-common   # Python 3.7
     sudo add-apt-repository ppa:deadsnakes/ppa    # Python 3.7
