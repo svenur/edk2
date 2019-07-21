@@ -22,15 +22,11 @@ strategy:
       imageName: 'ubuntu-16.04'
       tool_chain_tag: 'GCC5'
       package_archs: '-a IA32 -a X64 -a ARM -a AARCH64'
-    macos1013_xcode5:
-      imageName: 'macOS-10.13'
-      tool_chain_tag: 'XCODE5'
-      package_archs: '-a IA32 -a X64'
     macos1014_xcode5:
       imageName: 'macOS-10.14'
       tool_chain_tag: 'XCODE5'
       package_archs: '-a IA32 -a X64'
-  maxParallel: 5
+  maxParallel: 4
 
 pool:
   vmImage: $(imageName)
@@ -126,8 +122,10 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export
-    build -a X64  -t GCC5 -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
-    build -a IA32 -t GCC5 -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+    . EmulatorPkg/build.sh
+    . EmulatorPkg/build.sh -a IA32
+#    build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+#    build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
 #    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
 #    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
