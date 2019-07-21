@@ -58,9 +58,9 @@ steps:
     call edkSetup.bat Rebuild
     set
     call build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
-    call build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
-    call build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
+#    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+#    call build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
+#    call build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
 
 - script: |
@@ -92,12 +92,18 @@ steps:
     . edksetup.sh
     export
     build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
-    build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+#    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+#    build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
 
 - script: |
     export WORKSPACE=$PWD
+    curl -O https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg   # XQuartz
+    hdiutil attach XQuartz-2.7.11.dmg                                     # XQuartz
+    cd /Volumes/XQuartz-2.7.11/                                           # XQuartz
+    sudo installer -pkg XQuartz-2.7.11.pkg -target "/"                    # XQuartz
+    hdiutil detach /Volumes/XQuartz-2.7.11.pkg/                           # XQuartz
+    cd $WORKSPACE
     xcode-select --install
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
     brew install nasm
@@ -120,11 +126,11 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export
-    ls -al edk2/EmulatorPkg/Unix/Host
-    ls -al edk2/EmulatorPkg/Unix/Host/X11IncludeHack
+    ls -al EmulatorPkg/Unix/Host
+    ls -al EmulatorPkg/Unix/Host/X11IncludeHack
     ls -al /opt/X11/include
     build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
     build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
-    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+#    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+#    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
