@@ -120,8 +120,11 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export
-    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+    ls -al edk2/EmulatorPkg/Unix/Host
+    ls -al edk2/EmulatorPkg/Unix/Host/X11IncludeHack
+    ls -al /opt/X11/include
     build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
     build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
