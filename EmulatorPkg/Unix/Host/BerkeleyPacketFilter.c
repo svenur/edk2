@@ -16,6 +16,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #ifdef __APPLE__
 
+#ifdef NTOHLL
+#undef NTOHLL
+#endif
+
+#ifdef HTONLL
+#undef HTONLL
+#endif
 
 #include <Library/NetLib.h>
 
