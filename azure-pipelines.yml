@@ -98,10 +98,10 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
+    open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
     brew install caskroom/cask/brew-cask 2> /dev/null
     brew cask install xquartz
-    xcode-select --install
     brew install nasm
     brew install acpica
     curl https://sourceforge.net/p/cloverefiboot/code/4372/tree/BuildTools/usr/local/bin/mtoc.NEW.zip?format=raw -o mtoc.zip
@@ -117,7 +117,6 @@ steps:
     iasl -v
     openssl version
     mtoc
-    export MACOSX_DEPLOYMENT_TARGET=10.14
     export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
     export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
