@@ -58,9 +58,9 @@ steps:
     call edkSetup.bat Rebuild
     set
     call build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
-    call build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
-    call build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
+#    call build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+#    call build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
+#    call build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D WIN_SEC_BUILD
   condition: and (always(), eq(variables['Agent.OS'], 'Windows_NT'))
 
 - script: |
@@ -91,9 +91,9 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export
-    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
-    build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+#    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+#    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
+#    build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
   condition: and (always(), eq(variables['Agent.OS'], 'Linux'))
 
 - script: |
@@ -122,8 +122,8 @@ steps:
     make -C BaseTools
     . edksetup.sh
     export
-    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
-    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
     build -a IA32 -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
     build -a X64  -t $(tool_chain_tag) -p EmulatorPkg/EmulatorPkg.dsc -D UNIX_SEC_BUILD
+#    build $(package_archs) -n 0 -t $(tool_chain_tag) -p FatPkg/FatPkg.dsc
+#    build -a IA32 -a X64 -n 0 -t $(tool_chain_tag) -p OvmfPkg/OvmfPkgIa32X64.dsc -D SMM_REQUIRE -D DEBUG_ON_SERIAL_PORT
   condition: and (always(), eq(variables['Agent.OS'], 'Darwin'))
