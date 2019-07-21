@@ -98,14 +98,10 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
-    curl -O https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg   # XQuartz
-    hdiutil attach XQuartz-2.7.11.dmg                                     # XQuartz
-    cd /Volumes/XQuartz-2.7.11/                                           # XQuartz
-    sudo installer -pkg XQuartz-2.7.11.pkg -target "/"                    # XQuartz
-    hdiutil detach /Volumes/XQuartz-2.7.11.pkg/                           # XQuartz
-    cd $WORKSPACE
-    xcode-select --install
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
+    brew install caskroom/cask/brew-cask 2> /dev/null
+    brew cask install xquartz
+    xcode-select --install
     brew install nasm
     brew install acpica
     curl https://sourceforge.net/p/cloverefiboot/code/4372/tree/BuildTools/usr/local/bin/mtoc.NEW.zip?format=raw -o mtoc.zip
