@@ -98,7 +98,7 @@ steps:
 
 - script: |
     export WORKSPACE=$PWD
-    open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
     brew install caskroom/cask/brew-cask 2> /dev/null
     brew cask install xquartz
