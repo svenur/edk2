@@ -117,6 +117,7 @@ steps:
     iasl -v
     openssl version
     mtoc
+    export MACOSX_DEPLOYMENT_TARGET=10.14
     export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
     export GCC5_ARM_PREFIX=arm-none-eabi-
     make -C BaseTools
