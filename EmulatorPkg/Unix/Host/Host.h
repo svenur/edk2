@@ -14,7 +14,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // Name mangle to prevent build errors. I.e conflicts between EFI and OS
 //
 #define NTOHL   _UNIX_EFI_NAME_MANGLE_NTOHL_
+#define NTOHLL  _UNIX_EFI_NAME_MANGLE_NTOHLL_
 #define HTONL   _UNIX_EFI_NAME_MANGLE_HTONL_
+#define HTONLL  _UNIX_EFI_NAME_MANGLE_HTONLL_
 #define NTOHS   _UNIX_EFI_NAME_MANGLE_NTOHS_
 #define HTONS   _UNIX_EFI_NAME_MANGLE_HTOHS_
 #define B0      _UNIX_EFI_NAME_MANGLE_B0_
@@ -72,7 +74,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <utime.h>
 
 #undef NTOHL
+#undef NTOHLL
 #undef HTONL
+#undef HTONLL
 #undef NTOHS
 #undef HTONS
 #undef B0
