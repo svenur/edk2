@@ -195,7 +195,7 @@ void
 
 UINTN
 ReverseGasketUint64 (
-  CALL_BACK CallBack,
+  UINTN  CallBack,
   UINT64 a
   );
 

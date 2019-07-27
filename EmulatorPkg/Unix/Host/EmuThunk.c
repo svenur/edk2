@@ -157,7 +157,7 @@ settimer_handler (int sig)
   settimer_timeval = timeval;
 
   if (settimer_callback) {
-    ReverseGasketUint64 (settimer_callback, delta);
+    ReverseGasketUint64 ((UINTN)settimer_callback, delta);
   }
 }
 

@@ -109,7 +109,7 @@ SecFakePthreadStart (
   // This is a great example of how all problems in computer
   // science can be solved by adding another level of indirection
   //
- return  (VOID *)ReverseGasketUint64 ((CALL_BACK)Start, (UINTN)Context);
+ return  (VOID *)ReverseGasketUint64 ((UINTN)Start, (UINTN)Context);
 }
 
 UINTN
