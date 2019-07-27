@@ -189,7 +189,7 @@ GasketSecUnixUnixFwhAddress (
 
 typedef
 void
-(EFIAPI *CALL_BACK) (
+(*CALL_BACK) (
   UINT64 Delta
   );
 
