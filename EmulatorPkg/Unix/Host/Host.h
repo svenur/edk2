@@ -63,9 +63,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifndef _Bool
   #define _Bool char // for clang debug
 #endif
-
-#define EFIAPI __attribute__((ms_abi))
-
 #else
 #include <termio.h>
 #include <sys/vfs.h>
