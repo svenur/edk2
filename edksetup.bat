@@ -17,7 +17,7 @@
 @REM # You should not have to modify anything below this line
 @REM #
 
-@REM @echo off
+@echo off
 
 @REM
 @REM Set the WORKSPACE to the current working directory
