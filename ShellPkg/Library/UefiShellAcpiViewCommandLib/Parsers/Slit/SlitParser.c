@@ -57,8 +57,8 @@ ParseAcpiSlit (
   )
 {
   UINT32 Offset;
-  UINT64 Count;
-  UINT64 Index;
+  UINT32 Count;
+  UINT32 Index;
   UINT64 LocalityCount;
   UINT8* LocalityPtr;
   CHAR16 Buffer[80];  // Used for AsciiName param of ParseAcpi
@@ -103,6 +103,11 @@ ParseAcpiSlit (
       }
       Print (L"\n");
     }
+  }
+
+  if  (LocalityCount >= MAX_UINT32) {
+    Print (L"INFO: Skipping validation of System Localities as locality count is >= MAX_UINT32\n");
+    return;
   }
 
   // Validate
