@@ -216,6 +216,7 @@ EmuSnpStart (
   }
 
   Status = EFI_SUCCESS;
+  Private->ReadBuffer = NULL;
   if (Private->BpfFd == 0) {
     Status = OpenBpfFileDescriptor (Private, &Private->BpfFd);
     if (EFI_ERROR (Status)) {
@@ -765,10 +766,6 @@ EmuSnpGetStatus (
   EMU_SNP_PRIVATE    *Private;
 
   Private = EMU_SNP_PRIVATE_DATA_FROM_THIS (This);
-
-  if (TxBuf != NULL) {
-    *((UINT8 **)TxBuf) =  (UINT8 *)1;
-  }
 
   if ( InterruptStatus != NULL ) {
     *InterruptStatus = EFI_SIMPLE_NETWORK_TRANSMIT_INTERRUPT;
