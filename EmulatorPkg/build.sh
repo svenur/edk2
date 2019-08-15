@@ -209,21 +209,8 @@ fi
 if [[ "$RUN_EMULATOR" == "yes" ]]; then
   case `uname` in
     Darwin*)
-      #
-      # On Darwin we can't use dlopen, so we have to load the real PE/COFF images.
-      # This .gdbinit script sets a breakpoint that loads symbols for the PE/COFFEE
-      # images that get loaded in Host
-      #
-      if [[ "$CLANG_VER" == *-ccc-host-triple* ]]
-      then
-      # only older versions of Xcode support -ccc-host-tripe, for newer versions
-      # it is -target
-        cp $WORKSPACE/EmulatorPkg/Unix/lldbefi.py "$BUILD_OUTPUT_DIR/${BUILDTARGET}_$TARGET_TOOLS/$PROCESSOR"
-        cd $BUILD_ROOT_ARCH; /usr/bin/lldb --source $WORKSPACE/EmulatorPkg/Unix/lldbinit Host
-        exit $? 
-      else
-        cp $WORKSPACE/EmulatorPkg/Unix/.gdbinit "$BUILD_OUTPUT_DIR/${BUILDTARGET}_$TARGET_TOOLS/$PROCESSOR"
-      fi
+      cd $BUILD_ROOT_ARCH; /usr/bin/lldb -o "command script import $WORKSPACE/EmulatorPkg/Unix/lldbefi.py" -o "run" ./EmulatorPkg/Unix/Host/Host/DEBUG/Host
+      exit $?
       ;;
   esac
 
