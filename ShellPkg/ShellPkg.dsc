@@ -143,5 +143,7 @@
   }
   ShellPkg/DynamicCommand/DpDynamicCommand/DpApp.inf
 
+  ShellPkg/DynamicCommand/VConfig/VConfig.inf
+
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
