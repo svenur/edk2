@@ -11,7 +11,6 @@
 **/
 
 #include <IndustryStandard/IoRemappingTable.h>
-#include <Library/AcpiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>

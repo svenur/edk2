@@ -12,7 +12,6 @@
   - Obj or OBJ - Object
 **/
 
-#include <Library/AcpiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>

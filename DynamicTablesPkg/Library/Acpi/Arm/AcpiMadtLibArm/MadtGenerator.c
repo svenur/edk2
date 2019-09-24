@@ -9,7 +9,6 @@
 
 **/
 
-#include <Library/AcpiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Protocol/AcpiTable.h>

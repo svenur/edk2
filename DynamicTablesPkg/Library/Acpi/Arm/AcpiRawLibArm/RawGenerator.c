@@ -5,7 +5,6 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#include <Library/AcpiLib.h>
 #include <Library/DebugLib.h>
 #include <Protocol/AcpiTable.h>
 

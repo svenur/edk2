@@ -10,7 +10,6 @@
 **/
 
 #include <IndustryStandard/DebugPort2Table.h>
-#include <Library/AcpiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PL011UartLib.h>
 #include <Protocol/AcpiTable.h>
@@ -22,6 +21,8 @@
 #include <ConfigurationManagerHelper.h>
 #include <Library/TableHelperLib.h>
 #include <Protocol/ConfigurationManagerProtocol.h>
+
+#define GAS32(Address)  { EFI_ACPI_5_0_SYSTEM_MEMORY, 32, 0, EFI_ACPI_5_0_DWORD, Address }
 
 /** ARM standard DBG2 Table Generator
 
@@ -129,7 +130,7 @@ typedef struct {
       OFFSET_OF (DBG2_DEBUG_DEVICE_INFORMATION, AddressSize)          \
     },                                                                \
     /* EFI_ACPI_6_2_GENERIC_ADDRESS_STRUCTURE BaseAddressRegister */  \
-    ARM_GAS32 (UartBase),                                             \
+    GAS32 (UartBase),                                             \
     /* UINT32  AddressSize */                                         \
     UartAddrLen,                                                      \
     /* UINT8   NameSpaceString[MAX_DBG2_NAME_LEN] */                  \

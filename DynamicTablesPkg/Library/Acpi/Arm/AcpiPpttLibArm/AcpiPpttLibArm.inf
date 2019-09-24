@@ -20,7 +20,6 @@
   PpttGenerator.c
 
 [Packages]
-  EmbeddedPkg/EmbeddedPkg.dec
   DynamicTablesPkg/DynamicTablesPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec

@@ -12,7 +12,6 @@
 
 #include <IndustryStandard/DebugPort2Table.h>
 #include <IndustryStandard/SerialPortConsoleRedirectionTable.h>
-#include <Library/AcpiLib.h>
 #include <Library/DebugLib.h>
 #include <Protocol/AcpiTable.h>
 
@@ -22,6 +21,8 @@
 #include <ConfigurationManagerHelper.h>
 #include <Library/TableHelperLib.h>
 #include <Protocol/ConfigurationManagerProtocol.h>
+
+#define GAS32(Address)  { EFI_ACPI_5_0_SYSTEM_MEMORY, 32, 0, EFI_ACPI_5_0_DWORD, Address }
 
 /** ARM standard SPCR Table Generator
 
@@ -61,7 +62,7 @@ EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE AcpiSpcr = {
     EFI_ACPI_RESERVED_BYTE,
     EFI_ACPI_RESERVED_BYTE
   },
-  ARM_GAS32 (0), // {Template}: Serial Port Base Address
+  GAS32 (0), // {Template}: Serial Port Base Address
   EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_INTERRUPT_TYPE_GIC,
   0, // Not used on ARM
   0, // {Template}: Serial Port Interrupt

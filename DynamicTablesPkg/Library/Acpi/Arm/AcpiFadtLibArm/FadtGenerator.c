@@ -9,7 +9,6 @@
 
 **/
 
-#include <Library/AcpiLib.h>
 #include <Library/DebugLib.h>
 #include <Protocol/AcpiTable.h>
 
@@ -19,6 +18,8 @@
 #include <ConfigurationManagerHelper.h>
 #include <Library/TableHelperLib.h>
 #include <Protocol/ConfigurationManagerProtocol.h>
+
+#define NULL_GAS  { EFI_ACPI_5_0_SYSTEM_MEMORY,  0, 0, EFI_ACPI_5_0_UNDEFINED, 0L }
 
 /** ARM standard FADT Generator
 
