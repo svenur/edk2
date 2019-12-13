@@ -31,6 +31,7 @@
   VERSION_STRING                 = 1.0
   MODULE_TYPE                    = DXE_SMM_DRIVER
   LIBRARY_CLASS                  = BaseCryptLib | DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = TlsLib       | DXE_SMM_DRIVER
   CONSTRUCTOR                    = SmmCryptLibConstructor
 
 #

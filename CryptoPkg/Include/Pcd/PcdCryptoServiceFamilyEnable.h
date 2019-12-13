@@ -236,4 +236,56 @@ typedef struct {
     } Services;
     UINT32    Family;
   } Hkdf;
+  union {
+    struct {
+      UINT8  Initialize:1;
+      UINT8  CtxFree:1;
+      UINT8  CtxNew:1;
+      UINT8  Free:1;
+      UINT8  New:1;
+      UINT8  InHandshake:1;
+      UINT8  DoHandshake:1;
+      UINT8  HandleAlert:1;
+      UINT8  CloseNotify:1;
+      UINT8  CtrlTrafficOut:1;
+      UINT8  CtrlTrafficIn:1;
+      UINT8  Read:1;
+      UINT8  Write:1;
+    } Services;
+    UINT32    Family;
+  } Tls;
+  union {
+    struct {
+      UINT8  Version:1;
+      UINT8  ConnectionEnd:1;
+      UINT8  CipherList:1;
+      UINT8  CompressionMethod:1;
+      UINT8  Verify:1;
+      UINT8  VerifyHost:1;
+      UINT8  SessionId:1;
+      UINT8  CaCertificate:1;
+      UINT8  HostPublicCert:1;
+      UINT8  HostPrivateKey:1;
+      UINT8  CertRevocationList:1;
+    } Services;
+    UINT32    Family;
+  } TlsSet;
+  union {
+    struct {
+      UINT8  Version:1;
+      UINT8  ConnectionEnd:1;
+      UINT8  CurrentCipher:1;
+      UINT8  CurrentCompressionId:1;
+      UINT8  Verify:1;
+      UINT8  SessionId:1;
+      UINT8  ClientRandom:1;
+      UINT8  ServerRandom:1;
+      UINT8  KeyMaterial:1;
+      UINT8  CaCertificate:1;
+      UINT8  HostPublicCert:1;
+      UINT8  HostPrivateKey:1;
+      UINT8  CertRevocationList:1;
+    } Services;
+    UINT32    Family;
+  } TlsGet;
 } PCD_CRYPTO_SERVICE_FAMILY_ENABLE;

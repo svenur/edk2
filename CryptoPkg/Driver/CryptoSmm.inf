@@ -60,6 +60,7 @@
   SmmServicesTableLib
   DebugLib
   BaseCryptLib
+  TlsLib
 
 [Protocols]
   gEdkiiSmmCryptoProtocolGuid  ## PRODUCES
