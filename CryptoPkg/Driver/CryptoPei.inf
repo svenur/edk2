@@ -59,7 +59,8 @@
   TlsLib
 
 [Ppis]
-  gEdkiiCryptoPpiGuid  ## PRODUCES
+  gEfiPeiMemoryDiscoveredPpiGuid  ## CONSUMES
+  gEdkiiCryptoPpiGuid             ## PRODUCES
 
 [Pcd]
   gEfiCryptoPkgTokenSpaceGuid.PcdCryptoServiceFamilyEnable  ## CONSUMES
