@@ -72,7 +72,7 @@ CryptoPeiEntry (
     //
     // CryptoPei is dispatched before gEfiPeiMemoryDiscoveredPpiGuid
     //
-    Status = (*PeiServices)->RegisterForShadow (FileHandle);
+    Status = PeiServicesRegisterForShadow (FileHandle);
     ASSERT_EFI_ERROR (Status);
     if (!EFI_ERROR (Status)) {
       //
