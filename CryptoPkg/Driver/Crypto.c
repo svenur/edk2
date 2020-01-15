@@ -1,8 +1,6 @@
 /** @file
-  This module is used for PEI, DXE, and SMM modules.
-
-  This links the functions in the protocol to the functions in BaseCryptLib.
-  See Readme.md in the root of CryptoPkg for more info.
+  Implements the EDK II Crypto Protocol/PPI services using the library services
+  from BaseCryptLib and TlsLib.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent

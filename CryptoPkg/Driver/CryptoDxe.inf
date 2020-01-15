@@ -1,10 +1,7 @@
 ## @file
-#  This module consolidates all crypto needed for Project Mu UEFI and provides
-#  protocol for those functions. This protocol provides a subset of BaseCryptLib.
-#
-#  see Readme.md in CryptoPkg
-#  There are a few flavors of support from the protocol and this is just one version.
-#  This supports all baseCrypt function
+#  Produces the EDK II Crypto Protocol using the library services from
+#  BaseCryptLib and TlsLib.  PcdCryptoServiceFamilyEnable is used to enable the
+#  subset of available services.
 #
 #  Copyright (C) Microsoft Corporation. All rights reserved.
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -15,6 +12,7 @@
   INF_VERSION                    = 0x0001001B
   PI_SPECIFICATION_VERSION       = 0x0001000A
   BASE_NAME                      = CryptoDxe
+  MODULE_UNI_FILE                = Crypto.uni
   FILE_GUID                      = FEA01457-E381-4135-9475-C6AFD0076C61
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0

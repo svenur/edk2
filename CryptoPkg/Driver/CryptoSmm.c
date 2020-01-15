@@ -1,5 +1,5 @@
 /** @file
-  This module installs the EDK II Crypto SMM Protocol
+  Installs the EDK II Crypto SMM Protocol
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent

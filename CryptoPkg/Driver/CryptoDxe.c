@@ -1,7 +1,5 @@
 /** @file
-  This module installs the EDK II Crypto Protocol
-
-  See Readme.md in the root of CryptoPkg for more information
+  Installs the EDK II Crypto Protocol
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent

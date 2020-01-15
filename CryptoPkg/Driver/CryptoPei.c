@@ -1,5 +1,7 @@
 /** @file
-  This module installs the EDK II Crypto PPI
+  Installs the EDK II Crypto PPI.  If this PEIM is dispatched before memory is
+  discovered, the RegisterForShadow() feature is used to reload this PEIM into
+  memory after memory is discovered.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent
