@@ -1,5 +1,6 @@
 /** @file
-  The version of the Crypto wrapper Library for DXE
+  Implements the GetCryptoServices() API that retuns a pointer to the EDK II
+  Crypto Protocol.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent

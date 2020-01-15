@@ -1,7 +1,6 @@
 /** @file
-  This defines the implementation of BaseCryptLib and calls out to the protocol
-  published by CryptoDxe Driver. The GetCryptoServices funtion is defined by
-  the flavor of the library.
+  Implements the BaseCryptLib and TlsLib using the servives of the EDK II Crypto
+  Protocol/PPI.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent

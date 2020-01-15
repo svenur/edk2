@@ -1,14 +1,16 @@
 ## @file
+# Implements the BaseCryptLib and TlsLib using the servives of the EDK II Crypto
+# PPI.
 #
 # Copyright (C) Microsoft Corporation. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 
-
 [Defines]
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = PeiCryptLib
+  MODULE_UNI_FILE                = CryptLib.uni
   FILE_GUID                      = 3E8B50C6-F68C-4212-B903-94A10FE02399
   VERSION_STRING                 = 1.0
   MODULE_TYPE                    = PEIM

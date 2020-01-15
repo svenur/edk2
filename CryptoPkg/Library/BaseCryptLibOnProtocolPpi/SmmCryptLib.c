@@ -1,4 +1,6 @@
 /** @file
+  Implements the GetCryptoServices() API that retuns a pointer to the EDK II
+  SMM Crypto Protocol.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent
