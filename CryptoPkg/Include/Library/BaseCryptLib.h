@@ -4,7 +4,7 @@
   primitives (Hash Serials, HMAC, RSA, Diffie-Hellman, etc) for UEFI security
   functionality enabling.
 
-Copyright (c) 2009 - 2019, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2009 - 2020, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
