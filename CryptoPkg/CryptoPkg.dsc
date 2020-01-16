@@ -36,7 +36,8 @@
   #                     mininimum required services.
   #
   DEFINE CRYPTO_SERVICES = ALL
-!if NOT ($(CRYPTO_SERVICES) in "ALL NONE MIN_PEI MIN_DXE_MIN_SMM")
+!if $(CRYPTO_SERVICES) IN "ALL NONE MIN_PEI MIN_DXE_MIN_SMM"
+!else
   !error CRYPTO_SERVICES must be set to one of ALL NONE MIN_PEI MIN_DXE_MIN_SMM.
 !endif
 
@@ -188,6 +189,7 @@
 [Components]
   CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
   CryptoPkg/Library/BaseCryptLib/PeiCryptLib.inf
+  CryptoPkg/Library/BaseCryptLib/SmmCryptLib.inf
   CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
   CryptoPkg/Library/BaseCryptLibNull/BaseCryptLibNull.inf
   CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
